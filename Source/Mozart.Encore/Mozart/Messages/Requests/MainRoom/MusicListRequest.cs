@@ -1,0 +1,11 @@
+using Encore.Messaging;
+
+namespace Mozart;
+
+public class MusicListRequest : IMessage
+{
+    public static Enum Command => RequestCommand.SendMusicList;
+
+    [CollectionMessageField(order: 0, prefixSizeType: TypeCode.Int32)]
+    public required IReadOnlyList<int> MusicIds { get; init; }
+}
