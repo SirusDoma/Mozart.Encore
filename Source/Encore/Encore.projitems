@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>79bba56f-aada-4f4a-b5ca-ade62335ca18</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Extensions\CommandFilterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Extensions\CommandHostExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Extensions\CommandRouterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Extensions\MessageFramerExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Extensions\SessionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hosting\Logging\EncoreConsoleFormatter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\Attributes\CollectionMessageFieldAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\Attributes\StringMessageFieldAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\Codecs\CollectionMessageFieldCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\Codecs\StringMessageFieldCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\IMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageFieldAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageFieldCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageFramer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageMember.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandHandlerAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandHandlerDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\CommandResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\AllowAnonymousAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\AuthorizeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\CommandFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\Exception\CommandExceptionContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\Exception\CommandExceptionHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\Exception\CommandExceptionLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\Filters\Exception\CommandExecutionContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\ICommandDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\TcpOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Server\TcpServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\Session.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\SessionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\SessionManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\MemoryExtendedStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\StreamExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\StringColorExtensions.cs" />
+  </ItemGroup>
+</Project>
