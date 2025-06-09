@@ -1,0 +1,80 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- Uncomment these to go native
+             You have to completely use function handler entirely without controllers
+
+            <PublishAot>true</PublishAot>
+            <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+            <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
+        -->
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86</Platforms>
+        <RootNamespace>Mozart</RootNamespace>
+        <AssemblyName>Mozart.Encore</AssemblyName>
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <IsPackable>false</IsPackable>
+        <ApplicationIcon>Mozart.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+      <OutputPath>..\..\..\bin\Debug\</OutputPath>
+      <IntermediateOutputPath>..\..\Temp\Mozart\Debug</IntermediateOutputPath>
+      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+      <OutputPath>..\..\..\bin\Release\</OutputPath>
+        <IntermediateOutputPath>..\..\Temp\Mozart\Release</IntermediateOutputPath>
+      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.6" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+      <PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Mozart\*" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="config.ini">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Itemdata.dat">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Persistence\Migrations\**" />
+      <Compile Remove="Persistence\Migrations\**" />
+      <Content Remove="Persistence\Migrations\**" />
+      <EmbeddedResource Remove="Persistence\Migrations\**" />
+      <Folder Remove="Persistence\Migrations\**" />
+
+      <Compile Include="Persistence\Migrations\**\*ModelSnapshot.cs" />
+      <Content Include="Persistence\Migrations\**\*ModelSnapshot.cs" />
+    </ItemGroup>
+
+    <Import Project="..\Encore\Encore.projitems" Label="Shared" />
+</Project>
