@@ -10,8 +10,8 @@ This project is inspired by the _Mozart Project 0.028_.
 
 | Project                               | Description                                 |
 |---------------------------------------|---------------------------------------------|
-| [Encore](Source/Encore/Encore) | Custom TCP server framework                 |
-| [Mozart](Source/Mozart/Mozart) | Game server implementation for v3.10 client |
+| [Encore](Source/Encore/) | Custom TCP server framework                 |
+| [Mozart](Source/Mozart/) | Game server implementation for v3.10 client |
 
 # Configuration
 
