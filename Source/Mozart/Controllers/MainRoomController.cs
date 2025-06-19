@@ -5,6 +5,7 @@ using Encore.Server;
 
 using Mozart.Controllers.Filters;
 using Mozart.Entities;
+using Mozart.Events;
 using Mozart.Messages;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
@@ -14,8 +15,8 @@ using Mozart.Sessions;
 namespace Mozart.Controllers;
 
 [ChannelAuthorize]
-public class MainRoomController(Session session,IRoomService roomService, ILogger<MainRoomController> logger)
-    : CommandController<Session>(session)
+public class MainRoomController(Session session,IRoomService roomService, IEventPublisher<Room> publisher,
+    ILogger<MainRoomController> logger) : CommandController<Session>(session)
 {
     private IChannel Channel => Session.Channel!;
 
@@ -109,7 +110,7 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
     }
 
     [CommandHandler]
-    public async Task<JoinRoomResponse> JoinRoom(JoinRoomRequest request, CancellationToken cancellationToken)
+    public JoinRoomResponse JoinRoom(JoinRoomRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.JoinWaiting,
@@ -147,7 +148,7 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
             if (!string.IsNullOrEmpty(room.Password) && room.Password != request.Password)
                 throw new ArgumentOutOfRangeException(nameof(request));
 
-            await Session.Register(room, cancellationToken);
+            Session.Register(room);
             int index  = room.Slots.ToList().FindIndex(r => r is Room.MemberSlot m && m.Session == Session);
             var member = (room.Slots[index] as Room.MemberSlot)!;
 
@@ -215,7 +216,7 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
     }
 
     [CommandHandler]
-    public async Task<CreateRoomResponse> CreateRoom(CreateRoomRequest request, CancellationToken cancellationToken)
+    public CreateRoomResponse CreateRoom(CreateRoomRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.CreateRoom,
@@ -225,7 +226,9 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
 
         try
         {
-            var room = await roomService.CreateRoom(Session, request, cancellationToken);
+            var room = roomService.CreateRoom(Session, request);
+            publisher.Monitor(room);
+
             return new CreateRoomResponse
             {
                 Result = CreateRoomResponse.CreateResult.Success,
@@ -243,7 +246,7 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
     }
 
     [CommandHandler(RequestCommand.ChannelLogout)]
-    public async Task<ChannelLogoutResponse> ChannelLogout(CancellationToken cancellationToken)
+    public ChannelLogoutResponse ChannelLogout()
     {
         logger.LogInformation(
             (int)RequestCommand.ChannelLogout,
@@ -251,7 +254,7 @@ public class MainRoomController(Session session,IRoomService roomService, ILogge
             Channel.Id
         );
 
-        await Session.Exit(Channel, cancellationToken);
+        Session.Exit(Channel);
         return new ChannelLogoutResponse();
     }
 }

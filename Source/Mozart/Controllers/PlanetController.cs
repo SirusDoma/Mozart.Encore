@@ -73,7 +73,7 @@ public class PlanetController(Session session, IIdentityService identityService,
         try
         {
             var channel = channelService.GetChannel(request.ChannelId);
-            await Session.Register(channel, cancellationToken);
+            Session.Register(channel);
 
             await identityService.UpdateChannel(Session.Actor.Token, options.Value.Id, request.ChannelId, cancellationToken);
             return new ChannelLoginResponse { Full = false };

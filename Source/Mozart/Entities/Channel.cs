@@ -13,9 +13,9 @@ public interface IChannel : IBroadcastable
 
     string ItemDataPath { get; }
 
-    ValueTask Register(Session session, CancellationToken cancellationToken);
+    void Register(Session session);
 
-    ValueTask Remove(Session session, CancellationToken cancellationToken);
+    void Remove(Session session);
 }
 
 public class Channel() : Broadcastable, IChannel
@@ -46,23 +46,21 @@ public class Channel() : Broadcastable, IChannel
 
     public int UserCount => _sessions.Count;
 
-    ValueTask IChannel.Register(Session session, CancellationToken cancellationToken)
+    void IChannel.Register(Session session)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(session.Authorized, true, nameof(session));
 
         if (session.Channel == null)
-            return session.Register(this, cancellationToken);
+            session.Register(this);
 
         if (_sessions.Count > Capacity)
             throw new InvalidOperationException("Channel is full");
 
         session.Disconnected += OnSessionDisconnected;
         _sessions.Add(session);
-
-        return ValueTask.CompletedTask;
     }
 
-    ValueTask IChannel.Remove(Session session, CancellationToken cancellationToken)
+    void IChannel.Remove(Session session)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(session.Authorized, true, nameof(session));
 
@@ -71,16 +69,14 @@ public class Channel() : Broadcastable, IChannel
             if (session.Channel != this)
                 throw new ArgumentOutOfRangeException(nameof(session));
 
-            return session.Exit(this, cancellationToken);
+            session.Exit(this);
         }
 
         _sessions.Remove(session);
         session.Disconnected -= OnSessionDisconnected;
-
-        return ValueTask.CompletedTask;
     }
 
-    private async void OnSessionDisconnected(object? sender, EventArgs args)
+    private void OnSessionDisconnected(object? sender, EventArgs args)
     {
         try
         {
@@ -88,11 +84,11 @@ public class Channel() : Broadcastable, IChannel
             if (session.Room != null)
             {
                 var room = (Room)session.Room;
-                await room.Disconnect(session, CancellationToken.None);
+                room.Disconnect(session);
             }
 
             IChannel channel = this;
-            await channel.Remove(session, CancellationToken.None);
+            channel.Remove(session);
 
             SessionDisconnected?.Invoke(sender, args);
         }
@@ -104,13 +100,5 @@ public class Channel() : Broadcastable, IChannel
                 Exception = ex
             });
         }
-    }
-
-    protected override IEnumerable<Session> GetSessionsByContext<TContext>(TContext ctx)
-    {
-        if (ctx is WhisperMessageContext whisper)
-            return _sessions.Where(s => whisper.Recipients.Contains(s.GetAuthorizedToken<Actor>().Nickname));
-
-        return [];
     }
 }

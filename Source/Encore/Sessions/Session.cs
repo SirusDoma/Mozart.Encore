@@ -76,6 +76,7 @@ public class Session
         {
             OnDisconnected();
             Disconnected?.Invoke(this, EventArgs.Empty);
+            Disconnected = null;
         }
     }
 

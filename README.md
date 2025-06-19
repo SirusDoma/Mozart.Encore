@@ -8,8 +8,8 @@ This project is inspired by the _Mozart Project 0.028_.
 
 ## Project Structure
 
-| Project                               | Description                                 |
-|---------------------------------------|---------------------------------------------|
+| Project                  | Description                                 |
+|--------------------------|---------------------------------------------|
 | [Encore](Source/Encore/) | Custom TCP server framework                 |
 | [Mozart](Source/Mozart/) | Game server implementation for v3.10 client |
 
@@ -99,7 +99,7 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 # Scaling
 
 > [!WARNING]
-> This feature is not implemented yet
+> This feature is not implemented yet.
 > It is very likely that it will be scrapped after the full release.
 
 # CLI Command

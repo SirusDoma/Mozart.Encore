@@ -8,11 +8,6 @@ using Mozart.Sessions;
 
 namespace Mozart.Services;
 
-public class WhisperMessageContext
-{
-    public required IReadOnlySet<string> Recipients { get; init; }
-}
-
 public interface IChannelService : IBroadcastable
 {
     IReadOnlyList<Channel> GetChannels();
@@ -78,11 +73,6 @@ public class ChannelService : Broadcastable, IChannelService
         ArgumentOutOfRangeException.ThrowIfNegative(id, nameof(id));
 
         _channels.Remove(id, out _);
-    }
-
-    protected override IEnumerable<Session> GetSessionsByContext<TContext>(TContext ctx)
-    {
-        return [];
     }
 
     private void OnChannelSessionDisconnected(object? sender, EventArgs args)

@@ -7,4 +7,5 @@ public class GameOptions
     public bool AllowSoloInVersus   { get; init; } = true;
 
     public int SingleModeRewardLevelLimit { get; init; } = 10;
+    public int MusicLoadTimeout { get; init; } = 60;
 }
