@@ -5,26 +5,26 @@ using Encore.Server;
 
 using Mozart.Controllers.Filters;
 using Mozart.Entities;
+using Mozart.Events;
 using Mozart.Messages;
 using Mozart.Messages.Events;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
 using Mozart.Options;
+using Mozart.Services;
 using Mozart.Sessions;
 
 namespace Mozart.Controllers;
 
 [RoomAuthorize]
-public class WaitingController(Session session, IOptions<GameOptions> options, ILogger<WaitingController> logger)
-    : CommandController<Session>(session)
+public class WaitingController(Session session, IEventPublisher<ScoreTracker> publisher,
+    IOptions<GameOptions> options, ILogger<WaitingController> logger) : CommandController<Session>(session)
 {
-    private IChannel Channel => Session.Channel!;
-
     private IRoom Room => Session.Room!;
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public async Task<WaitingMusicChangedEventData> SetRoomMusic(SetRoomMusicRequest request, CancellationToken cancellationToken)
+    public WaitingMusicChangedEventData SetRoomMusic(SetRoomMusicRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomMusic,
@@ -35,7 +35,7 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
         Room.MusicId = request.MusicId;
         Room.Difficulty = request.Difficulty;
         Room.Speed = request.Speed;
-        await Room.SaveMetadataChanges(Session, cancellationToken);
+        Room.SaveMetadataChanges();
 
         return new WaitingMusicChangedEventData
         {
@@ -47,13 +47,13 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public async Task<WaitingRoomTitleEventData> SetRoomTitle(SetRoomTitleRequest request, CancellationToken cancellationToken)
+    public WaitingRoomTitleEventData SetRoomTitle(SetRoomTitleRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomTitle,
             "Update room [{RoomId:000}] title: [{Title}]", Room.Id, request.Title);
 
         Room.Title = request.Title;
-        await Room.SaveMetadataChanges(Session, cancellationToken);
+        Room.SaveMetadataChanges();
 
         return new WaitingRoomTitleEventData
         {
@@ -63,7 +63,7 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public async Task<RoomArenaChangedEventData> SetRoomArena(SetRoomArenaRequest request, CancellationToken cancellationToken)
+    public RoomArenaChangedEventData SetRoomArena(SetRoomArenaRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomArena,
@@ -73,7 +73,7 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
 
         Room.Arena           = request.Payload.Arena;
         Room.ArenaRandomSeed = request.Payload.RandomSeed;
-        await Room.SaveMetadataChanges(Session, cancellationToken);
+        Room.SaveMetadataChanges();
 
         return new RoomArenaChangedEventData
         {
@@ -83,41 +83,39 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
     }
 
     [CommandHandler]
-    public async Task SetRoomPlayerTeam(SetTeamRequest request, CancellationToken cancellationToken)
+    public void SetRoomPlayerTeam(SetTeamRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomTeam,
             "Update room [{RoomId:000}] [{User}] team: [{Team}]", Room.Id, Session.Actor.Nickname, request.Team);
 
-        await Room.UpdateTeam(Session, request.Team, cancellationToken);
+        Room.UpdateTeam(Session, request.Team);
     }
 
     [CommandHandler]
-    public Task SetPlayerInstrument(SetInstrumentRequest request, CancellationToken cancellationToken)
+    public void SetPlayerInstrument(SetInstrumentRequest request)
     {
         // Do not reply to this command:
         // The game was supposed to send "InstrumentId" but instead, it always sends us 0
-        // return Task.FromResult(new PlayerInstrumentChangedEventData()
+        // return new PlayerInstrumentChangedEventData()
         // {
         //     MemberId     = 0,
         //     InstrumentId = request.InstrumentId
-        // });
-
-        return Task.CompletedTask;
+        // };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public async Task UpdateSlot(UpdateSlotRequest request, CancellationToken cancellationToken)
+    public void UpdateSlot(UpdateSlotRequest request)
     {
         logger.LogInformation((int)RequestCommand.UpdateSlot,
             "Update room [{RoomId:000}] slot: [{MemberId}]", Room.Id, request.MemberId);
 
-        await Room.UpdateSlot(Session, request.MemberId, cancellationToken);
+        Room.UpdateSlot(Session, request.MemberId);
     }
 
     [CommandHandler(RequestCommand.StartGame)]
     [RoomMasterAuthorize]
-    public async Task<StartGameEventData> StartGame(CancellationToken cancellationToken)
+    public StartGameEventData StartGame()
     {
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
@@ -154,17 +152,8 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
             }
         }
 
-        Room.ScoreTracker.Reset();
-        await Channel.Broadcast(new RoomStateChangedEventData
-        {
-            Number = Room.Id,
-            State  = RoomState.Playing
-        }, cancellationToken);
-
-        await Room.Broadcast(Session, new StartGameEventData
-        {
-            Result = StartGameEventData.StartResult.Success
-        }, cancellationToken);
+        Room.StartGame();
+        publisher.Monitor((ScoreTracker)Room.ScoreTracker);
 
         return new StartGameEventData
         {
@@ -173,33 +162,16 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
     }
 
     [CommandHandler(RequestCommand.Ready)]
-    public async Task Ready(CancellationToken cancellationToken)
+    public void Ready()
     {
         logger.LogInformation((int)RequestCommand.Ready,
             "Update room [{RoomId:000}] ready state", Room.Id);
 
-        await Room.UpdateReadyState(Session, cancellationToken);
-    }
-
-    [CommandHandler(RequestCommand.ConfirmMusicLoaded)]
-    public async Task ConfirmMusicLoaded(CancellationToken cancellationToken)
-    {
-        logger.LogInformation((int)RequestCommand.ConfirmMusicLoaded,
-            "User music loaded: [{RoomId:000}]", Room.Id);
-
-        var slots = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
-        if (memberId < 0)
-            return;
-
-        await Room.Broadcast(new MusicLoadedEventData
-        {
-            MemberId = (byte)memberId
-        }, cancellationToken);
+        Room.UpdateReadyState(Session);
     }
 
     [CommandHandler(RequestCommand.ExitWaiting)]
-    public async Task<ExitWaitingResponse> ExitRoom(CancellationToken cancellationToken)
+    public ExitWaitingResponse ExitRoom()
     {
         logger.LogInformation(
             (int)RequestCommand.ExitWaiting,
@@ -208,7 +180,7 @@ public class WaitingController(Session session, IOptions<GameOptions> options, I
         );
 
         var room = Room;
-        await Session.Exit(room, cancellationToken);
+        Session.Exit(room);
 
         return new ExitWaitingResponse
         {

@@ -10,7 +10,7 @@ public class RoomMasterAuthorizeAttribute: RoomAuthorizeAttribute
         base.OnActionExecuting(context);
 
         var session = (Session)context.Session;
-        if (session.Actor != session.Room!.Master)
+        if (session != session.Room!.Master)
             throw new InvalidOperationException("Unauthorized");
     }
 }

@@ -31,40 +31,40 @@ public class Session : Encore.Sessions.Session
         await Framer.WriteFrame(_codec.Encode(message), cancellationToken);
     }
 
-    public async ValueTask Register(IChannel channel, CancellationToken cancellationToken)
+    public void Register(IChannel channel)
     {
         if (Channel != null)
-            await Exit(Channel!, cancellationToken);
+            Exit(Channel!);
 
         Channel = channel;
-        await Channel.Register(this, cancellationToken);
+        Channel.Register(this);
     }
 
-    public ValueTask Exit(IChannel channel, CancellationToken cancellationToken)
+    public void Exit(IChannel channel)
     {
         if (channel != Channel)
             throw new ArgumentOutOfRangeException(nameof(channel));
 
         Channel = null;
-        return channel.Remove(this, cancellationToken);
+        channel.Remove(this);
     }
 
-    public async ValueTask Register(IRoom room, CancellationToken cancellationToken)
+    public void Register(IRoom room)
     {
         if (Room != null)
-            await Exit(Room, cancellationToken);
+            Exit(Room);
 
         Room = room;
-        await Room.Register(this, cancellationToken);
+        Room.Register(this);
     }
 
-    public ValueTask Exit(IRoom room, CancellationToken cancellationToken)
+    public void Exit(IRoom room)
     {
         if (room != Room)
             throw new ArgumentOutOfRangeException(nameof(room));
 
         Room = null;
-        return room.Remove(this, cancellationToken);
+        room.Remove(this);
     }
 
     public void Kick()

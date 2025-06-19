@@ -44,7 +44,6 @@ public class SessionManager<TSession> : ISessionManager<TSession>
 
     }
     private readonly List<ManagedSession> _sessions = [];
-    private readonly EventHandler _disconnectHandler;
 
     public event EventHandler<SessionEventArgs>? Started;
 
@@ -54,7 +53,6 @@ public class SessionManager<TSession> : ISessionManager<TSession>
 
     public SessionManager()
     {
-        _disconnectHandler = (sender, _) => StopSession((TSession)sender!);
     }
 
     public void StartSession(TSession session)
@@ -62,7 +60,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
         if (Validate(session))
             return;
 
-        session.Disconnected += _disconnectHandler;
+        session.Disconnected += OnSessionDisconnected;
 
         var cancellationTokenSource = new CancellationTokenSource();
         var execution = Task.Run(async () =>
@@ -78,6 +76,12 @@ public class SessionManager<TSession> : ISessionManager<TSession>
                     Session = session,
                     Exception = ex
                 });
+
+                await StopSession(session);
+            }
+            finally
+            {
+                session.Terminate();
             }
         }, cancellationTokenSource.Token);
 
@@ -97,7 +101,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
         if (managed == null)
             return Task.CompletedTask;
 
-        managed.Session.Disconnected -= _disconnectHandler;
+        managed.Session.Disconnected -= OnSessionDisconnected;
         managed.CancellationTokenSource.Cancel();
 
         Stopped?.Invoke(this, session);
@@ -116,7 +120,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
         List<Task> tasks = [];
         foreach (var managed in _sessions)
         {
-            managed.Session.Disconnected -= _disconnectHandler;
+            managed.Session.Disconnected -= OnSessionDisconnected;
             managed.CancellationTokenSource.Cancel();
 
             tasks.Add(managed.Execution);
@@ -124,6 +128,11 @@ public class SessionManager<TSession> : ISessionManager<TSession>
 
         _sessions.Clear();
         return Task.WhenAll(tasks);
+    }
+
+    private void OnSessionDisconnected(object? sender, EventArgs e)
+    {
+        StopSession((TSession)sender!);
     }
 
     public virtual void Dispose()

@@ -19,8 +19,6 @@ public class AuthOptions
     public int SessionExpiry { get; init; } = 5;
 
     public bool RevokeOnStartup { get; init; } = true;
-
-
 }
 
 public class AuthModeConverter() : EnumConverter(typeof(AuthMode))

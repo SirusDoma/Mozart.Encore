@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Mozart.Persistence.Contexts;
 
 namespace Mozart.CLI;

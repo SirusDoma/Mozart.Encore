@@ -1,14 +1,13 @@
 using System.CommandLine;
 using System.Net;
 using System.Text;
-using Mozart.Persistence.Contexts;
 using Mozart.Persistence.Entities;
 using Mozart.Services;
 
 namespace Mozart.CLI;
 
 
-public class AuthorizeUserCommandTask(UserDbContext context, IIdentityService identityService) : ICommandLineTask
+public class AuthorizeUserCommandTask(IIdentityService identityService) : ICommandLineTask
 {
     public static string Name => "user:authorize";
     public static string Description => "Authorize the user for a game session";
@@ -33,7 +32,7 @@ public class AuthorizeUserCommandTask(UserDbContext context, IIdentityService id
     public Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         // This won't be called since we override the handler in ConfigureCommand
-        throw new NotImplementedException("Use the overload of ExecuteAsync instead");
+        throw new NotSupportedException("Use the overload of ExecuteAsync instead");
     }
 
     private async Task<int> ExecuteAsync(string username, string password)

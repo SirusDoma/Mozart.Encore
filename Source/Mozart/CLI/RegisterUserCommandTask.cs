@@ -41,7 +41,7 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
     public Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         // This won't be called since we override the handler in ConfigureCommand
-        throw new NotImplementedException("Use overload of ExecuteAsync instead");
+        throw new NotSupportedException("Use overload of ExecuteAsync instead");
     }
 
     private async Task<int> ExecuteAsync(string username, string password, Gender gender, bool admin)

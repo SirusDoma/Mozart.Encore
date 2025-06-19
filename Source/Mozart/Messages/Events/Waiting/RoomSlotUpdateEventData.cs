@@ -1,21 +1,16 @@
 using Encore.Messaging;
+using Mozart.Metadata.Room;
 
-namespace Mozart.Messages.Events;
-
-public class RoomSlotUpdateEventData : IMessage
+namespace Mozart.Messages.Events
 {
-    public enum EventType : byte
+    public class RoomSlotUpdateEventData : IMessage
     {
-        SlotUnlocked = 0,
-        SlotLocked   = 2,
-        PlayerKicked = 3
+        public static Enum Command => EventCommand.RoomSlotUpdate;
+
+        [MessageField(order: 0)]
+        public byte Index { get; init; }
+
+        [MessageField(order: 1)]
+        public RoomSlotActionType Type { get; init; }
     }
-
-    public static Enum Command => EventCommand.RoomSlotUpdate;
-
-    [MessageField(order: 0)]
-    public byte Index { get; init; }
-
-    [MessageField(order: 1)]
-    public EventType Type { get; init; }
 }

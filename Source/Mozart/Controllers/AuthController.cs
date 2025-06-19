@@ -80,10 +80,10 @@ public class AuthController(Session session, SessionManager manager, IIdentitySe
             logger.LogInformation((int)RequestCommand.Terminate, "Session stop requested");
 
             if (Session.Room != null)
-                await Session.Exit(Session.Room, cancellationToken);
+                Session.Exit(Session.Room);
 
             if (Session.Channel != null)
-                await Session.Exit(Session.Channel, cancellationToken);
+                Session.Exit(Session.Channel);
         }
 
         await manager.StopSession(Session);

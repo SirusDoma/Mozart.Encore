@@ -395,9 +395,12 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             }
             catch (Exception ex)
             {
-                // TODO: Make 'exception' as inner exception of 'ex'
+                var mainException = ex;
+                if (exception != null)
+                    mainException = new AggregateException(ex, exception);
+
                 return await FilterException(
-                    new CommandExceptionContext(ex, session, handler.Descriptor, request),
+                    new CommandExceptionContext(mainException, session, handler.Descriptor, request),
                     cancellationToken
                 );
             }

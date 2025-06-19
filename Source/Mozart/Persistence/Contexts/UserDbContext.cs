@@ -8,7 +8,7 @@ using Mozart.Options;
 
 namespace Mozart.Persistence.Contexts;
 
-public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions, IOptions<DatabaseOptions> dbOptions,
+public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions,
     IOptions<AuthOptions> authOptions) : DbContext(contextOptions)
 {
     public DbSet<User> Users { get; init; }

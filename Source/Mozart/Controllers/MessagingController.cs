@@ -79,10 +79,7 @@ public class MessagingController(Session session, IChannelService channelService
             "[{Sender}] Send whisper message to [{Recipient}]: {Content}", actor.Nickname, request.Recipient, request.Content);
 
         int recipientCount = await channelService.Broadcast(
-            new WhisperMessageContext
-            {
-                Recipients = new HashSet<string> { request.Recipient }
-            },
+            session => session.Actor.Nickname == request.Recipient,
             new ReceiveWhisperResponse
             {
                 Sender  = request.Recipient,

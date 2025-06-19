@@ -1,52 +1,24 @@
 using Mozart.Messages;
-using Mozart.Messages.Events;
-using Mozart.Messages.Responses;
+using Mozart.Metadata.Room;
 using Mozart.Services;
 using Mozart.Sessions;
 
 namespace Mozart.Entities;
 
-public interface IRoom : IBroadcastable
-{
-    int Id { get; }
-    RoomState State { get; }
-    RoomMetadata Metadata { get; }
-    int Capacity { get; }
-    int UserCount { get; }
-    string Title { get; set; }
-    int MusicId { get; set; }
-    Difficulty Difficulty { get; set; }
-    GameSpeed Speed { get; set; }
-    Arena Arena { get; set; }
-    byte ArenaRandomSeed { get; set; }
-    Actor Master { get; }
-    IReadOnlyList<Room.ISlot> Slots { get; }
-    IScoreTracker ScoreTracker { get; }
-
-
-    ValueTask Register(Session session, CancellationToken cancellationToken);
-    ValueTask Remove(Session session, CancellationToken cancellationToken);
-    ValueTask SaveMetadataChanges(Session initiator, CancellationToken cancellationToken);
-
-    ValueTask UpdateReadyState(Session session, CancellationToken cancellationToken);
-    ValueTask UpdateTeam(Session session, RoomTeam team, CancellationToken cancellationToken);
-    ValueTask UpdateSlot(Session session, int memberId, CancellationToken cancellationToken);
-
-    ValueTask Disconnect(Session session, CancellationToken cancellationToken);
-}
 
 public class Room : Broadcastable, IRoom
 {
     public const byte MaxCapacity = 8;
 
-    private readonly IRoomService _service;
-
     private RoomMetadata _previous;
+
+    private readonly IRoomService _service;
     private readonly RoomMetadata _metadata;
 
     private readonly List<ISlot> _slots;
+    private readonly TimeSpan? _musicLoadTimeout;
 
-    public Room(IRoomService service, Session master, RoomMetadata metadata)
+    public Room(IRoomService service, Session master, RoomMetadata metadata, TimeSpan? musicLoadTimeout = null)
     {
         _service = service;
         _previous = metadata;
@@ -67,6 +39,7 @@ public class Room : Broadcastable, IRoom
             new VacantSlot(),
             new VacantSlot(),
         ];
+        _musicLoadTimeout = musicLoadTimeout;
 
         Channel = master.Channel!;
         ScoreTracker = new ScoreTracker(this);
@@ -84,12 +57,11 @@ public class Room : Broadcastable, IRoom
 
         public required RoomTeam Team { get; set; }
 
-        public bool IsMaster { get; set; } = false;
+        public bool IsMaster { get; set; }
 
-        public bool IsReady { get; set; } = false;
+        public bool IsReady { get; set; }
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
-
     }
 
     public int Id => _metadata.Id;
@@ -148,27 +120,39 @@ public class Room : Broadcastable, IRoom
         set => _metadata.ArenaRandomSeed = value;
     }
 
-    public Actor Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Actor;
+    public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
     public IReadOnlyList<ISlot> Slots => _slots;
 
-    public IScoreTracker ScoreTracker { get; }
+    public IScoreTracker ScoreTracker { get; private set; }
+
+    public event EventHandler<RoomUserJoinedEventArgs>? UserJoined;
+    public event EventHandler<RoomUserLeftEventArgs>? UserLeft;
+    public event EventHandler<RoomUserLeftEventArgs>? UserDisconnected;
+    public event EventHandler<RoomUserTeamChangedEventArgs>? UserTeamChanged;
+    public event EventHandler<RoomUserReadyStateChangedEventArgs>? UserReadyStateChanged;
+
+    public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
+    public event EventHandler<RoomMusicChangedEventArgs>? MusicChanged;
+    public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
+    public event EventHandler<RoomStateChangedEventArgs>? StateChanged;
+    public event EventHandler<RoomSlotChangedEventArgs>? SlotChanged;
 
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
 
     public event EventHandler<Encore.Sessions.SessionEventArgs>? SessionDisconnected;
 
-    async ValueTask IRoom.Register(Session session, CancellationToken cancellationToken)
+    void IRoom.Register(Session session)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(session.Authorized, true, nameof(session));
-
+        
         if (_slots.OfType<MemberSlot>().Any(m => m.Session == session))
             return;
 
         if (session.Room != this)
         {
-            await session.Register(this, cancellationToken);
+            session.Register(this);
             return;
         }
 
@@ -186,17 +170,12 @@ public class Room : Broadcastable, IRoom
                 continue;
 
             _slots[i] = member;
-            await Broadcast(session, new UserJoinWaitingEventData
+
+            UserJoined?.Invoke(this, new RoomUserJoinedEventArgs
             {
-                MemberId   = (byte)i,
-                Nickname   = member.Actor.Nickname,
-                Level      = member.Actor.Level,
-                Gender     = member.Actor.Gender,
-                Team       = member.Team,
-                Ready      = member.IsReady,
-                Equipments = member.Actor.Equipments,
-                MusicIds   = member.Actor.MusicIds
-            }, cancellationToken);
+                MemberId = i,
+                Member   = member
+            });
 
             return;
         }
@@ -204,7 +183,7 @@ public class Room : Broadcastable, IRoom
         throw new InvalidOperationException("Room is full");
     }
 
-    async ValueTask IRoom.Remove(Session session, CancellationToken cancellationToken)
+    void IRoom.Remove(Session session)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(session.Authorized, true, nameof(session));
 
@@ -213,7 +192,7 @@ public class Room : Broadcastable, IRoom
             if (session.Room != this)
                 throw new ArgumentOutOfRangeException(nameof(session));
 
-            await session.Exit(this, cancellationToken);
+            session.Exit(this);
             return;
         }
 
@@ -232,84 +211,72 @@ public class Room : Broadcastable, IRoom
                 ((MemberSlot)_slots[masterId]).IsMaster = true;
         }
 
-        await ScoreTracker.Untrack(session, cancellationToken);
-        await Broadcast(session, new UserLeaveWaitingEventData
+        if (State == RoomState.Playing)
+            ScoreTracker.Untrack(session);
+
+        UserLeft?.Invoke(this, new RoomUserLeftEventArgs
         {
-            MemberId              = (byte)index,
-            NewRoomMasterMemberId = (byte)masterId,
-        }, cancellationToken);
+            MemberId           = index,
+            Member             = member,
+            RoomMasterMemberId = masterId
+        });
 
         if (!_slots.OfType<MemberSlot>().Any())
-            await _service.DeleteRoom(Channel, Id, cancellationToken);
+            _service.DeleteRoom(Channel, Id);
     }
 
+    public bool IsMember(Session session)
+    {
+        return _slots.Any(s => s is MemberSlot m && m.Session == session);
+    }
 
-    public async ValueTask SaveMetadataChanges(Session initiator, CancellationToken cancellationToken)
+    public bool IsMember(Actor actor)
+    {
+        return _slots.Any(s => s is MemberSlot m && m.Actor == actor);
+    }
+
+    public void SaveMetadataChanges()
     {
         if (_previous.Title != _metadata.Title)
         {
-            await initiator.Channel!.Broadcast(initiator, new RoomTitleChangedEventData
+            TitleChanged?.Invoke(this, new RoomTitleChangedEventArgs
             {
-                Number = _metadata.Id,
-                Title  = _metadata.Title
-            }, cancellationToken);
-
-            await Broadcast(initiator, new WaitingRoomTitleEventData
-            {
-                Title  = _metadata.Title
-            }, cancellationToken);
-
+                Title = _metadata.Title
+            });
         }
 
         if (_previous.MusicId != _metadata.MusicId ||
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
-            await initiator.Channel!.Broadcast(initiator, new RoomMusicChangedEventData
-            {
-                Number     = _metadata.Id,
-                MusicId    = _metadata.MusicId,
-                Difficulty = _metadata.Difficulty,
-                Speed      = _metadata.Speed,
-
-            }, cancellationToken);
-
-            await Broadcast(initiator, new WaitingMusicChangedEventData
+            MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
             {
                 MusicId    = _metadata.MusicId,
                 Difficulty = _metadata.Difficulty,
                 Speed      = _metadata.Speed,
-
-            }, cancellationToken);
+            });
         }
 
         if (_previous.Arena != _metadata.Arena ||
             _previous.ArenaRandomSeed != _metadata.ArenaRandomSeed)
         {
-            await Broadcast(initiator, new RoomArenaChangedEventData
+            ArenaChanged?.Invoke(this, new RoomArenaChangedEventArgs
             {
                 Arena      = _metadata.Arena,
                 RandomSeed = _metadata.ArenaRandomSeed
-            }, cancellationToken);
+            });
         }
 
         if (_previous.State != _metadata.State)
         {
-            await initiator.Channel!.Broadcast(initiator, new RoomStateChangedEventData
+            StateChanged?.Invoke(this, new RoomStateChangedEventArgs
             {
-                Number = _metadata.Id,
-                State  = _metadata.State
-            }, cancellationToken);
-
-            if (_previous.State == RoomState.Waiting)
-            {
-                await Broadcast(initiator, new StartGameEventData
-                {
-                    Result = StartGameEventData.StartResult.Success
-                }, cancellationToken);
-            }
+                PreviousState = _previous.State,
+                CurrentState  = _metadata.State
+            });
         }
 
+        // Capture state
         _previous = new RoomMetadata
         {
             Id              = _metadata.Id,
@@ -327,7 +294,7 @@ public class Room : Broadcastable, IRoom
         };
     }
 
-    public async ValueTask UpdateReadyState(Session session, CancellationToken cancellationToken)
+    public void UpdateReadyState(Session session)
     {
         int index = _slots.FindIndex(s => s is MemberSlot m && m.Session == session);
         if (index < 0)
@@ -336,14 +303,15 @@ public class Room : Broadcastable, IRoom
         var member     = (_slots[index] as MemberSlot)!;
         member.IsReady = !member.IsReady;
 
-        await Broadcast(new MemberReadyStateChangedEventData()
+        UserReadyStateChanged?.Invoke(this, new RoomUserReadyStateChangedEventArgs
         {
-            MemberId = (byte)index,
+            MemberId = index,
+            Member   = member,
             Ready    = member.IsReady
-        }, cancellationToken);
+        });
     }
 
-    public async ValueTask UpdateTeam(Session session, RoomTeam team, CancellationToken cancellationToken)
+    public void UpdateTeam(Session session, RoomTeam team)
     {
         int index = _slots.FindIndex(s => s is MemberSlot m && m.Session == session);
         if (index < 0)
@@ -352,71 +320,109 @@ public class Room : Broadcastable, IRoom
         var member   = (_slots[index] as MemberSlot)!;
         member.Team = team;
 
-        await Broadcast(new MemberTeamChangedEventData
+        UserTeamChanged?.Invoke(this, new RoomUserTeamChangedEventArgs
         {
-            MemberId = (byte)index,
-            Team     = team
-        }, cancellationToken);
+            MemberId = index,
+            Member   = member,
+            Team     = member.Team
+        });
     }
 
-    public async ValueTask UpdateSlot(Session session, int memberId,
-        CancellationToken cancellationToken)
+    public void UpdateSlot(Session session, int slotId)
     {
-        if (session.Actor != Master)
+        if (session != Master)
             throw new ArgumentOutOfRangeException(nameof(session)); // request forged?
 
-        if (memberId is < 0 or >= MaxCapacity)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
+        if (slotId is < 0 or >= MaxCapacity)
+            throw new ArgumentOutOfRangeException(nameof(slotId));
 
-        var target = _slots[memberId];
-        var result = RoomSlotUpdateEventData.EventType.PlayerKicked;
+        var target = _slots[slotId];
+        var result = RoomSlotActionType.PlayerKicked;
+
         switch (target)
         {
-            case MemberSlot member:
-                _slots[memberId] = new VacantSlot();
-
-                await member.Session.WriteMessage(new KickEventData(), cancellationToken);
-                result = RoomSlotUpdateEventData.EventType.PlayerKicked;
+            case MemberSlot:
+                _slots[slotId] = new VacantSlot();
+                result = RoomSlotActionType.PlayerKicked;
 
                 break;
             case LockedSlot:
-                _slots[memberId] = new VacantSlot();
-                result = RoomSlotUpdateEventData.EventType.SlotUnlocked;
+                _slots[slotId] = new VacantSlot();
+                result = RoomSlotActionType.SlotUnlocked;
 
                 break;
             case VacantSlot:
-                _slots[memberId] = new LockedSlot();
-                result = RoomSlotUpdateEventData.EventType.SlotLocked;
+                _slots[slotId] = new LockedSlot();
+                result = RoomSlotActionType.SlotLocked;
 
                 break;
         }
 
-        await Broadcast(new RoomSlotUpdateEventData()
+        SlotChanged?.Invoke(this, new RoomSlotChangedEventArgs
         {
-            Index = (byte)memberId,
-            Type = result
-        }, cancellationToken);
-
-        await session.Channel!.Broadcast(new RoomUserCountChangedEventData
-        {
-            Number    = Id,
-            Capacity  = (byte)Capacity,
-            UserCount = (byte)UserCount
-        }, cancellationToken);
+            SlotId       = slotId,
+            PreviousSlot = target,
+            CurrentSlot  = _slots[slotId],
+            ActionType   = result,
+            Capacity     = Capacity,
+            UserCount    = UserCount
+        });
     }
 
-    public async ValueTask Disconnect(Session session, CancellationToken cancellationToken)
+    public void StartGame()
+    {
+        ScoreTracker = new ScoreTracker(this);
+
+        _metadata.State = RoomState.Playing;
+        SaveMetadataChanges();
+
+        _ = ScheduleStartTimeout();
+    }
+
+    public void CompleteGame()
+    {
+        if (!ScoreTracker.Completed)
+            return;
+
+        _metadata.State = RoomState.Waiting;
+        SaveMetadataChanges();
+    }
+
+    public void Disconnect(Session session)
     {
         IRoom room = this;
-        await room.Remove(session, CancellationToken.None);
+        room.Remove(session);
 
         SessionDisconnected?.Invoke(this, new Encore.Sessions.SessionEventArgs { Session = session });
     }
 
-
-    protected override IEnumerable<Session> GetSessionsByContext<TContext>(TContext ctx)
+    private async Task ScheduleStartTimeout()
     {
-        return [];
+        if (_musicLoadTimeout == null)
+            return;
+        
+        await Task.Delay(_musicLoadTimeout.Value);
+
+        if (State != RoomState.Playing || ScoreTracker.Count == UserCount)
+            return;
+
+        for (int i = 0; i < _slots.Count; i++)
+        {
+            var slot = _slots[i];
+            if (slot is not MemberSlot member)
+                continue;
+
+            if (ScoreTracker.IsTracked(member.Session))
+                continue;
+
+            member.Session.Exit(this);
+            UserDisconnected?.Invoke(this, new RoomUserLeftEventArgs
+            {
+                MemberId           = i,
+                Member             = member,
+                RoomMasterMemberId = _slots.FindIndex(s => s is MemberSlot { IsMaster: true })
+            });
+        }
     }
 }
 
@@ -440,7 +446,7 @@ public class RoomMetadata
 
     public required Arena Arena { get; set; }
 
-    public byte ArenaRandomSeed { get; set; } = 0;
+    public byte ArenaRandomSeed { get; set; }
 
     public string Password { get; init; } = string.Empty;
 

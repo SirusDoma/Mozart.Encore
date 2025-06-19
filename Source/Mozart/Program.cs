@@ -21,6 +21,8 @@ using Mozart.Contexts;
 using Mozart.Services;
 using Mozart.Sessions;
 using Mozart.CLI;
+using Mozart.Entities;
+using Mozart.Events;
 
 namespace Mozart;
 
@@ -230,6 +232,13 @@ public class Program
 
                 // Application contexts
                 services.AddScoped<IAuthContext, AuthContext>();
+
+                // Event subscribers
+                // Note: The subscriber lifetime is mostly tied to the object that it's subscribing
+                //       (e.g, Use singleton when subscribing events from singleton service)
+                services.AddScoped<IEventPublisher<Room>, RoomEventPublisher>();
+                services.AddScoped<IEventPublisher<ScoreTracker>, ScoreTrackerEventPublisher>();
+                services.AddSingleton<IEventPublisher<RoomService>, RoomServiceEventPublisher>();
 
                 // Services
                 services.AddSingleton<IMetadataResolver, MetadataResolver>()
