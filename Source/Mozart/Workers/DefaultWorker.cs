@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Mozart.Options;
-using Mozart.Persistence.Contexts;
+using Mozart.Data.Contexts;
 using Mozart.Services;
 using Mozart.Sessions;
 

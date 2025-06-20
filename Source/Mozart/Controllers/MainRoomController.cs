@@ -9,6 +9,7 @@ using Mozart.Events;
 using Mozart.Messages;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
+using Mozart.Metadata;
 using Mozart.Services;
 using Mozart.Sessions;
 
@@ -226,7 +227,14 @@ public class MainRoomController(Session session,IRoomService roomService, IEvent
 
         try
         {
-            var room = roomService.CreateRoom(Session, request);
+            var room = roomService.CreateRoom(
+                session:       Session,
+                title:         request.Title,
+                mode:          request.Mode,
+                password:      request.Password,
+                minLevelLimit: request.MinLevelLimit,
+                maxLevelLimit: request.MaxLevelLimit
+            );
             publisher.Monitor(room);
 
             return new CreateRoomResponse

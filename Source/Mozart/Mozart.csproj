@@ -23,33 +23,20 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-      <OutputPath>..\..\..\bin\Debug\</OutputPath>
+      <OutputPath>..\..\Build\Debug\</OutputPath>
       <IntermediateOutputPath>..\..\Temp\Mozart\Debug</IntermediateOutputPath>
-      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-      <OutputPath>..\..\..\bin\Release\</OutputPath>
+      <OutputPath>..\..\Build\Release\</OutputPath>
         <IntermediateOutputPath>..\..\Temp\Mozart\Release</IntermediateOutputPath>
-      <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.6" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
-      <PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+      <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -66,15 +53,11 @@
     </ItemGroup>
     
     <ItemGroup>
-      <None Remove="Persistence\Migrations\**" />
-      <Compile Remove="Persistence\Migrations\**" />
-      <Content Remove="Persistence\Migrations\**" />
-      <EmbeddedResource Remove="Persistence\Migrations\**" />
-      <Folder Remove="Persistence\Migrations\**" />
-
-      <Compile Include="Persistence\Migrations\**\*ModelSnapshot.cs" />
-      <Content Include="Persistence\Migrations\**\*ModelSnapshot.cs" />
+      <ProjectReference Include="..\Mozart.Data\Mozart.Data.csproj" />
+      <ProjectReference Include="..\Mozart.Server\Mozart.Server.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Migrations\MySql\Mozart.Migrations.MySql.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Migrations\Postgres\Mozart.Migrations.Postgres.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj" />
     </ItemGroup>
-
-    <Import Project="..\Encore\Encore.projitems" Label="Shared" />
 </Project>

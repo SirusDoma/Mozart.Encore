@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 using Encore.Server;
 
-using Mozart.Persistence.Repositories;
+using Mozart.Data.Repositories;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
 using Mozart.Services;
