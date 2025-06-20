@@ -90,23 +90,32 @@ public class MainRoomController(Session session,IRoomService roomService, IEvent
             Channel.Id
         );
 
+        var rooms  = roomService.GetRooms(Channel);
+        var states = new List<RoomListResponse.RoomInfo>();
+
+        for (ushort i = 0; i < Channel.Capacity; i++)
+        {
+            var room = rooms.SingleOrDefault(r => r.Id == i);
+            states.Add(new RoomListResponse.RoomInfo
+            {
+                Number         = room?.Id ?? 0,
+                State          = room?.State ?? new RoomState(),
+                Title          = room?.Title ?? string.Empty,
+                HasPassword    = !string.IsNullOrEmpty(room?.Password),
+                MusicId        = room?.MusicId ?? 0,
+                Difficulty     = room?.Difficulty ?? Difficulty.EX,
+                Mode           = room?.Mode ?? GameMode.Single,
+                Speed          = room?.Speed ?? GameSpeed.X10,
+                Capacity       = (byte)(room?.Capacity ?? 0),
+                UserCount      = (byte)(room?.UserCount ?? 0),
+                MinLevelLimit  = (byte)(room?.MinLevelLimit ?? 0),
+                MaxLevelLimit  = (byte)(room?.MaxLevelLimit ?? 0)
+            });
+        }
+
         return new RoomListResponse
         {
-            Rooms = roomService.GetRooms(Channel).Select(room => new RoomListResponse.RoomInfo
-            {
-                Number         = room.Id,
-                State          = room.State,
-                Title          = room.Title,
-                HasPassword    = !string.IsNullOrEmpty(room.Password),
-                MusicId        = room.MusicId,
-                Difficulty     = room.Difficulty,
-                Mode           = room.Mode,
-                Speed          = room.Speed,
-                Capacity       = (byte)room.Capacity,
-                UserCount      = (byte)room.UserCount,
-                MinLevelLimit  = (byte)room.MinLevelLimit,
-                MaxLevelLimit  = (byte)room.MaxLevelLimit
-            }).ToList()
+            Rooms = states
         };
     }
 
@@ -231,7 +240,7 @@ public class MainRoomController(Session session,IRoomService roomService, IEvent
                 session:       Session,
                 title:         request.Title,
                 mode:          request.Mode,
-                password:      request.Password,
+                password:      request.HasPassword ? request.Password : string.Empty,
                 minLevelLimit: request.MinLevelLimit,
                 maxLevelLimit: request.MaxLevelLimit
             );

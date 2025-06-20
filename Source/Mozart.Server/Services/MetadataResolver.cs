@@ -21,6 +21,9 @@ public class MetadataResolver(IOptions<MetadataOptions> defaultOptions) : IMetad
         if (string.IsNullOrEmpty(path))
             path = defaultOptions.Value.ItemData;
 
+        if (!File.Exists(path))
+            throw new FileNotFoundException("Metadata file is not found", path);
+
         return _itemCache.GetOrAdd(channel.Id, static (_, p) =>
             ItemDataParser.Parse(File.ReadAllBytes(p)), path);
     }

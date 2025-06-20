@@ -11,35 +11,22 @@
         <RootNamespace>Mozart</RootNamespace>
         <AssemblyName>Mozart.Data</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
         <OutputPath>..\..\Build\Debug\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Data\Debug</IntermediateOutputPath>
+        <IntermediateOutputPath>..\..\Temp\Mozart.Data\</IntermediateOutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
         <OutputPath>..\..\Build\Release\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Data\Release</IntermediateOutputPath>
+        <IntermediateOutputPath>..\..\Temp\Mozart.Data\</IntermediateOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="Migrations\**" />
-        <Compile Remove="Migrations\**" />
-        <Content Remove="Migrations\**" />
-        <EmbeddedResource Remove="Migrations\**" />
-        <Folder Remove="Migrations\**" />
-
-        <Compile Include="Migrations\**\*ModelSnapshot.cs" />
-        <Content Include="Migrations\**\*ModelSnapshot.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />

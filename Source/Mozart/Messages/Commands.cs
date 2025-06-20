@@ -98,3 +98,21 @@ public enum EventCommand : ushort
     GameCompleted           = 0x0FB2, // 4018
     UserLeaveGame           = 0x0FB6, // 4022
 }
+
+public enum GatewayCommand : ushort
+{
+    CreateChannel     = 0x0C8, // 200
+    GetChannelStats   = 0x0C9, // 201
+    GrantSession      = 0x0CA, // 202
+    RevokeSession     = 0x0CB, // 203
+    Relay             = 0x0CC, // 204
+}
+
+public enum ChannelCommand : ushort
+{
+    CreateChannel   = 0x12C, // 300
+    GetChannelStats = 0x12D, // 301
+    Relay           = 0x12E, // 302
+    GrantSession    = 0x12F, // 303
+    DeleteChannel   = 0x130, // 304
+}

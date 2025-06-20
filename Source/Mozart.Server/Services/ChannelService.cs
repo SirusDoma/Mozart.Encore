@@ -23,20 +23,28 @@ public class ChannelService : Broadcastable, IChannelService
 
     private readonly ILogger<ChannelService> _logger;
 
-    public ChannelService(IServiceProvider provider, ILogger<ChannelService> logger,
+    public ChannelService(IOptions<ServerOptions> options, ILogger<ChannelService> logger,
         IOptions<GatewayOptions> gatewayOptions)
     {
         _logger = logger;
-        _channels = new ConcurrentDictionary<int, IChannel>(gatewayOptions.Value.Channels.ToDictionary(
-            c => c.Id,
-            IChannel (c) =>
-            {
-                var channel = new Channel(c);
-                channel.SessionDisconnected += OnChannelSessionDisconnected;
 
-                return channel;
-            }
-        ));
+        if (options.Value.Mode != DeploymentMode.Gateway)
+        {
+            _channels = new ConcurrentDictionary<int, IChannel>(gatewayOptions.Value.Channels.ToDictionary(
+                c => c.Id,
+                IChannel (c) =>
+                {
+                    var channel = new Channel(c);
+                    channel.SessionDisconnected += OnChannelSessionDisconnected;
+
+                    return channel;
+                }
+            ));
+        }
+        else
+        {
+            _channels = [];
+        }
     }
 
     public override IReadOnlyList<Session> Sessions

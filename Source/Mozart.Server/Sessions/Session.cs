@@ -1,10 +1,13 @@
 using System.Net.Sockets;
+using System.Text;
 using Microsoft.Extensions.Options;
 
+using Encore;
 using Encore.Messaging;
 using Encore.Server;
-using Mozart.Entities;
 
+using Mozart.Entities;
+using Mozart.Options;
 
 namespace Mozart.Sessions;
 
@@ -28,7 +31,7 @@ public class Session : Encore.Sessions.Session
         where TMessage : class, IMessage
     {
         _codec.Register<TMessage>();
-        await Framer.WriteFrame(_codec.Encode(message), cancellationToken);
+        await WriteFrame(_codec.Encode(message), cancellationToken).ConfigureAwait(false);
     }
 
     public void Register(IChannel channel)
@@ -44,6 +47,9 @@ public class Session : Encore.Sessions.Session
     {
         if (channel != Channel)
             throw new ArgumentOutOfRangeException(nameof(channel));
+
+        if (Room != null)
+            Exit(Room);
 
         Channel = null;
         channel.Remove(this);

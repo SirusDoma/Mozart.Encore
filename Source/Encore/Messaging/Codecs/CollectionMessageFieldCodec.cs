@@ -66,16 +66,15 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         int minCount       = attribute.MinCount;
         int maxCount       = attribute.MaxCount;
         var codec          = _defaultCodec;
+        var elementType    = GetEnumerableElementType(targetType);
 
-        int count = minCount;
         int realCount = minCount;
         if (prefixSizeType != TypeCode.Empty)
-        {
             realCount = Convert.ToInt32(reader.ReadInteger(prefixSizeType));
-            count = Math.Min(Math.Max(realCount, minCount), maxCount);
-        }
+        else if (elementType == typeof(byte) || elementType == typeof(char) || elementType == typeof(bool))
+            realCount = (int)(reader.BaseStream.Length - reader.BaseStream.Position);
 
-        var elementType = GetEnumerableElementType(targetType);
+        int count = Math.Min(Math.Max(realCount, minCount), maxCount);
 
         object[] items = new object[count];
         for (int i = 0; i < realCount; i++)

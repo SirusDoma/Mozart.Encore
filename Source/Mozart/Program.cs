@@ -1,5 +1,4 @@
 ﻿using System.Net.Sockets;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,22 +12,25 @@ using Encore.Messaging;
 using Encore.Server;
 
 using Mozart.Controllers;
+using Mozart.Controllers.Internal;
 using Mozart.Controllers.Filters;
 using Mozart.Data.Contexts;
 using Mozart.Data.Repositories;
 using Mozart.Options;
 using Mozart.Contexts;
 using Mozart.Services;
-using Mozart.Sessions;
 using Mozart.CLI;
 using Mozart.Entities;
 using Mozart.Events;
+using Mozart.Sessions;
+using Mozart.Workers.Channels;
+using Mozart.Workers.Gateway;
 
 namespace Mozart;
 
 public class Program
 {
-    public static Version Version        => new(0, 8, 0);
+    public static Version Version        => new(1, 0, 0);
     public static Version NetworkVersion => new(3, 10);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
@@ -50,19 +52,30 @@ public class Program
             .ConfigureSessions((context, provider) =>
             {
                 provider.UseSession<Session>()
-                    .AddFactory<SessionFactory>()
-                    .AddManager<SessionManager>();
+                    .AddFactory<ISessionFactory>(svc => new SessionFactory(svc))
+                    .AddManager<ISessionManager>(_ => new SessionManager());
             })
             .ConfigureFilters((context, builder) =>
             {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
                 builder.AddExceptionHandler<DefaultExceptionHandler>()
                     .AddExceptionLogger<DefaultExceptionLogger>()
                     .AddFilter<SessionScopeLoggerFilter>();
+
+                if (options.Mode == DeploymentMode.Gateway)
+                    builder.AddFilter<GatewayFilter>();
             })
-            .ConfigureRoutes((context, routes) =>
+            .ConfigureRoutes((context, provider) =>
             {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
                 // Controller-based routing: Not safe with AOT
-                routes.UseCodec<DefaultMessageCodec>()
+                var routes = provider.UseCodec<DefaultMessageCodec>()
                     .Map<AuthController>()
                     .Map<PlanetController>()
                     .Map<MessagingController>()
@@ -72,12 +85,47 @@ public class Program
                     .Map<MusicShopController>()
                     .Map<WaitingController>()
                     .Map<PlayingController>();
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Gateway:
+                        routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                    case DeploymentMode.Channel:
+                        routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                }
             })
             .ConfigureServices((context, services) =>
             {
-                // Server
-                services.AddHostedService<DefaultWorker>()
-                    .AddTransient<IMozartServer, MozartServer>();
+                services.AddSingleton<IMozartServer, MozartServer>();
+
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Channel:
+                        services.AddSingleton<IGatewayClient, GatewayClient>()
+                            .AddSingleton<IUserSessionFactory, UserSessionFactory>()
+                            .AddHostedService<ChannelWorker>();
+
+                        break;
+                    case DeploymentMode.Gateway:
+                        services.AddSingleton<IClientServer, ClientServer>()
+                            .AddSingleton<IGatewayServer, GatewayServer>()
+                            .AddSingleton<IChannelAggregator, ChannelAggregator>()
+                            .AddSingleton<IClientSessionFactory, ClientSessionFactory>()
+                            .AddSingleton<IChannelSessionFactory, ChannelSessionFactory>()
+                            .AddSingleton<IChannelSessionManager, ChannelSessionManager>()
+                            .AddHostedService<GatewayWorker>();
+
+                        break;
+                    case DeploymentMode.Full:
+                        services.AddHostedService<DefaultWorker>();
+                        break;
+                }
             })
             .Build();
 
@@ -133,7 +181,7 @@ public class Program
                     .AddConsole(options => options.FormatterName = "EncoreLoggerFormatter")
                     .AddConsoleFormatter<EncoreConsoleFormatter, EncoreConsoleFormatterOptions>()
                     .AddFilter("Microsoft.*", LogLevel.None)
-                    .SetMinimumLevel(LogLevel.Trace);
+                    .SetMinimumLevel(LogLevel.Debug);
             })
             .ConfigureServices((context, services) =>
             {
@@ -165,7 +213,7 @@ public class Program
                         DatabaseDriver.Sqlite =>
                             builder.UseSqlite(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.Sqlite"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.Sqlite");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -179,7 +227,7 @@ public class Program
                         DatabaseDriver.SqlServer =>
                             builder.UseSqlServer(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.SqlServer"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.SqlServer");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -193,7 +241,7 @@ public class Program
                         DatabaseDriver.MySql =>
                             builder.UseMySql(options.Url, ServerVersion.AutoDetect(options.Url), ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.MySql"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.MySql");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -207,7 +255,7 @@ public class Program
                         DatabaseDriver.Postgres =>
                             builder.UseNpgsql(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.Postgres"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.Postgres");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -246,22 +294,5 @@ public class Program
                     .AddSingleton<IRoomService, RoomService>()
                     .AddScoped<IIdentityService, IdentityService>();
             });
-    }
-
-    private static async Task StartServer(string[] args)
-    {
-        var host = CreateHostBuilder(args).Build();
-        await host.RunAsync();
-    }
-
-    private static Assembly LoadAssembly(string name)
-    {
-        if (File.Exists(name))
-            return Assembly.LoadFrom(name);
-
-        if (File.Exists($"{name}.dll"))
-            return Assembly.LoadFrom($"{name}.dll");
-
-        return Assembly.GetExecutingAssembly();
     }
 }

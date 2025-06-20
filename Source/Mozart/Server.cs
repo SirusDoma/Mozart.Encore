@@ -9,7 +9,7 @@ public interface IMozartServer : ITcpServer<Session>;
 
 public class MozartServer : TcpServer<Session>, IMozartServer
 {
-    public MozartServer(Encore.Sessions.ISessionFactory<Session> factory, IOptions<TcpOptions> options)
+    public MozartServer(ISessionFactory factory, IOptions<TcpOptions> options)
         : base(factory, options)
     {
     }

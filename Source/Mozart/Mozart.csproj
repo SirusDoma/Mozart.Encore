@@ -18,25 +18,31 @@
         <RootNamespace>Mozart</RootNamespace>
         <AssemblyName>Mozart.Encore</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
-        <IsPackable>false</IsPackable>
         <ApplicationIcon>Mozart.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
       <OutputPath>..\..\Build\Debug\</OutputPath>
-      <IntermediateOutputPath>..\..\Temp\Mozart\Debug</IntermediateOutputPath>
+      <IntermediateOutputPath>..\..\Temp\Mozart\</IntermediateOutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
       <OutputPath>..\..\Build\Release\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart\Release</IntermediateOutputPath>
+      <IntermediateOutputPath>..\..\Temp\Mozart\</IntermediateOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.6" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-      <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -53,11 +59,11 @@
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\Mozart.Data\Mozart.Data.csproj" />
       <ProjectReference Include="..\Mozart.Server\Mozart.Server.csproj" />
-      <ProjectReference Include="..\Mozart.Data\Migrations\MySql\Mozart.Migrations.MySql.csproj" />
-      <ProjectReference Include="..\Mozart.Data\Migrations\Postgres\Mozart.Migrations.Postgres.csproj" />
-      <ProjectReference Include="..\Mozart.Data\Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj" />
-      <ProjectReference Include="..\Mozart.Data\Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Mozart.Data.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\Postgres\Mozart.Migrations.Postgres.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj" />
     </ItemGroup>
 </Project>

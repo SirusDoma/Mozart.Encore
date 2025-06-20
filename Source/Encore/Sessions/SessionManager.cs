@@ -3,6 +3,12 @@ namespace Encore.Sessions;
 public interface ISessionManager<in TSession>: IDisposable
     where TSession : Session
 {
+    public event EventHandler<SessionEventArgs>? Started;
+
+    public event EventHandler<SessionEventArgs>? Stopped;
+
+    public event EventHandler<SessionErrorEventArgs>? Error;
+
     void StartSession(TSession session);
 
     Task StopSession(TSession session);
@@ -55,7 +61,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
     {
     }
 
-    public void StartSession(TSession session)
+    public virtual void StartSession(TSession session)
     {
         if (Validate(session))
             return;
@@ -95,7 +101,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
         Started?.Invoke(this, session);
     }
 
-    public Task StopSession(TSession session)
+    public virtual Task StopSession(TSession session)
     {
         var managed = _sessions.FirstOrDefault(m => m.Session == session);
         if (managed == null)
@@ -110,7 +116,7 @@ public class SessionManager<TSession> : ISessionManager<TSession>
         return managed.Execution;
     }
 
-    public bool Validate(TSession session)
+    public virtual bool Validate(TSession session)
     {
         return _sessions.FirstOrDefault(m => m.Session == session) != null;
     }

@@ -20,9 +20,7 @@ public class SizePrefixedMessageFramerFactory<TSize> : IMessageFramerFactory
 
 public interface IMessageFramer
 {
-    Task<int> ReadFrame(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
-
-    Task<int> ReadFrame(Memory<byte> buffer, CancellationToken cancellationToken);
+    Task<byte[]> ReadFrame(int bufferSize = 1024, CancellationToken cancellationToken = default);
 
     ValueTask WriteFrame(byte[] payload, CancellationToken cancellationToken);
 
@@ -32,6 +30,8 @@ public interface IMessageFramer
 public class SizePrefixedMessageFramer<TSize> : IMessageFramer
     where TSize : unmanaged, IBinaryInteger<TSize>, IConvertible
 {
+    private const uint MB = 1048576;
+
     private readonly NetworkStream _stream;
 
     public SizePrefixedMessageFramer(NetworkStream stream)
@@ -39,39 +39,38 @@ public class SizePrefixedMessageFramer<TSize> : IMessageFramer
         _stream = stream;
     }
 
-    public Task<int> ReadFrame(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
-        ArgumentOutOfRangeException.ThrowIfNegative(offset, nameof(offset));
-        ArgumentOutOfRangeException.ThrowIfLessThan((uint)count, (uint)(buffer.Length - offset), nameof(count));
-
-        return ReadFrame(buffer.AsMemory(offset, count), cancellationToken);
-    }
-
-    public async Task<int> ReadFrame(Memory<byte> buffer, CancellationToken cancellationToken)
+    public async Task<byte[]> ReadFrame(int bufferSize = 1024, CancellationToken cancellationToken = default)
     {
         if (!_stream.CanRead)
-            return 0;
+            return [];
 
         byte[] prefix = new byte[default(TSize).GetByteCount()];
         await _stream.ReadExactlyAsync(prefix, cancellationToken).ConfigureAwait(false);
 
         var tsize = MemoryMarshal.Read<TSize>(prefix);
         if (TSize.IsZero(tsize))
-            return 0; // Something wrong..
+            return []; // Something wrong..
 
         int size = tsize.ToInt32(null) - default(TSize).GetByteCount();
         if (size == 0)
-            return 0;
+            return [];
 
         if (size < 0)
             throw new FormatException("Cannot read frame with negative size");
 
-        if (size > buffer.Length)
-            throw new OutOfMemoryException("The specified buffer length is less than the frame size");
+        if (size > 1 * MB) // 1MB
+            throw new OutOfMemoryException("The the frame size is too big");
 
-        await _stream.ReadExactlyAsync(buffer[..size], cancellationToken).ConfigureAwait(false);
-        return size;
+        byte[] buffer = new byte[size];
+        for (int read = 0; read < size; read += bufferSize)
+        {
+            if (read + bufferSize > size)
+                bufferSize = size - read;
+
+            await _stream.ReadExactlyAsync(buffer, read, bufferSize, cancellationToken).ConfigureAwait(false);
+        }
+
+        return buffer;
     }
 
     public ValueTask WriteFrame(byte[] payload, CancellationToken cancellationToken)

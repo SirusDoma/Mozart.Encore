@@ -8,7 +8,7 @@ namespace Encore.Sessions;
 public interface ISessionFactory<out TSession>
     where TSession : Session
 {
-    TSession CreateSession(TcpClient client);
+    public TSession CreateSession(TcpClient client, params object[] parameters);
 }
 
 public interface ISessionFactory : ISessionFactory<Session>
@@ -39,7 +39,7 @@ public sealed class SessionFactory : ISessionFactory
         _dispatcher    = dispatcher    ?? new CommandDispatcher();
     }
 
-    public Session CreateSession(TcpClient client)
+    public Session CreateSession(TcpClient client, params object[] parameters)
     {
         return new Session(client, _options, _framerFactory, _dispatcher);
     }
