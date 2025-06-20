@@ -95,11 +95,42 @@ Gameplay-specific settings.
 
 Use `--Game:<Option>` to configure these settings via command-line arguments.
 
-| Option                       | Description                                                                                                                                                                                                                                                                                              |
-|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                     |
-| `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                            |
-| `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music. <br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
+| Option                       | Description                                                                                                                                                                                                                                                                                                  |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                         |
+| `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
+| `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
+
+# Migration
+
+Use Entity Framework tools to run the database migration.
+See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
+
+The migration files are divided by [projects based on provider](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/providers?tabs=dotnet-core-cli).
+Use the following command to create a new migration:
+
+```shell
+ dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
+                             --startup-project Source\Mozart\Mozart.csproj \
+                             --context Mozart.Data.Contexts.UserDbContext \
+                             -- --Auth:Mode=<auth mode> \
+                             --Db:Driver=<driver> \
+                             --Db:Url="<connection string>"
+```
+
+>[!IMPORTANT]
+> Database migration is automatically executed every start-up as long as the `Auth:Mode` equals to `Default`.  
+> This is because `Auth:Foreign` is a compatibility mode that enables Mozart to continue to work with foreign existing database.
+>  
+> Database migration will never be supported in `Foreign` mode.
+
+>[!TIP]
+> The `--` token directs `dotnet ef` to treat everything that follows as an argument and not try to parse them as options.
+> Any extra arguments not used by dotnet ef are forwarded to the Mozart.
+
+>[!TIP]
+> You can place the configured `config.ini` in your working directory to configure the database configuration
+> instead of passing them via CLI.
 
 # Scaling
 
@@ -111,7 +142,7 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 
 The server application has built-in utilities shaped toward local player usage. 
 
-- `db:init`: Initialize a new database if the configured database is not exists.
+- `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
 - `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
 

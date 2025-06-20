@@ -6,6 +6,9 @@
         <Nullable>enable</Nullable>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x86</Platforms>
+        <IsPackable>false</IsPackable>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -15,14 +18,11 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <OutputPath>..\..\..\..\Build\Release\</OutputPath>
     </PropertyGroup>
-
+    
     <ItemGroup>
-        <ProjectReference Include="..\..\Mozart.Data.csproj" />
-        <Compile Remove="*ModelSnapshot.cs" />
-        <Content Remove="*ModelSnapshot.cs" />
+        <ProjectReference Include="..\..\Mozart.Data\Mozart.Data.csproj" />
     </ItemGroup>
 
-    <Import Condition="Exists('$(MSBuildProjectDirectory)\obj\$(MSBuildProjectFile).EntityFrameworkCore.targets')"
-            Project="$(MSBuildProjectDirectory)\obj\$(MSBuildProjectFile).EntityFrameworkCore.targets"/>
+
 
 </Project>

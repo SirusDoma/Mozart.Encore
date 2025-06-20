@@ -1,5 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <BaseIntermediateOutputPath>..\..\..\..\..\Temp\Mozart\Migrations\SqlServer</BaseIntermediateOutputPath>
-    </PropertyGroup>
-</Project>

@@ -133,7 +133,7 @@ public class Program
                     .AddConsole(options => options.FormatterName = "EncoreLoggerFormatter")
                     .AddConsoleFormatter<EncoreConsoleFormatter, EncoreConsoleFormatterOptions>()
                     .AddFilter("Microsoft.*", LogLevel.None)
-                    .SetMinimumLevel(LogLevel.Trace);
+                    .SetMinimumLevel(LogLevel.Debug);
             })
             .ConfigureServices((context, services) =>
             {
@@ -165,7 +165,7 @@ public class Program
                         DatabaseDriver.Sqlite =>
                             builder.UseSqlite(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.Sqlite"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.Sqlite");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -179,7 +179,7 @@ public class Program
                         DatabaseDriver.SqlServer =>
                             builder.UseSqlServer(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.SqlServer"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.SqlServer");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -193,7 +193,7 @@ public class Program
                         DatabaseDriver.MySql =>
                             builder.UseMySql(options.Url, ServerVersion.AutoDetect(options.Url), ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.MySql"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.MySql");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -207,7 +207,7 @@ public class Program
                         DatabaseDriver.Postgres =>
                             builder.UseNpgsql(options.Url, ctx =>
                             {
-                                ctx.MigrationsAssembly(LoadAssembly("Mozart.Migrations.Postgres"));
+                                ctx.MigrationsAssembly("Mozart.Migrations.Postgres");
                                 if (options.CommandTimeout != null)
                                     ctx.CommandTimeout(options.CommandTimeout.Value);
 
@@ -246,22 +246,5 @@ public class Program
                     .AddSingleton<IRoomService, RoomService>()
                     .AddScoped<IIdentityService, IdentityService>();
             });
-    }
-
-    private static async Task StartServer(string[] args)
-    {
-        var host = CreateHostBuilder(args).Build();
-        await host.RunAsync();
-    }
-
-    private static Assembly LoadAssembly(string name)
-    {
-        if (File.Exists(name))
-            return Assembly.LoadFrom(name);
-
-        if (File.Exists($"{name}.dll"))
-            return Assembly.LoadFrom($"{name}.dll");
-
-        return Assembly.GetExecutingAssembly();
     }
 }

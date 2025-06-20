@@ -1,3 +1,5 @@
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,8 +31,9 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, Sess
             {
                 logger.LogInformation($"Mozart.Encore: Version {Program.Version}");
 
-                // Ensure database and its tables are created
-                await context.Database.EnsureCreatedAsync(cancellationToken);
+                // Ensure database and its tables are created when using default auth
+                if (authOptions.Value.Mode == AuthMode.Default)
+                    await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
 
                 // Clear left-over login session or open connection to database.
                 if (identityService.Options.RevokeOnStartup)

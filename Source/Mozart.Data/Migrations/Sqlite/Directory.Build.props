@@ -1,5 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <BaseIntermediateOutputPath>..\..\..\..\..\Temp\Mozart\Migrations\Sqlite</BaseIntermediateOutputPath>
-    </PropertyGroup>
-</Project>

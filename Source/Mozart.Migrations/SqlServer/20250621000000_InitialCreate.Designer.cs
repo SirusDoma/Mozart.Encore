@@ -9,10 +9,10 @@ using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Data.Migrations.SqlServer
+namespace Mozart.Migrations.SqlServer
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250615000000_InitialCreate")]
+    [Migration("20250621000000_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,6 +92,9 @@ namespace Mozart.Data.Migrations.SqlServer
                         .HasColumnType("nvarchar(12)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("t_o2jam_credentials", (string)null);
                 });
@@ -293,6 +296,9 @@ namespace Mozart.Data.Migrations.SqlServer
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username", "Nickname")
+                        .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
                 });

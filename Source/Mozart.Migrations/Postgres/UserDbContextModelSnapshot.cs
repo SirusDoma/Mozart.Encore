@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mozart.Data.Contexts;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mozart.Data.Migrations.Postgres
+namespace Mozart.Migrations.Postgres
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250615000000_InitialCreate")]
-    partial class InitialCreate
+    partial class UserDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,6 +89,9 @@ namespace Mozart.Data.Migrations.Postgres
                         .HasColumnType("character varying(12)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("t_o2jam_credentials", (string)null);
                 });
@@ -293,6 +293,9 @@ namespace Mozart.Data.Migrations.Postgres
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username", "Nickname")
+                        .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
                 });

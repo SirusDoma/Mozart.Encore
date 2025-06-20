@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mozart.Data.Migrations.Postgres
+namespace Mozart.Migrations.SqlServer
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -16,18 +15,18 @@ namespace Mozart.Data.Migrations.Postgres
                 name: "t_o2jam_charinfo",
                 columns: table => new
                 {
-                    USER_INDEX_ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    USER_ID = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    USER_NICKNAME = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Sex = table.Column<bool>(type: "boolean", nullable: false),
-                    Level = table.Column<int>(type: "integer", nullable: false),
-                    Battle = table.Column<int>(type: "integer", nullable: false),
-                    Win = table.Column<int>(type: "integer", nullable: false),
-                    Lose = table.Column<int>(type: "integer", nullable: false),
-                    Draw = table.Column<int>(type: "integer", nullable: false),
-                    Experience = table.Column<int>(type: "integer", nullable: false),
-                    AdminLevel = table.Column<int>(type: "integer", nullable: false)
+                    USER_INDEX_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    USER_ID = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    USER_NICKNAME = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Sex = table.Column<bool>(type: "bit", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false),
+                    Battle = table.Column<int>(type: "int", nullable: false),
+                    Win = table.Column<int>(type: "int", nullable: false),
+                    Lose = table.Column<int>(type: "int", nullable: false),
+                    Draw = table.Column<int>(type: "int", nullable: false),
+                    Experience = table.Column<int>(type: "int", nullable: false),
+                    AdminLevel = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -39,10 +38,10 @@ namespace Mozart.Data.Migrations.Postgres
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    Username = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
-                    Password = table.Column<byte[]>(type: "bytea", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
+                    Password = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -53,14 +52,14 @@ namespace Mozart.Data.Migrations.Postgres
                 name: "t_o2jam_login",
                 columns: table => new
                 {
-                    USER_INDEX_ID = table.Column<int>(type: "integer", nullable: false),
-                    GATEWAY_ID = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    MAIN_CH = table.Column<int>(type: "integer", nullable: false),
-                    SUB_CH = table.Column<int>(type: "integer", nullable: false),
-                    USER_ID = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    TUSER_ID = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ADDR_IP = table.Column<string>(type: "text", nullable: false),
-                    LOGIN_TIME = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    USER_INDEX_ID = table.Column<int>(type: "int", nullable: false),
+                    GATEWAY_ID = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    MAIN_CH = table.Column<int>(type: "int", nullable: false),
+                    SUB_CH = table.Column<int>(type: "int", nullable: false),
+                    USER_ID = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TUSER_ID = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ADDR_IP = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LOGIN_TIME = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,9 +70,9 @@ namespace Mozart.Data.Migrations.Postgres
                 name: "t_o2jam_charcash",
                 columns: table => new
                 {
-                    USER_INDEX_ID = table.Column<int>(type: "integer", nullable: false),
-                    Gem = table.Column<int>(type: "integer", nullable: false),
-                    O2Cash = table.Column<int>(type: "integer", nullable: false)
+                    USER_INDEX_ID = table.Column<int>(type: "int", nullable: false),
+                    Gem = table.Column<int>(type: "int", nullable: false),
+                    O2Cash = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,7 +88,7 @@ namespace Mozart.Data.Migrations.Postgres
                 name: "t_o2jam_item",
                 columns: table => new
                 {
-                    USER_INDEX_ID = table.Column<int>(type: "integer", nullable: false),
+                    USER_INDEX_ID = table.Column<int>(type: "int", nullable: false),
                     Equip1 = table.Column<short>(type: "smallint", nullable: false),
                     Equip2 = table.Column<short>(type: "smallint", nullable: false),
                     Equip3 = table.Column<short>(type: "smallint", nullable: false),
@@ -146,6 +145,18 @@ namespace Mozart.Data.Migrations.Postgres
                         principalTable: "t_o2jam_charinfo",
                         principalColumn: "USER_INDEX_ID");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_t_o2jam_charinfo_USER_ID_USER_NICKNAME",
+                table: "t_o2jam_charinfo",
+                columns: new[] { "USER_ID", "USER_NICKNAME" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_t_o2jam_credentials_Username",
+                table: "t_o2jam_credentials",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />

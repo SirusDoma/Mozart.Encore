@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Data.Migrations.MySql
+namespace Mozart.Migrations.MySql
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250615000000_InitialCreate")]
-    partial class InitialCreate
+    partial class UserDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,21 +76,24 @@ namespace Mozart.Data.Migrations.MySql
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<byte[]>("Password")
+                    b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("passwd");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("varchar(12)");
+                        .HasColumnType("varchar(12)")
+                        .HasColumnName("userid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("t_o2jam_credentials", (string)null);
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("member", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
@@ -293,6 +293,9 @@ namespace Mozart.Data.Migrations.MySql
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username", "Nickname")
+                        .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
                 });

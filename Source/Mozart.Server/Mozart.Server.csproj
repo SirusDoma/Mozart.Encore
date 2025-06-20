@@ -11,16 +11,18 @@
         <RootNamespace>Mozart</RootNamespace>
         <AssemblyName>Mozart.Server</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
         <OutputPath>..\..\Build\Debug\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Server\Debug</IntermediateOutputPath>
+        <IntermediateOutputPath>..\..\Temp\Mozart.Server\</IntermediateOutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
         <OutputPath>..\..\Build\Release\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Server\Release</IntermediateOutputPath>
+        <IntermediateOutputPath>..\..\Temp\Mozart.Server\</IntermediateOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,5 +31,5 @@
     </ItemGroup>
 
     <Import Project="..\Encore\Encore.projitems" Label="Shared" />
-    
+
 </Project>
