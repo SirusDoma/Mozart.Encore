@@ -29,9 +29,12 @@ public interface IIdentityService
     Task Revoke(string token, CancellationToken cancellationToken);
 
     Task ClearSessions(CancellationToken cancellationToken);
+
+    Task ClearSessions(int serverId, int channelId, CancellationToken cancellationToken);
 }
 
-public sealed class IdentityService(IAuthContext ctx, IOptions<TcpOptions> tcp, IOptions<AuthOptions> options)
+public sealed class IdentityService(IAuthContext ctx, IOptions<ServerOptions> server, IOptions<TcpOptions> tcp,
+    IOptions<GatewayOptions> gateway, IOptions<AuthOptions> options)
     : IIdentityService
 {
     public AuthOptions Options => options.Value;
@@ -63,7 +66,15 @@ public sealed class IdentityService(IAuthContext ctx, IOptions<TcpOptions> tcp, 
         if (!verified)
             throw new ArgumentException("Invalid username or password", nameof(request));
 
-        var session = await ctx.CreateSession(tcp.Value.Address, record.Username, request.Address,
+        string gatewayId = server.Value.Mode switch
+        {
+            DeploymentMode.Full    => tcp.Value.Address,
+            DeploymentMode.Gateway => tcp.Value.Address,
+            DeploymentMode.Channel => gateway.Value.Address,
+            _ => tcp.Value.Address
+        };
+
+        var session = await ctx.CreateSession(gatewayId, record.Username, request.Address,
             cancellationToken);
 
         await ctx.Commit();
@@ -109,6 +120,11 @@ public sealed class IdentityService(IAuthContext ctx, IOptions<TcpOptions> tcp, 
     public Task ClearSessions(CancellationToken cancellationToken)
     {
         return ctx.Sessions.Clear(cancellationToken);
+    }
+
+    public Task ClearSessions(int serverId, int channelId, CancellationToken cancellationToken)
+    {
+        return ctx.Sessions.Clear(serverId, channelId, cancellationToken);
     }
 
     private static bool VerifyHashedPassword(Credential record, UsernamePasswordCredentialRequest credentialRequest)

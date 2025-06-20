@@ -164,6 +164,11 @@ public class ScoreTracker : IScoreTracker
                 Completed   = false
             });
 
+            UserTracked?.Invoke(this, new ScoreTrackEventArgs
+            {
+                MemberId = i,
+                Session  = member.Session
+            });
             return;
         }
 

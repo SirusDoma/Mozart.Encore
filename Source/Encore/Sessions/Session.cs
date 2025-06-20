@@ -5,7 +5,7 @@ using Encore.Server;
 
 namespace Encore.Sessions;
 
-public class Session
+public class Session : IDisposable
 {
     private object? _token = null;
 
@@ -39,7 +39,6 @@ public class Session
     public virtual bool Authorized => _token != null;
 
     public virtual void Authorize<T>(T token)
-        where T : class
     {
         _token = token;
     }
@@ -54,7 +53,15 @@ public class Session
 
     public virtual T GetAuthorizedToken<T>()
     {
-        return (T)GetAuthorizedToken();
+        try
+        {
+            return (T)GetAuthorizedToken();
+        }
+        catch (InvalidCastException)
+        {
+            throw new InvalidOperationException(
+                $"Token type mismatch (Expected: {typeof(T).Name} / Actual: {_token?.GetType().Name})");
+        }
     }
 
     public virtual async Task Execute(CancellationToken cancellationToken)
@@ -64,8 +71,7 @@ public class Session
             while (!cancellationToken.IsCancellationRequested)
             {
                 byte[] frame = await ReadFrame(cancellationToken).ConfigureAwait(false);
-                if (frame.Length > 0)
-                    await OnFrameReceived(frame, cancellationToken).ConfigureAwait(false);
+                await OnFrameReceived(frame, cancellationToken).ConfigureAwait(false);
 
                 // Check if the recent operation disconnect the socket
                 if (!Client.Connected)
@@ -74,18 +80,17 @@ public class Session
         }
         finally
         {
-            OnDisconnected();
-            Disconnected?.Invoke(this, EventArgs.Empty);
-            Disconnected = null;
+            TriggerDisconnectEvent();
         }
     }
 
     protected virtual async Task OnFrameReceived(byte[] payload, CancellationToken cancellationToken)
     {
-        await Dispatcher.Dispatch(this, payload, cancellationToken).ConfigureAwait(false);
+        if (payload.Length > 0)
+            await Dispatcher.Dispatch(this, payload, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Terminate()
+    public virtual void Terminate()
     {
         Client.Close();
     }
@@ -94,16 +99,26 @@ public class Session
     {
     }
 
-    public async Task WriteFrame(byte[] frame, CancellationToken cancellationToken)
+    public virtual async Task WriteFrame(byte[] frame, CancellationToken cancellationToken)
     {
         await Framer.WriteFrame(frame, cancellationToken);
     }
 
-    public async ValueTask<byte[]> ReadFrame(CancellationToken cancellationToken)
+    public virtual async ValueTask<byte[]> ReadFrame(CancellationToken cancellationToken)
     {
-        byte[] buffer = new byte[Options.PacketBufferSize];
-        int count = await Framer.ReadFrame(buffer, cancellationToken);
+        return await Framer.ReadFrame(Options.PacketBufferSize, cancellationToken);
+    }
 
-        return count <= 0 ? [] : buffer[..count];
+    protected void TriggerDisconnectEvent()
+    {
+        OnDisconnected();
+        Disconnected?.Invoke(this, EventArgs.Empty);
+        Disconnected = null;
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Client.Dispose();
     }
 }

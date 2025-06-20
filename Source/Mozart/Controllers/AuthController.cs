@@ -12,7 +12,7 @@ using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Controllers;
 
-public class AuthController(Session session, SessionManager manager, IIdentityService identityService,
+public class AuthController(Session session, ISessionManager manager, IIdentityService identityService,
     IChannelService channelService, IUserRepository userRepository, ILogger<AuthController> logger) : CommandController<Session>(session)
 {
     [CommandHandler]
@@ -20,7 +20,7 @@ public class AuthController(Session session, SessionManager manager, IIdentitySe
     {
         try
         {
-            logger.LogInformation((int)RequestCommand.Authorize, "Authorize: [{token}]", request.Token);
+            logger.LogInformation((int)RequestCommand.Authorize, "Authorize session");
 
             const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
             if (channelService.Sessions.Any(s => s.Actor.Token.Equals(request.Token, comparison)))

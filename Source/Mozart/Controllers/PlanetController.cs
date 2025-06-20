@@ -27,19 +27,22 @@ public class PlanetController(Session session, IIdentityService identityService,
 
         var states     = new List<ChannelListResponse.ChannelState>();
         var channels   = channelService.GetChannels();
-        int maxChannel = channels.Max(c => c.Id) + 1;
 
-        for (ushort i = 0; i < maxChannel; i++)
+        if (channels.Count > 0)
         {
-            var channel = channels.SingleOrDefault(s => s.Id == i);
-            states.Add(new ChannelListResponse.ChannelState
+            int maxChannel = channels.Max(c => c.Id) + 1;
+            for (ushort i = 0; i < maxChannel; i++)
             {
-                ServerId   = (ushort)gateway.Id,
-                ChannelId  = i,
-                Capacity   = channel?.Capacity  ?? 0,
-                Population = channel?.UserCount ?? 0,
-                Active     = channel != null
-            });
+                var channel = channels.SingleOrDefault(s => s.Id == i);
+                states.Add(new ChannelListResponse.ChannelState
+                {
+                    ServerId   = (ushort)gateway.Id,
+                    ChannelId  = i,
+                    Capacity   = channel?.Capacity ?? 0,
+                    Population = channel?.UserCount ?? 0,
+                    Active     = channel != null
+                });
+            }
         }
 
         return new ChannelListResponse { Channels = states };

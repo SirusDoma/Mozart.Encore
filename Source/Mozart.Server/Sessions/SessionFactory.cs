@@ -3,9 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mozart.Sessions;
 
-public class SessionFactory(IServiceProvider provider) : Encore.Sessions.ISessionFactory<Session>
+public interface ISessionFactory : Encore.Sessions.ISessionFactory<Session>;
+
+public class SessionFactory(IServiceProvider provider) : ISessionFactory
 {
-    public Session CreateSession(TcpClient client)
+    public Session CreateSession(TcpClient client, params object[] parameters)
     {
         return ActivatorUtilities.CreateInstance<Session>(provider, client);
     }

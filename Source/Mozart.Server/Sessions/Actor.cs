@@ -66,9 +66,9 @@ public class Actor
 
     public bool IsAdministrator { get; init; }
 
-    public Dictionary<ItemType, int> Equipments { get; set; } = [];
+    public Dictionary<ItemType, int> Equipments { get; set; }
 
-    public IList<int> Inventory { get; set; } = [];
+    public IList<int> Inventory { get; set; }
 
     public IList<int> AttributiveItemIds { get; set; } = [];
 

@@ -2,13 +2,22 @@ using System.Collections.Concurrent;
 
 namespace Mozart.Sessions;
 
-public class SessionManager : Encore.Sessions.SessionManager<Session>
+public interface ISessionManager : Encore.Sessions.ISessionManager<Session>
+{
+    void StartExpiry(Session session, TimeSpan expiry, Action<Session>? callback = null);
+    bool CancelExpiry(Session session);
+}
+
+public class SessionManager : Encore.Sessions.SessionManager<Session>, ISessionManager
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _expiryCancellations = new();
 
     public void StartExpiry(Session session, TimeSpan expiry, Action<Session>? callback = null)
     {
         if (!Validate(session))
+            return;
+
+        if (!session.Authorized)
             return;
 
         string token = session.Actor.Token;
@@ -45,6 +54,9 @@ public class SessionManager : Encore.Sessions.SessionManager<Session>
 
     public bool CancelExpiry(Session session)
     {
+        if (!session.Authorized)
+            return false;
+
         if (_expiryCancellations.TryRemove(session.Actor.Token, out var cts))
         {
             cts.Cancel();

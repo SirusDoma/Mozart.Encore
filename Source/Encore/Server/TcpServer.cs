@@ -6,7 +6,7 @@ using Encore.Messaging;
 
 namespace Encore.Server;
 
-public interface ITcpServer<TSession>
+public interface ITcpServer<TSession> : IDisposable
     where TSession : Session
 {
     public Socket Socket { get; }

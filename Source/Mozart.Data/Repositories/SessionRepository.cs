@@ -19,6 +19,8 @@ public interface ISessionRepository : IRepository<AuthSession>
     Task Revoke(string token, CancellationToken cancellationToken = default);
 
     Task Clear(CancellationToken cancellationToken = default);
+
+    Task Clear(int serverId, int channelId, CancellationToken cancellationToken = default);
 }
 
 public class SessionRepository(IDbContextFactory<UserDbContext> factory)
@@ -65,5 +67,11 @@ public class SessionRepository(IDbContextFactory<UserDbContext> factory)
     public async Task Clear(CancellationToken cancellationToken)
     {
         await DbSet.ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public async Task Clear(int serverId, int channelId, CancellationToken cancellationToken = default)
+    {
+        await DbSet.Where(s => s.ServerId == serverId && s.ChannelId == channelId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }

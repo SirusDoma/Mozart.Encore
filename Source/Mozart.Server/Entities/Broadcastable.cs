@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Sessions;
 
-namespace Mozart.Services;
+namespace Mozart.Entities;
 
 public interface IBroadcastable
 {
@@ -30,7 +30,6 @@ public abstract class Broadcastable : IBroadcastable
 
         return Sessions.Count;
     }
-
 
     public virtual async Task<int> Broadcast<TMessage>(Session sender, TMessage message,
         CancellationToken cancellationToken) where TMessage : class, IMessage

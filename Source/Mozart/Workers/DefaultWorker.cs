@@ -1,3 +1,5 @@
+using System.Net.Sockets;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,12 +12,10 @@ using Mozart.Sessions;
 
 namespace Mozart;
 
-public class DefaultWorker(IServiceProvider provider, IMozartServer server, SessionManager manager, IMetadataResolver resolver,
-    IChannelService channelService, UserDbContext context, IOptions<DatabaseOptions> dbOptions, IOptions<AuthOptions> authOptions,
-    ILogger<DefaultWorker> logger, IHostEnvironment env) : BackgroundService
+public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISessionManager manager,
+    IMetadataResolver resolver, IChannelService channelService, UserDbContext context, IOptions<DatabaseOptions> dbOptions,
+    IOptions<AuthOptions> authOptions, ILogger<DefaultWorker> logger, IHostEnvironment env) : BackgroundService
 {
-    public static string GatewayId { get; } = Guid.NewGuid().ToString().ToUpper();
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         // Scope in background service
@@ -27,25 +27,33 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, Sess
 
             try
             {
-                logger.LogInformation($"Mozart.Encore: Version {Program.Version}");
+                logger.LogInformation("Mozart.Encore: Version {Version}", Program.Version);
 
-                // Ensure database and its tables are created
-                await context.Database.EnsureCreatedAsync(cancellationToken);
+                // Validate by loading metadata files
+                this.ValidateMetadata(channelService, resolver, logger);
+
+                try
+                {
+                    // Ensure database and its tables are created when using default auth
+                    if (authOptions.Value.Mode == AuthMode.Default)
+                        await context.Database.MigrateAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to execute database migration");
+                }
 
                 // Clear left-over login session or open connection to database.
                 if (identityService.Options.RevokeOnStartup)
                     await identityService.ClearSessions(cancellationToken);
 
-                // Validate by loading metadata files
-                ValidateMetadata();
-
                 // Start the TCP Server
                 server.Start(server.Options.MaxConnections);
 
-                logger.LogInformation($"Application started: Listening @ {server.Socket.LocalEndPoint}");
-                logger.LogInformation($"[!] Network environment: {Program.NetworkVersion} ({env.EnvironmentName})");
-                logger.LogInformation($"[!] Database driver: {dbOptions.Value.Driver.GetPrintableName()}");
-                logger.LogInformation($"[?] Press [CTRL+C] to shut down");
+                logger.LogInformation("Application started: Listening @ {EndPoint}", server.Socket.LocalEndPoint);
+                logger.LogInformation("[!] Network environment: {NetworkVersion} ({Env})", Program.NetworkVersion, env.EnvironmentName);
+                logger.LogInformation("[!] Database driver: {Driver}", dbOptions.Value.Driver.GetPrintableName());
+                logger.LogInformation("[?] Press [CTRL+C] to shut down");
             }
             catch (Exception ex)
             {
@@ -55,12 +63,13 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, Sess
 
             manager.Stopped += (sender, args) =>
             {
-                logger.LogInformation("Session with [{Client}] has been stopped", args.Session.Socket.RemoteEndPoint);
+                logger.LogInformation("Session with [{Client}] has been stopped", args.Session.Socket?.RemoteEndPoint?.ToString()  ??
+                    args.Session.GetAuthorizedToken<Actor>().Nickname);
 
                 int expiry = authOptions.Value.SessionExpiry;
                 if (expiry > 0)
                 {
-                    ((SessionManager)sender!).StartExpiry((Session)args.Session, TimeSpan.FromMinutes(expiry), s =>
+                    ((ISessionManager)sender!).StartExpiry((Session)args.Session, TimeSpan.FromMinutes(expiry), s =>
                     {
                         // Expiring session after 5 minutes of disconnection
                         logger.LogInformation("Deleted login session [{Token}]", s.Actor.Token);
@@ -74,14 +83,15 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, Sess
                 using (logger.BeginScope("System"))
                 using (logger.BeginScope("Session"))
                 {
-                    var address = ((Session?)sender)?.Socket.RemoteEndPoint;
+                    var address = args.Session.Socket?.RemoteEndPoint?.ToString() ??
+                                  args.Session.GetAuthorizedToken<Actor>().Nickname;
                     switch (args.Exception)
                     {
-                        case EndOfStreamException:
+                        case EndOfStreamException or IOException { InnerException: SocketException }:
                             logger.LogWarning("Session [{User}] connection has been lost", address);
                             break;
                         case OperationCanceledException or TaskCanceledException:
-                            logger.LogWarning("Session [{User}] terminated by server", address);
+                            logger.LogInformation("Session [{User}] terminated by server", address);
                             break;
                         default:
                             logger.LogError(args.Exception,
@@ -125,19 +135,5 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, Sess
             logger.LogInformation("[!] Shutting down application..");
 
         await manager.ClearSessions();
-    }
-
-    private void ValidateMetadata()
-    {
-        try
-        {
-            foreach (var channel in channelService.GetChannels())
-                _ = resolver.GetItemData(channel);
-        }
-        catch (Exception)
-        {
-            logger.LogError("Failed to validate metadata files");
-            throw;
-        }
     }
 }

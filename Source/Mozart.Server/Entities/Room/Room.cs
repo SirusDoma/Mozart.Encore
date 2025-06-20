@@ -367,6 +367,9 @@ public class Room : Broadcastable, IRoom
             Capacity     = Capacity,
             UserCount    = UserCount
         });
+
+        if (target is MemberSlot member)
+            member.Session.Exit(this);
     }
 
     public void StartGame()

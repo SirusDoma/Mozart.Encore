@@ -26,6 +26,8 @@ public interface IMessageCodec
 
     byte[] Encode(IMessage message);
 
+    byte[] EncodeCommand(Enum command);
+
     T Decode<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(byte[] data)
         where T : class, IMessage, new();
 
@@ -168,6 +170,16 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
 
         EncodeMessage(writer, message, type);
         return stream.ToArray();
+    }
+
+    public byte[] EncodeCommand(Enum command)
+    {
+        ushort code = (ushort)Convert.ChangeType(command, TypeCode.UInt16);
+        if (_commands.TryGetValue(code, out var cmd))
+            return BitConverter.GetBytes((ushort)code);
+
+        //throw new NotSupportedException($"Command '0x{code:X4}' is not recognized");
+        return BitConverter.GetBytes((ushort)code);
     }
 
     public T Decode<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(byte[] data)

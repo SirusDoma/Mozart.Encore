@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86</Platforms>
+        <IsPackable>false</IsPackable>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>..\..\..\..\Build\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <OutputPath>..\..\..\..\Build\Release\</OutputPath>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\..\Mozart.Data\Mozart.Data.csproj" />
+    </ItemGroup>
+
+
+
+</Project>

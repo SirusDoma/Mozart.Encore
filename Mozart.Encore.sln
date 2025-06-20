@@ -7,13 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Encore", "Source\Moz
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore", "Source\Encore\Encore.shproj", "{79BBA56F-AADA-4F4A-B5CA-ADE62335CA18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.Sqlite", "Source\Mozart.Data\Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj", "{9ABA341B-F982-4F23-8326-3A44D0EC2799}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.Sqlite", "Source\Mozart.Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj", "{9ABA341B-F982-4F23-8326-3A44D0EC2799}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.SqlServer", "Source\Mozart.Data\Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj", "{E8C6BF08-C511-49B2-A860-68D206542774}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.SqlServer", "Source\Mozart.Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj", "{E8C6BF08-C511-49B2-A860-68D206542774}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.MySql", "Source\Mozart.Data\Migrations\MySql\Mozart.Migrations.MySql.csproj", "{CC9CD365-FC7A-47F0-89D2-F06747FC17DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.MySql", "Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj", "{CC9CD365-FC7A-47F0-89D2-F06747FC17DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.Postgres", "Source\Mozart.Data\Migrations\Postgres\Mozart.Migrations.Postgres.csproj", "{4D0D75E1-E4D4-4C1C-A2A7-09953033F286}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Migrations.Postgres", "Source\Mozart.Migrations\Postgres\Mozart.Migrations.Postgres.csproj", "{4D0D75E1-E4D4-4C1C-A2A7-09953033F286}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Server", "Source\Mozart.Server\Mozart.Server.csproj", "{8223593E-3ED9-467D-B6D7-0F34A493F074}"
 EndProject
@@ -45,14 +45,14 @@ Global
 		{4D0D75E1-E4D4-4C1C-A2A7-09953033F286}.Debug|x86.Build.0 = Debug|x86
 		{4D0D75E1-E4D4-4C1C-A2A7-09953033F286}.Release|x86.ActiveCfg = Release|x86
 		{4D0D75E1-E4D4-4C1C-A2A7-09953033F286}.Release|x86.Build.0 = Release|x86
-		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Debug|x86.Build.0 = Debug|Any CPU
-		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Release|x86.ActiveCfg = Release|Any CPU
-		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Release|x86.Build.0 = Release|Any CPU
-		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Debug|x86.Build.0 = Debug|Any CPU
-		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Release|x86.ActiveCfg = Release|Any CPU
-		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Release|x86.Build.0 = Release|Any CPU
+		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Debug|x86.ActiveCfg = Debug|x86
+		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Debug|x86.Build.0 = Debug|x86
+		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Release|x86.ActiveCfg = Release|x86
+		{88AD1B4F-B812-4376-9F94-D48735103DA6}.Release|x86.Build.0 = Release|x86
+		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Debug|x86.ActiveCfg = Debug|x86
+		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Debug|x86.Build.0 = Debug|x86
+		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Release|x86.ActiveCfg = Release|x86
+		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

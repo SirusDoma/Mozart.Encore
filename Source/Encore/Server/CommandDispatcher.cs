@@ -247,7 +247,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
                 }
 
                 // ReSharper disable once PossibleMultipleEnumeration
-                var descriptor = new CommandHandlerDescriptor(method, attribute, filters.Concat(_filters));
+                var descriptor = new CommandHandlerDescriptor(method, attribute, filters);
 
                 if (descriptor.RequestType != null)
                 {
@@ -336,18 +336,18 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
     private async Task<CommandResponse> Execute(CommandHandler handler, Session session, Enum command,
         IMessage? request, CancellationToken cancellationToken)
     {
-        var context = new CommandExecutionContext(session, request, handler.Descriptor);
+        var context = new CommandExecutionContext(session, command, request, handler.Descriptor);
 
         var response = CommandResponse.Empty;
         var frames = new List<ResponseFrame>();
 
         bool cancel = false;
-        foreach (var filter in handler.Filters)
+        foreach (var filter in _filters.Concat(handler.Filters))
         {
             try
             {
                 var executingContext = new CommandExecutingContext(context);
-                await filter.OnActionExecutingAsync(executingContext, cancellationToken);
+                await filter.OnActionExecutingAsync(executingContext, cancellationToken).ConfigureAwait(false);
 
                 if (executingContext.Cancel)
                 {
@@ -360,6 +360,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
                     }
 
                     cancel = true;
+                    break;
                 }
             }
             catch (Exception ex)
@@ -367,7 +368,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
                 return await FilterException(
                     new CommandExceptionContext(ex, session, handler.Descriptor, request),
                     cancellationToken
-                );
+                ).ConfigureAwait(false);
             }
         }
 
@@ -387,11 +388,11 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         }
 
         var executedContext = new CommandExecutedContext(context, exception);
-        foreach (var filter in handler.Filters.Reverse())
+        foreach (var filter in handler.Filters)
         {
             try
             {
-                await filter.OnActionExecutedAsync(executedContext, cancellationToken);
+                await filter.OnActionExecutedAsync(executedContext, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -402,7 +403,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
                 return await FilterException(
                     new CommandExceptionContext(mainException, session, handler.Descriptor, request),
                     cancellationToken
-                );
+                ).ConfigureAwait(false);
             }
         }
 
@@ -411,7 +412,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return await FilterException(
                 new CommandExceptionContext(executedContext.Exception, session, handler.Descriptor, request),
                 cancellationToken
-            );
+            ).ConfigureAwait(false);
         }
 
         if (executedContext.Result != null)
@@ -431,7 +432,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         foreach (var logger in _exceptionLogger)
         {
             var ctx = new CommandExceptionLoggerContext(context);
-            await logger.LogAsync(ctx, cancellationToken);
+            await logger.LogAsync(ctx, cancellationToken).ConfigureAwait(false);
 
             propagate = propagate && ctx.PropagateException;
         }
@@ -442,7 +443,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         if (_exceptionHandler != null)
         {
             var ctx = new CommandExceptionHandlerContext(context);
-            await _exceptionHandler.HandleAsync(ctx, cancellationToken);
+            await _exceptionHandler.HandleAsync(ctx, cancellationToken).ConfigureAwait(false);
             if (ctx.Result != null)
             {
                 if (_codec.GetRegisteredType(ctx.Result.GetType()) == null)
@@ -497,7 +498,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return;
         }
 
-        var tasks  = new ConcurrentBag<Task>();
+        var tasks = new ConcurrentBag<Task>();
         foreach (var handler in handlers)
         {
             try
