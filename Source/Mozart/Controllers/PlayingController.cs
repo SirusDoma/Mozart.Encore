@@ -7,6 +7,7 @@ using Mozart.Entities;
 using Mozart.Messages;
 using Mozart.Messages.Events;
 using Mozart.Messages.Requests;
+using Mozart.Metadata;
 using Mozart.Services;
 using Mozart.Sessions;
 
@@ -55,7 +56,17 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
         logger.LogInformation((int)RequestCommand.SubmitScore,
             "Game [{RoomId:000}] [{User}] Submit score: {Value}", Room.Id, Session.Actor.Nickname, request.Score);
 
-        Tracker.SubmitScore(Session, request);
+        Tracker.SubmitScore(
+            session:     Session,
+            cool:        request.Cool,
+            good:        request.Good,
+            bad:         request.Bad,
+            miss:        request.Miss,
+            maxCombo:    request.MaxCombo,
+            maxJamCombo: request.MaxJamCombo,
+            score:       request.Score,
+            life:        request.Life
+        );
     }
 
     [CommandHandler(RequestCommand.ExitPlaying)]

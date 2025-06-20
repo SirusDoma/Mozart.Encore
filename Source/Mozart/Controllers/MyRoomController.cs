@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
 using Mozart.Metadata.Items;
-using Mozart.Persistence.Repositories;
+using Mozart.Data.Repositories;
 using Mozart.Sessions;
 
 namespace Mozart.Controllers;

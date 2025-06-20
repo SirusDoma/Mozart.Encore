@@ -1,7 +1,7 @@
 using System.CommandLine;
 using System.Net;
 using System.Text;
-using Mozart.Persistence.Entities;
+using Mozart.Data.Entities;
 using Mozart.Services;
 
 namespace Mozart.CLI;

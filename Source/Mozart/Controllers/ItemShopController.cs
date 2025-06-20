@@ -6,7 +6,7 @@ using Mozart.Controllers.Filters;
 using Mozart.Entities;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
-using Mozart.Persistence.Repositories;
+using Mozart.Data.Repositories;
 using Mozart.Services;
 using Mozart.Sessions;
 

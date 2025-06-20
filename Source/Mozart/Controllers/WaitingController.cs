@@ -10,6 +10,7 @@ using Mozart.Messages;
 using Mozart.Messages.Events;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
+using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;

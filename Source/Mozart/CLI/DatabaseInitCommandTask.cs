@@ -1,4 +1,4 @@
-using Mozart.Persistence.Contexts;
+using Mozart.Data.Contexts;
 
 namespace Mozart.CLI;
 

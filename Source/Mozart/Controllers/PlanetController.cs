@@ -31,14 +31,14 @@ public class PlanetController(Session session, IIdentityService identityService,
 
         for (ushort i = 0; i < maxChannel; i++)
         {
-            var metadata = channels.SingleOrDefault(s => s.Id == i);
+            var channel = channels.SingleOrDefault(s => s.Id == i);
             states.Add(new ChannelListResponse.ChannelState
             {
                 ServerId   = (ushort)gateway.Id,
                 ChannelId  = i,
-                Capacity   = metadata?.Capacity  ?? 0,
-                Population = metadata?.UserCount ?? 0,
-                Active     = metadata != null
+                Capacity   = channel?.Capacity  ?? 0,
+                Population = channel?.UserCount ?? 0,
+                Active     = channel != null
             });
         }
 
