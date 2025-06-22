@@ -76,24 +76,24 @@ namespace Mozart.Migrations.MySql
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("passwd");
+                        .HasColumnType("longblob");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("varchar(12)")
-                        .HasColumnName("userid");
+                        .HasColumnType("varchar(12)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("member", (string)null);
+                    b.ToTable("t_o2jam_credentials", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
