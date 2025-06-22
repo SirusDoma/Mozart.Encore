@@ -69,24 +69,24 @@ namespace Mozart.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("passwd");
+                        .HasColumnType("BLOB");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("userid");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("member", (string)null);
+                    b.ToTable("t_o2jam_credentials", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
