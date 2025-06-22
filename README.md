@@ -3,9 +3,6 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-> [!WARNING]
-> This project is currently work in progress.
-
 ## Project Structure
 
 | Project                                        | Description                                       |
