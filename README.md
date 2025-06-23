@@ -117,10 +117,16 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 | `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
 | `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
 
-# Migration
+# Database Migration
 
 Use Entity Framework tools to run the database migration.
 See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
+
+>[!IMPORTANT]
+> You may notice that the database schema look funky with premature normalizations here and there.  
+> This is intentional because the app need to support the existing official database schema.
+>
+> However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
 ## Add Migration
 
@@ -140,7 +146,7 @@ Use the following command to create a new migration:
 
 >[!IMPORTANT]
 > Database migration is automatically executed every start-up as long as the `Auth:Mode` equals to `Default`.  
-> This is because `Auth:Foreign` is a compatibility mode that enables Mozart to continue to work with an existing foreign database that has different auth schema than the original e-Games clients (such as 9you or GAMANIA).
+> This is because `Auth:Mode=Foreign` is a compatibility mode that enables Mozart to continue to work with an existing foreign database that has different auth schema than the original e-Games clients (such as 9you or GAMANIA).
 >  
 > Database migration will never be officially supported in `Foreign` mode<sup>*</sup>.
 > 
@@ -188,7 +194,7 @@ To support this design, you must run Mozart.Encore in separate instances:
   - Handles persistent and non-persistent in-game states for its assigned Channel
 
 There can only be one "node" of `Gateway` or `Channel` instance at a time, and it cannot be horizontally scaled. 
-You cannot run multiple instances to represent a single `Gateway` (or ``Channel`), because each instance is the scaling unit of the horizontal scaling itself.
+You cannot run multiple instances to represent a single `Gateway` or `Channel`, because each instance is the scaling unit of the horizontal scaling itself.
 
 See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configuration section above to configure the `Gateway` and `Channel` instances.
 
