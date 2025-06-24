@@ -219,6 +219,9 @@ public class ScoreTracker : IScoreTracker
 
         if (Completed)
         {
+            foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
+                member.IsReady = member.IsMaster;
+
             GameCompleted?.Invoke(this, new ScoreTrackedEventArgs
             {
                 Room    = Room,
