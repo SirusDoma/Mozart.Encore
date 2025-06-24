@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <InvariantGlobalization>true</InvariantGlobalization>
         <Configurations>Release;Debug</Configurations>
-        <Platforms>x86</Platforms>
+        <Platforms>x86;x64</Platforms>
         <RootNamespace>Mozart</RootNamespace>
         <AssemblyName>Mozart.Data</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
@@ -15,12 +15,12 @@
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <OutputPath>..\..\Build\Debug\</OutputPath>
         <IntermediateOutputPath>..\..\Temp\Mozart.Data\</IntermediateOutputPath>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <OutputPath>..\..\Build\Release\</OutputPath>
         <IntermediateOutputPath>..\..\Temp\Mozart.Data\</IntermediateOutputPath>
     </PropertyGroup>

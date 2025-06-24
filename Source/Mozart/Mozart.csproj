@@ -14,19 +14,19 @@
         -->
         <InvariantGlobalization>true</InvariantGlobalization>
         <Configurations>Release;Debug</Configurations>
-        <Platforms>x86</Platforms>
+        <Platforms>x86;x64</Platforms>
         <RootNamespace>Mozart</RootNamespace>
         <AssemblyName>Mozart.Encore</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
         <ApplicationIcon>Mozart.ico</ApplicationIcon>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <OutputPath>..\..\Build\Debug\</OutputPath>
       <IntermediateOutputPath>..\..\Temp\Mozart\</IntermediateOutputPath>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <OutputPath>..\..\Build\Release\</OutputPath>
       <IntermediateOutputPath>..\..\Temp\Mozart\</IntermediateOutputPath>
     </PropertyGroup>
