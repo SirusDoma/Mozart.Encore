@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mozart.Migrations.Postgres
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250620200418_InitialCreate")]
+    [Migration("20250621000000_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
