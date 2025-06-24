@@ -35,13 +35,24 @@ public class ItemShopController(Session session, IMetadataResolver resolver, IUs
         var user      = (await repository.Find(actor.UserId, cancellationToken))!;
         var inventory = user.Inventory;
 
-
         var itemData = resolver.GetItemData(Channel);
         int itemId   = request.ItemId;
         int index    = inventory.FindSlot(0);
 
         if (!itemData.TryGetValue(itemId, out var item))
             throw new ArgumentOutOfRangeException(nameof(request));
+
+        if (inventory.Any(id => itemId == id))
+        {
+            return new PurchaseItemResponse
+            {
+                Result             = PurchaseItemResponse.PurchaseResult.InventoryFull,
+                TotalUserGem       = actor.Gem,
+                TotalUserPoint     = actor.Point,
+                InventorySlotIndex = 0,
+                ItemId             = inventory[0]
+            };
+        }
 
         if (index < 0 || inventory.Count >= inventory.Capacity)
             return new PurchaseItemResponse { Result = PurchaseItemResponse.PurchaseResult.InventoryFull };
