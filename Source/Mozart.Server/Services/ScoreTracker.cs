@@ -1,4 +1,5 @@
 using Mozart.Entities;
+using Mozart.Metadata;
 using Mozart.Sessions;
 
 namespace Mozart.Services;
@@ -189,6 +190,11 @@ public class ScoreTracker : IScoreTracker
             MemberId = state.MemberId,
             Session  = session
         });
+
+        // Client send exit room, but just to be safe - let's remove the member here
+        // Probably need to revise in the future network version
+        if (Room.State == RoomState.Playing)
+            state.Session.Exit(Room);
     }
 
     public IReadOnlyList<UserScore> SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
