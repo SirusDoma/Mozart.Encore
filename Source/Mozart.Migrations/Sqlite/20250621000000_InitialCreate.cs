@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Mozart.Migrations.Sqlite
+namespace Mozart.Migrations.Sqlite.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -11,20 +11,6 @@ namespace Mozart.Migrations.Sqlite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "member",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    userid = table.Column<string>(type: "TEXT", maxLength: 12, nullable: false),
-                    passwd = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_member", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "t_o2jam_charinfo",
                 columns: table => new
@@ -45,6 +31,21 @@ namespace Mozart.Migrations.Sqlite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_o2jam_charinfo", x => x.USER_INDEX_ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "t_o2jam_credentials",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", maxLength: 12, nullable: false),
+                    Password = table.Column<byte[]>(type: "BLOB", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_t_o2jam_credentials", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -146,15 +147,15 @@ namespace Mozart.Migrations.Sqlite
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_member_userid",
-                table: "member",
-                column: "userid",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_t_o2jam_charinfo_USER_ID_USER_NICKNAME",
                 table: "t_o2jam_charinfo",
                 columns: new[] { "USER_ID", "USER_NICKNAME" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_t_o2jam_credentials_Username",
+                table: "t_o2jam_credentials",
+                column: "Username",
                 unique: true);
         }
 
@@ -162,10 +163,10 @@ namespace Mozart.Migrations.Sqlite
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "member");
+                name: "t_o2jam_charcash");
 
             migrationBuilder.DropTable(
-                name: "t_o2jam_charcash");
+                name: "t_o2jam_credentials");
 
             migrationBuilder.DropTable(
                 name: "t_o2jam_item");

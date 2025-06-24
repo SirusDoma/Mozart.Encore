@@ -8,7 +8,7 @@ using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Migrations.MySql
+namespace Mozart.Migrations.MySql.Migrations
 {
     [DbContext(typeof(UserDbContext))]
     partial class UserDbContextModelSnapshot : ModelSnapshot

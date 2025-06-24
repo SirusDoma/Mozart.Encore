@@ -7,7 +7,7 @@ using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Migrations.Sqlite
+namespace Mozart.Migrations.Sqlite.Migrations
 {
     [DbContext(typeof(UserDbContext))]
     partial class UserDbContextModelSnapshot : ModelSnapshot
