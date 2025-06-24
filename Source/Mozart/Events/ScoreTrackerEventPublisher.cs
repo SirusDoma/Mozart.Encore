@@ -207,7 +207,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
             await room.Broadcast(new GameCompletedEventData
             {
-                Scores = entries
+                Scores = entries.OrderByDescending(s => s.Score).ToList()
             }, CancellationToken.None);
 
             await channel.Broadcast(new RoomStateChangedEventData
