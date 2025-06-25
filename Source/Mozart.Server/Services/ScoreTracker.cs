@@ -16,7 +16,7 @@ public interface IScoreTracker
     void Track(Session session);
     void Untrack(Session session);
 
-    IReadOnlyList<ScoreTracker.UserScore> SubmitScore(Session session, int cool, int good, int bad, int miss,
+    void SubmitScore(Session session, int cool, int good, int bad, int miss,
         int maxCombo, int maxJamCombo, uint score, int life);
 }
 
@@ -95,7 +95,7 @@ public class ScoreTracker : IScoreTracker
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
-            throw new ArgumentOutOfRangeException(nameof(session)); // request forged?
+            return; // might be left-over after leaving during gameplay
 
         state.Life = life;
         if (state is { Completed: false, Life: 0 })
@@ -118,7 +118,7 @@ public class ScoreTracker : IScoreTracker
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
-            throw new ArgumentOutOfRangeException(nameof(session)); // request forged?
+            return; // might be left-over after leaving during gameplay
 
         state.JamCombo = jamCombo;
         UserJamIncreased?.Invoke(this, new ScoreUpdateEventArgs
@@ -213,7 +213,7 @@ public class ScoreTracker : IScoreTracker
             state.Session.Exit(Room);
     }
 
-    public IReadOnlyList<UserScore> SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
+    public void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
         int maxJamCombo, uint score, int life)
     {
         var state = _states.SingleOrDefault(s => s.Session == session);
@@ -252,8 +252,6 @@ public class ScoreTracker : IScoreTracker
 
             Room.CompleteGame();
         }
-
-        return completedStates;
     }
 
     public void OnSessionDisconnected(object? sender, EventArgs e)

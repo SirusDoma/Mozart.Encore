@@ -57,15 +57,15 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
             "Game [{RoomId:000}] [{User}] Submit score: {Value}", Room.Id, Session.Actor.Nickname, request.Score);
 
         Tracker.SubmitScore(
-            session:     Session,
-            cool:        request.Cool,
-            good:        request.Good,
-            bad:         request.Bad,
-            miss:        request.Miss,
-            maxCombo:    request.MaxCombo,
+            session: Session,
+            cool: request.Cool,
+            good: request.Good,
+            bad: request.Bad,
+            miss: request.Miss,
+            maxCombo: request.MaxCombo,
             maxJamCombo: request.MaxJamCombo,
-            score:       request.Score,
-            life:        request.Life
+            score: request.Score,
+            life: request.Life
         );
     }
 
