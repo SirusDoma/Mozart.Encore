@@ -45,6 +45,9 @@ public class Session : Encore.Sessions.Session
 
     public void Exit(IChannel channel)
     {
+        if (Channel == null)
+            return;
+
         if (channel != Channel)
             throw new ArgumentOutOfRangeException(nameof(channel));
 
@@ -66,6 +69,9 @@ public class Session : Encore.Sessions.Session
 
     public void Exit(IRoom room)
     {
+        if (Room == null)
+            return;
+
         if (room != Room)
             throw new ArgumentOutOfRangeException(nameof(room));
 
