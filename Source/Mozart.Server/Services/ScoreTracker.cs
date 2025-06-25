@@ -170,6 +170,22 @@ public class ScoreTracker : IScoreTracker
                 MemberId = i,
                 Session  = member.Session
             });
+
+            if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
+            {
+                for (int j = 0; j < Entities.Room.MaxCapacity; j++)
+                {
+                    if (Room.Slots[j] is Entities.Room.VacantSlot or Entities.Room.LockedSlot)
+                    {
+                        UserTracked?.Invoke(this, new ScoreTrackEventArgs
+                        {
+                            MemberId = j,
+                            Session = null!
+                        });
+                    }
+                }
+            }
+
             return;
         }
 
