@@ -197,7 +197,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     Miss       = (ushort)state.Miss,
                     MaxCombo   = (ushort)state.MaxCombo,
                     JamCombo   = (ushort)state.MaxJamCombo,
-                    Score      = (ushort)state.Score,
+                    Score      = state.Score,
                     Reward     = (ushort)Math.Max(0, reward),
                     Level      = state.Session.Actor.Level,
                     Experience = state.Session.Actor.Experience,
