@@ -65,9 +65,9 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
             Result = AuthResult.Success,
             Subscription = new AuthResponse.SubscriptionInfo
             {
-                Billing                   = BillingCode.DB,
+                Billing                   = BillingCode.TB,
                 CurrentTimestamp          = DateTime.Now,
-                SubscriptionRemainingTime = TimeSpan.FromMinutes(240)
+                SubscriptionRemainingTime = TimeSpan.FromMinutes(0)
             }
         };
     }
