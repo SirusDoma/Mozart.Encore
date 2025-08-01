@@ -6,15 +6,15 @@ namespace Mozart.Messages.Responses;
 
 public enum AuthResult : uint
 {
-    Success            = 0x00000000,
-    NetworkError       = 0x00000003, // 03
-    InsufficientBalnce = 0x0000000A, // 10 or 0x0000000B/11 or 0x00000021/33
-    MultiGamesSession  = 0x00000011, // 17
-    IllegalUser        = 0x00000012, // 18
-    DatabaseError      = 0xFFFFFF9B, // -101
-    Banned             = 0xFFFFFFFB, // -5
-    DuplicateSessions  = 0xFFFFFFFE, // -2,
-    InvalidCredentials = 0xFFFFFFFF, // -1,
+    Success             = 0x00000000,
+    NetworkError        = 0x00000003, // 03
+    InsufficientBalance = 0x0000000A, // 10 or 0x0000000B/11 or 0x00000021/33
+    MultiGamesSession   = 0x00000011, // 17
+    IllegalUser         = 0x00000012, // 18
+    DatabaseError       = 0xFFFFFF9B, // -101
+    Banned              = 0xFFFFFFFB, // -5
+    DuplicateSessions   = 0xFFFFFFFE, // -2,
+    InvalidCredentials  = 0xFFFFFFFF, // -1,
 }
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
