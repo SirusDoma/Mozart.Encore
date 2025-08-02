@@ -13,7 +13,7 @@ namespace Mozart.Controllers;
 
 [Authorize]
 public class PlanetController(Session session, IIdentityService identityService, IChannelService channelService,
-    IOptions<GatewayOptions> options, ILogger<MessagingController> logger) : CommandController<Session>(session)
+    IOptions<GatewayOptions> options, ILogger<PlanetController> logger) : CommandController<Session>(session)
 {
     [CommandHandler(RequestCommand.GetChannelList)]
     public ChannelListResponse GetChannelList()
