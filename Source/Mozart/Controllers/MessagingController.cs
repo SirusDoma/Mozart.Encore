@@ -80,10 +80,10 @@ public class MessagingController(Session session, IChannelService channelService
 
         int recipientCount = await channelService.Broadcast(
             session => session.Actor.Nickname == request.Recipient,
-            new ReceiveWhisperResponse
+            new WhisperEventData
             {
-                Sender  = request.Recipient,
-                Content = request.Content
+                Recipient = request.Recipient,
+                Content   = request.Content
             },
         cancellationToken);
 
