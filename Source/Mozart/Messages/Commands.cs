@@ -60,7 +60,6 @@ public enum ResponseCommand : ushort
     MainRoomAdminMessage = 0x07DE, // 2014
     Announcement         = 0x07E0, // 2016
     SendWhisper          = 0x07E2, // 2018
-    ReceiveWhisper       = 0x07E3, // 2019
     ChannelLogout        = 0x07E6, // 2022
     JoinRoom             = 0x0BBB, // 3003
     ExitWaiting          = 0x0BBE, // 3006
@@ -78,6 +77,7 @@ public enum EventCommand : ushort
     RoomRemoved             = 0x07D7, // 2007
     RoomTitleChanged        = 0x07D8, // 2008
     RoomUserCountChanged    = 0x07D9, // 2009
+    ReceiveWhisper          = 0x07E3, // 2019
     RoomStateChanged        = 0x07E4, // 2020
     RoomMusicChanged        = 0x07E7, // 2023
     WaitingTitleChanged     = 0x0BB9, // 3001
