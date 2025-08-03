@@ -4,7 +4,7 @@ namespace Mozart.Messages.Events;
 
 public class RoomUserCountChangedEventData : IMessage
 {
-    public static Enum Command => EventCommand.RoomPlayerCountChanged;
+    public static Enum Command => EventCommand.RoomUserCountChanged;
 
     [MessageField(order: 0)]
     public int Number { get; init; }

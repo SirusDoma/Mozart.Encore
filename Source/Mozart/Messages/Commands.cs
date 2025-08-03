@@ -77,7 +77,7 @@ public enum EventCommand : ushort
     RoomCreated             = 0x07D5, // 2005
     RoomRemoved             = 0x07D7, // 2007
     RoomTitleChanged        = 0x07D8, // 2008
-    RoomPlayerCountChanged  = 0x07D9, // 2009
+    RoomUserCountChanged    = 0x07D9, // 2009
     RoomStateChanged        = 0x07E4, // 2020
     RoomMusicChanged        = 0x07E7, // 2023
     WaitingTitleChanged     = 0x0BB9, // 3001
