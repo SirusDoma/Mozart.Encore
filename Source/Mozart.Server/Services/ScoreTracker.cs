@@ -209,7 +209,7 @@ public class ScoreTracker : IScoreTracker
 
         // Client send exit room, but just to be safe - let's remove the member here
         // Probably need to revise in the future network version
-        if (Room.State == RoomState.Playing)
+        if (Room.State == RoomState.Playing && Room.Metadata.Mode != GameMode.Single)
             state.Session.Exit(Room);
     }
 

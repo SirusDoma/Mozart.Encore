@@ -7,7 +7,7 @@ public class CreateRoomResponse : IMessage
     public enum CreateResult : int
     {
         Success     = 0x00000000, // 0
-        ChannelFull = 0x00000001 // 1
+        ChannelFull = 0x00000001  // 1
     }
 
     public static Enum Command => ResponseCommand.CreateRoom;
