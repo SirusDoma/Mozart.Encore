@@ -1,7 +1,9 @@
+using System.Net;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 using Encore.Server;
-
+using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
@@ -23,13 +25,25 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
             logger.LogInformation((int)RequestCommand.Authorize, "Authorize session");
 
             const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
-            if (channelService.Sessions.Any(s => s.Actor.Token.Equals(request.Token, comparison)))
+            var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(request.Token, comparison));
+            if (existingSession != null)
             {
-                return new AuthResponse
+                if (!manager.Validate(existingSession))
                 {
-                    Result = AuthResult.DuplicateSessions,
-                    Subscription = new AuthResponse.SubscriptionInfo()
-                };
+                    if (existingSession.Channel != null)
+                        existingSession.Exit(existingSession.Channel!);
+
+                    if (existingSession.Room != null)
+                        existingSession.Exit(existingSession.Room!);
+                }
+                else
+                {
+                    return new AuthResponse
+                    {
+                        Result = AuthResult.DuplicateSessions,
+                        Subscription = new AuthResponse.SubscriptionInfo()
+                    };
+                }
             }
 
             var authSession = await identityService.Authorize(request.Token, cancellationToken);

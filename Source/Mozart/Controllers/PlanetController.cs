@@ -12,7 +12,7 @@ using Mozart.Sessions;
 namespace Mozart.Controllers;
 
 [Authorize]
-public class PlanetController(Session session, IIdentityService identityService, IChannelService channelService,
+public class PlanetController(Session session, ISessionManager manager, IIdentityService identityService, IChannelService channelService,
     IOptions<GatewayOptions> options, ILogger<PlanetController> logger) : CommandController<Session>(session)
 {
     [CommandHandler(RequestCommand.GetChannelList)]
@@ -62,15 +62,27 @@ public class PlanetController(Session session, IIdentityService identityService,
             throw new ArgumentOutOfRangeException(nameof(request), "Invalid server id");
 
         const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
-        if (channelService.Sessions.Any(s => s.Actor.Token.Equals(Session.Actor.Token, comparison)))
+        var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(Session.Actor.Token, comparison));
+        if (existingSession != null)
         {
-            await Session.WriteMessage(new AuthResponse
+            if (!manager.Validate(existingSession))
             {
-                Result = AuthResult.DuplicateSessions,
-                Subscription = new AuthResponse.SubscriptionInfo()
-            }, cancellationToken);
+                if (existingSession.Channel != null)
+                    existingSession.Exit(existingSession.Channel!);
 
-            return null!;
+                if (existingSession.Room != null)
+                    existingSession.Exit(existingSession.Room!);
+            }
+            else
+            {
+                await Session.WriteMessage(new AuthResponse
+                {
+                    Result = AuthResult.DuplicateSessions,
+                    Subscription = new AuthResponse.SubscriptionInfo()
+                }, cancellationToken);
+
+                return null!;
+            }
         }
 
         try
