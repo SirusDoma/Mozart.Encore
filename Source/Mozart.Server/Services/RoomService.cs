@@ -72,7 +72,7 @@ public class RoomService : Broadcastable, IRoomService
                 Id              = i,
                 Title           = title,
                 Mode            = mode,
-                MusicId         = session.GetAuthorizedToken<Actor>().MusicIds[0],
+                MusicId         = session.GetAuthorizedToken<Actor>().MusicIds.FirstOrDefault(0),
                 Difficulty      = Difficulty.EX,
                 Speed           = GameSpeed.X10,
                 MinLevelLimit   = minLevelLimit,
