@@ -7,7 +7,7 @@ namespace Mozart.Messages.Events;
 
 public class UserJoinWaitingEventData : IMessage
 {
-    public static Enum Command => EventCommand.PlayerJoinWaiting;
+    public static Enum Command => EventCommand.UserJoinWaiting;
 
     [MessageField(order: 0)]
     public byte MemberId { get; init; }

@@ -1,5 +1,11 @@
 namespace Mozart;
 
+public enum CustomCommand : ushort
+{
+    LoginRequest  = 0x1FF0,
+    LoginResponse = 0x1FFF,
+}
+
 public enum GenericCommand : ushort
 {
     LegacyPing = 0x1770, // 6000
@@ -81,8 +87,8 @@ public enum EventCommand : ushort
     RoomStateChanged        = 0x07E4, // 2020
     RoomMusicChanged        = 0x07E7, // 2023
     WaitingTitleChanged     = 0x0BB9, // 3001
-    PlayerJoinWaiting       = 0x0BBC, // 3004
-    PlayerLeaveWaiting      = 0x0BBF, // 3007
+    UserJoinWaiting         = 0x0BBC, // 3004
+    UserLeaveWaiting        = 0x0BBF, // 3007
     RoomSlotUpdate          = 0x0BC1, // 3009
     Kick                    = 0x0BC2, // 3010
     RoomForceRemoved        = 0x0BC6, // 3013

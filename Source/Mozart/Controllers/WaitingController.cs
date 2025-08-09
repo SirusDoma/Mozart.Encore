@@ -64,7 +64,7 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public RoomArenaChangedEventData SetRoomArena(SetRoomArenaRequest request)
+    public WaitingArenaChangedEventData SetRoomArena(SetRoomArenaRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomArena,
@@ -76,7 +76,7 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
         Room.ArenaRandomSeed = request.Payload.RandomSeed;
         Room.SaveMetadataChanges();
 
-        return new RoomArenaChangedEventData
+        return new WaitingArenaChangedEventData
         {
             Arena      = request.Payload.Arena,
             RandomSeed = request.Payload.RandomSeed
