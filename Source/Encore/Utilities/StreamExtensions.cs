@@ -27,6 +27,9 @@ public static class StreamExtensions
         ArgumentNullException.ThrowIfNull(encoding, nameof(encoding));
         ArgumentOutOfRangeException.ThrowIfNegative(maxCount, nameof(maxCount));
 
+        if (reader.BaseStream.Length == reader.BaseStream.Position)
+            return string.Empty;
+
         if (prefix != TypeCode.Empty)
             maxCount = Convert.ToInt32(reader.ReadInteger(prefix));
 
