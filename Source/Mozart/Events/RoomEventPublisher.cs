@@ -185,7 +185,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new RoomArenaChangedEventData
+            await room.Broadcast(sender: room.Master, new WaitingArenaChangedEventData
             {
                 Arena      = room.Arena,
                 RandomSeed = room.ArenaRandomSeed

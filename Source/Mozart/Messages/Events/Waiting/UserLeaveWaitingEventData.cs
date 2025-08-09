@@ -4,7 +4,7 @@ namespace Mozart.Messages.Events;
 
 public class UserLeaveWaitingEventData : IMessage
 {
-    public static Enum Command => EventCommand.PlayerLeaveWaiting;
+    public static Enum Command => EventCommand.UserLeaveWaiting;
 
     [MessageField(order: 0)]
     public byte MemberId { get; init; }

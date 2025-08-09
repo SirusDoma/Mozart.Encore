@@ -3,7 +3,7 @@ using Mozart.Metadata;
 
 namespace Mozart.Messages.Responses;
 
-public class RoomArenaChangedEventData : IMessage
+public class WaitingArenaChangedEventData : IMessage
 {
     public static Enum Command => EventCommand.RoomArenaChanged;
 
