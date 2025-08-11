@@ -35,6 +35,7 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
             return; // request forged?
 
         Tracker.Track(Session);
+        member.IsReady = false;
     }
 
     [CommandHandler]
