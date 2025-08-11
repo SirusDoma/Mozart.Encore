@@ -5,6 +5,9 @@
 .idea/
 *.iml
 
+# Database file
+*.db
+
 # User-specific files
 *.suo
 *.user
