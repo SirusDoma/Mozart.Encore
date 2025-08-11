@@ -208,7 +208,11 @@ public class Room : Broadcastable, IRoom
         {
             masterId = _slots.FindIndex(s => s is MemberSlot m && m.Session != session);
             if (masterId >= 0)
-                ((MemberSlot)_slots[masterId]).IsMaster = true;
+            {
+                var master = ((MemberSlot)_slots[masterId]);
+                master.IsMaster = true;
+                master.IsReady  = true;
+            }
         }
 
         if (State == RoomState.Playing)
@@ -397,6 +401,17 @@ public class Room : Broadcastable, IRoom
         room.Remove(session);
 
         SessionDisconnected?.Invoke(this, new Encore.Sessions.SessionEventArgs { Session = session });
+    }
+
+    public override void Invalidate()
+    {
+        foreach (var session in Sessions)
+        {
+            if (session.Connected)
+                continue;
+
+            session.Exit(Channel);
+        }
     }
 
     private async Task ScheduleStartTimeout()

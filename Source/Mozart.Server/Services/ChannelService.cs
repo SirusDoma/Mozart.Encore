@@ -83,6 +83,18 @@ public class ChannelService : Broadcastable, IChannelService
         _channels.Remove(id, out _);
     }
 
+    public override void Invalidate()
+    {
+        foreach (var session in Sessions)
+        {
+            if (session.Connected)
+                continue;
+
+            if (session.Channel != null)
+                session.Exit(session.Channel);
+        }
+    }
+
     private void OnChannelSessionDisconnected(object? sender, EventArgs args)
     {
         if (args is Encore.Sessions.SessionErrorEventArgs argsEx)

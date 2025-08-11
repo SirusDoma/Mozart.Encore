@@ -134,6 +134,20 @@ public class RoomService : Broadcastable, IRoomService
         return _rooms[channel.Id].Values.ToList();
     }
 
+    public override void Invalidate()
+    {
+        foreach (var session in Sessions)
+        {
+            if (session.Connected)
+                continue;
+
+            if (session.Channel != null)
+                session.Exit(session.Channel);
+            else if (session.Room != null)
+                session.Exit(session.Room);
+        }
+    }
+
     private void OnRoomSessionDisconnected(object? sender, Encore.Sessions.SessionEventArgs e)
     {
         _logger.LogWarning("Session [{User}] removed from the room due to connection lost",

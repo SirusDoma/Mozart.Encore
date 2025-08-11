@@ -64,6 +64,17 @@ public class Channel() : Broadcastable, IChannel
         session.Disconnected -= OnSessionDisconnected;
     }
 
+    public override void Invalidate()
+    {
+        foreach (var session in Sessions)
+        {
+            if (session.Connected)
+                continue;
+
+            session.Exit(this);
+        }
+    }
+
     private void OnSessionDisconnected(object? sender, EventArgs args)
     {
         try

@@ -36,6 +36,8 @@ public class Session : IDisposable
 
     public ConcurrentDictionary<string, object> Properties { get; } = [];
 
+    public bool Connected { get; private set; }
+
     public virtual bool Authorized => _token != null;
 
     public virtual void Authorize<T>(T token)
@@ -68,6 +70,7 @@ public class Session : IDisposable
     {
         try
         {
+            Connected = true;
             while (!cancellationToken.IsCancellationRequested)
             {
                 byte[] frame = await ReadFrame(cancellationToken).ConfigureAwait(false);
@@ -111,6 +114,8 @@ public class Session : IDisposable
 
     protected void TriggerDisconnectEvent()
     {
+        Connected = false;
+
         OnDisconnected();
         Disconnected?.Invoke(this, EventArgs.Empty);
         Disconnected = null;
