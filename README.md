@@ -246,7 +246,7 @@ Please refer to their [documentation](https://agones.dev/site/docs/) and [third-
 
 # CLI Command
 
-The server application has built-in utilities shaped toward local player usage. 
+The server application has built-in utilities to help local player usage or server maintenance. 
 
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
