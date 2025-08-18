@@ -10,7 +10,7 @@ public class SendWhisperResponse : IMessage
     public bool Invalid { get; init; } = true;
 
     [StringMessageField(order: 1)]
-    public required string Sender { get; init; }
+    public required string Recipient { get; init; }
 
     [StringMessageField(order: 2)]
     public string Content { get; init; } = string.Empty;

@@ -62,7 +62,7 @@ public abstract class Broadcastable : IBroadcastable
     private async Task Broadcast<TMessage>(ICollection<Session> sessions, TMessage message, CancellationToken cancellationToken)
         where TMessage : class, IMessage
     {
-        var task = Task.WhenAll(Sessions.Select(s => WriteMessageFrame(s, message, cancellationToken)));
+        var task = Task.WhenAll(sessions.Select(s => WriteMessageFrame(s, message, cancellationToken)));
 
         try
         {
