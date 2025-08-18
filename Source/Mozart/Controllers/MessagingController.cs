@@ -82,16 +82,16 @@ public class MessagingController(Session session, IChannelService channelService
             session => session.Actor.Nickname == request.Recipient,
             new WhisperEventData
             {
-                Recipient = request.Recipient,
-                Content   = request.Content
+                Sender  = actor.Nickname,
+                Content = request.Content
             },
         cancellationToken);
 
         return new SendWhisperResponse
         {
-            Invalid = recipientCount == 0,
-            Sender  = request.Recipient,
-            Content = recipientCount == 0 ? string.Empty : request.Content
+            Invalid   = recipientCount == 0,
+            Recipient = request.Recipient,
+            Content   = recipientCount == 0 ? string.Empty : request.Content
         };
     }
 
