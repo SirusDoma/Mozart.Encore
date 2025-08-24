@@ -23,6 +23,7 @@ using Mozart.CLI;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Sessions;
+using Mozart.Web;
 using Mozart.Workers.Channels;
 using Mozart.Workers.Gateway;
 
@@ -127,6 +128,7 @@ public class Program
                         break;
                 }
             })
+            .ConfigureWebHost(WebServer.Build)
             .Build();
 
         await host.RunAsync();
@@ -158,6 +160,9 @@ public class Program
                         ["Server:Port"]                 = "15010",
                         ["Server:MaxConnections"]       = ((int)SocketOptionName.MaxConnections).ToString(),
                         ["Server:PacketBufferSize"]     = "4096",
+                        ["Http:Enabled"]                = "true",
+                        ["Http:Address"]                = "127.0.0.1",
+                        ["Http:Port"]                   = "15020",
                         ["Db:Driver"]                   = "Sqlite",
                         ["Db:Name"]                     = "O2JAM",
                         ["Db:Url"]                      = "Data Source=O2JAM.db",
@@ -194,6 +199,8 @@ public class Program
                     .BindConfiguration(TcpOptions.Section);
                 services.AddOptions<ServerOptions>()
                     .BindConfiguration(ServerOptions.Section);
+                services.AddOptions<HttpOptions>()
+                    .BindConfiguration(HttpOptions.Section);
                 services.AddOptions<GatewayOptions>()
                     .BindConfiguration(GatewayOptions.Section);
                 services.AddOptions<AuthOptions>()
