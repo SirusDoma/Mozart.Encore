@@ -50,4 +50,24 @@ public class User
 
     [NotMapped]
     public EquipmentItems Equipments => new(Items);
+
+    public static User NewUser(string username, Gender gender)
+    {
+        return new User
+        {
+            Id              = 0,
+            Username        = username,
+            Nickname        = username,
+            Gender          = gender,
+            Level           = 1,
+            Battle          = 0,
+            Win             = 0,
+            Lose            = 0,
+            Draw            = 0,
+            Experience      = 0,
+            IsAdministrator = false,
+            Gem             = 0,
+            Point           = 0,
+        };
+    }
 }
