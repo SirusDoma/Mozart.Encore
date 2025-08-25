@@ -9,6 +9,7 @@ public class Actor
     public Actor(User user)
     {
         UserId          = user.Id;
+        Username        = user.Username;
         Nickname        = user.Nickname;
         Gender          = user.Gender;
         Gem             = user.Gem;
@@ -45,6 +46,8 @@ public class Actor
     public required string Token { get; init; }
 
     public int UserId { get; init; }
+
+    public string Username { get; init; }
 
     public string Nickname { get; init; }
 
