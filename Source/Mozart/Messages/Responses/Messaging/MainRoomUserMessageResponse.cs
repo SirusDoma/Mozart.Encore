@@ -9,6 +9,6 @@ public class MainRoomUserMessageResponse : IMessage
     [StringMessageField(order: 0)]
     public required string Sender { get; init; }
 
-    [StringMessageField(order: 1)]
-    public required string Content { get; init; }
+    [CollectionMessageField(order: 1)]
+    public required byte[] Content { get; init; }
 }
