@@ -71,10 +71,19 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
                 {
                     ((ISessionManager)sender!).StartExpiry((Session)args.Session, TimeSpan.FromMinutes(expiry), s =>
                     {
-                        // Expiring session after 5 minutes of disconnection
+                        // Expiring session after x minutes of disconnection
+                        if (s.Channel != null)
+                            s.Exit(s.Channel);
+
                         logger.LogInformation("Deleted login session [{Token}]", s.Actor.Token);
                         identityService.Revoke(s.Actor.Token, CancellationToken.None);
                     });
+                }
+                else
+                {
+                    var s = (Session)args.Session;
+                    if (s.Channel != null)
+                        s.Exit(s.Channel);
                 }
             };
 
