@@ -6,6 +6,6 @@ public class SendMainRoomMessageRequest : IMessage
 {
     public static Enum Command => RequestCommand.SendMainRoomMessage;
 
-    [StringMessageField(order: 0)]
-    public required string Content { get; init; }
+    [CollectionMessageField(order: 0)]
+    public required byte[] Content { get; init; }
 }

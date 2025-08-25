@@ -1,3 +1,4 @@
+using System.Text;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Mozart.Messages.Requests;
@@ -16,7 +17,7 @@ public class MessagingController(Session session, IChannelService channelService
     {
         var actor = Session.GetAuthorizedToken<Actor>();
         logger.LogInformation((int)RequestCommand.SendMainRoomMessage,
-            "[{Sender}] Send channel message: {Content}", actor.Nickname, request.Content);
+            "[{Sender}] Send channel message: {Content}", actor.Nickname, Encoding.UTF8.GetString(request.Content));
 
         if (actor.IsAdministrator)
         {
@@ -45,7 +46,7 @@ public class MessagingController(Session session, IChannelService channelService
     {
         var actor = Session.GetAuthorizedToken<Actor>();
         logger.LogInformation((int)RequestCommand.SendWaitingMessage,
-            "[{Sender}] Send room message: {Content}", actor.Nickname, request.Content);
+            "[{Sender}] Send room message: {Content}", actor.Nickname, Encoding.UTF8.GetString(request.Content));
 
         var room = Session.Room!;
         if (actor.IsAdministrator)
