@@ -11,7 +11,6 @@ using Mozart.Services;
 
 namespace Mozart.Web;
 
-
 public static class RegisterEndpoint
 {
     public sealed record RegisterRequest(

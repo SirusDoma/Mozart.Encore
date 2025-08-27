@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Server", "Source\Moz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Data", "Source\Mozart.Data\Mozart.Data.csproj", "{88AD1B4F-B812-4376-9F94-D48735103DA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Web", "Source\Mozart.Web\Mozart.Web.csproj", "{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -70,6 +72,12 @@ Global
 		{8223593E-3ED9-467D-B6D7-0F34A493F074}.Release|x64.Build.0 = Release|x64
 		{79BBA56F-AADA-4F4A-B5CA-ADE62335CA18}.Release|x64.ActiveCfg = Release|x64
 		{79BBA56F-AADA-4F4A-B5CA-ADE62335CA18}.Release|x64.Build.0 = Release|x64
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Debug|x86.Build.0 = Debug|Any CPU
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x86.ActiveCfg = Release|Any CPU
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x86.Build.0 = Release|Any CPU
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x64.ActiveCfg = Release|Any CPU
+		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
