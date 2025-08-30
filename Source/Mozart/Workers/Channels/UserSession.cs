@@ -8,12 +8,12 @@ using Mozart.Sessions;
 
 namespace Mozart.Workers.Channels;
 
-public class UserSession : Session
+public sealed class UserSession : Session
 {
     private readonly IGatewayClient _gatewayClient;
     private readonly string _sessionId;
 
-    public bool Connected { get; private set; } = true;
+    public override bool Connected { get; protected set; } = true;
 
     public UserSession(
         string sessionId,
