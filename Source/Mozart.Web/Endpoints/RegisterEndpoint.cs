@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,19 +22,22 @@ public static class RegisterEndpoint
     );
 
     public static async Task<IResult> Post(
+        IIdentityService identityService,
+        HttpContext http,
         UserDbContext context,
         IOptions<AuthOptions> auth,
-        RegisterRequest body,
-        ILogger<WebServer> logger)
+        RegisterRequest request,
+        ILogger<WebServer> logger,
+        CancellationToken cancellationToken)
     {
         using (logger.BeginScope("Register"))
         {
-            if (string.IsNullOrEmpty(body.Username) || string.IsNullOrEmpty(body.Password))
+            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
             {
                 logger.LogWarning(
                     "Missing parameters for user registration: ({Username}, {Password})",
-                    body.Username,
-                    string.IsNullOrEmpty(body.Password)
+                    request.Username,
+                    string.IsNullOrEmpty(request.Password)
                 );
                 return Results.BadRequest(new {
                     success = false,
@@ -40,27 +45,40 @@ public static class RegisterEndpoint
                 });
             }
 
-            logger.LogInformation("Registering user '{User}'...", body.Username);
+            logger.LogInformation("Registering user '{User}'...", request.Username);
 
-            var user = User.NewUser(body.Username, body.Gender);
-            await context.AddAsync(user);
+            var user = new User
+            {
+                Id              = 0,
+                Username        = request.Username,
+                Nickname        = request.Username,
+                Gender          = request.Gender,
+                IsAdministrator = false
+            };
+            await context.AddAsync(user, cancellationToken);
 
-            user.Equipments[ItemType.Face] = (short)(body.Gender == Gender.Female ? 36 : 35);
+            user.Equipments[ItemType.Face] = (short)(request.Gender == Gender.Female ? 36 : 35);
 
-            var rawPassword = System.Text.Encoding.UTF8.GetBytes(body.Password);
+            var rawPassword = Encoding.UTF8.GetBytes(request.Password);
             var credential = new Credential
             {
                 UserId = user.Id,
-                Username = body.Username,
+                Username = request.Username,
                 Password = auth.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
             };
 
-            await context.AddAsync(credential);
-            await context.SaveChangesAsync();
-            
-            logger.LogInformation("User '{User}' registered successfully.", body.Username);
+            await context.AddAsync(credential, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
 
-            return Results.Ok(new { success = true });
+            string token = await identityService.Authenticate(new UsernamePasswordCredentialRequest()
+            {
+                Address  = http.Connection.RemoteIpAddress ?? IPAddress.Any,
+                Username = request.Username,
+                Password = Encoding.UTF8.GetBytes(request.Password)
+            }, cancellationToken);
+            
+            logger.LogInformation("User '{User}' registered successfully.", request.Username);
+            return Results.Text(token);
         }
     }
 }

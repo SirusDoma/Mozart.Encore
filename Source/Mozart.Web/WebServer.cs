@@ -41,6 +41,7 @@ public class WebServer
                 {
                     endpoints.MapHealthChecks("/healthz");
                     endpoints.MapGet("/ping", PingEndpoint.Get);
+                    endpoints.MapPost("/authenticate", AuthenticateEndpoint.Post);
                     endpoints.MapPost("/register", RegisterEndpoint.Post);
                 });
             });
