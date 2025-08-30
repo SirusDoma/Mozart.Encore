@@ -36,7 +36,7 @@ public class Session : IDisposable
 
     public ConcurrentDictionary<string, object> Properties { get; } = [];
 
-    public bool Connected { get; private set; }
+    public virtual bool Connected { get; protected set; }
 
     public virtual bool Authorized => _token != null;
 
