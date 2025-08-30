@@ -8,6 +8,8 @@ public interface ISessionRepository : IRepository<AuthSession>
 {
     Task<AuthSession?> Find(string token, CancellationToken cancellationToken = default);
 
+    Task<AuthSession?> FindByUsername(string username, CancellationToken cancellationToken = default);
+
     Task<bool> Check(string token, CancellationToken cancellationToken = default);
 
     Task<bool> CheckByUsername(string username, CancellationToken cancellationToken = default);
@@ -29,6 +31,11 @@ public class SessionRepository(IDbContextFactory<UserDbContext> factory)
     public Task<AuthSession?> Find(string token, CancellationToken cancellationToken)
     {
         return DbSet.AsNoTracking().SingleOrDefaultAsync(c => c.Token == token, cancellationToken);
+    }
+
+    public Task<AuthSession?> FindByUsername(string username, CancellationToken cancellationToken = default)
+    {
+        return DbSet.AsNoTracking().SingleOrDefaultAsync(c => c.Username == username, cancellationToken);
     }
 
     public Task<bool> Check(string token, CancellationToken cancellationToken)

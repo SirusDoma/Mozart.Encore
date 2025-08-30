@@ -38,9 +38,6 @@ public class AuthContext : IAuthContext
 
     public async Task<Credential> FindCredential(string username, CancellationToken cancellationToken)
     {
-        if (await Sessions.CheckByUsername(username, cancellationToken))
-            throw new InvalidOperationException("User is already logged in");
-
         var record = await Credentials.FindByUsername(username, cancellationToken);
         if (record == null)
             throw new ArgumentException("Invalid username or password", nameof(username));
@@ -54,6 +51,10 @@ public class AuthContext : IAuthContext
         var character = await Users.FindByUsername(username, cancellationToken);
         if (character == null)
             throw new NotSupportedException(); // TODO: Create char data?
+
+        var existingSession = await Sessions.FindByUsername(username, cancellationToken);
+        if (existingSession != null)
+            return existingSession;
 
         var session = new AuthSession(character)
         {
