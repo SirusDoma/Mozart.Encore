@@ -11,6 +11,7 @@ This project is inspired by the _Mozart Project 0.028_.
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
+| [Mozart.Web](Source/Mozart.Web/)               | Lightweight HTTP Web server                       |
 | [Mozart](Source/Mozart/)                       | Game server implementation for O2Jam client v3.10 |
 
 # Configuration
@@ -30,6 +31,15 @@ Use `--Server:<Option>` to configure these settings via command-line arguments (
 | `Port`             | <ul><li>In `Full`/`Gateway` mode:<br/>TCP port to listen incoming connection.</li><br/><li>In `Channel` mode:<br/>The local endpoint address for the TCP client.</li></ul> Default: `15010`                                                                                                                                                                                                              |
 | `MaxConnections`   | The maximum number of clients connecting to the server. Default: `10000`                                                                                                                                                                                                                                                                                                                                 |
 | `PacketBufferSize` | The maximum number of bytes per [message frame](https://blog.stephencleary.com/2009/04/message-framing.html) that can be processed by the server. Default: `4096` bytes                                                                                                                                                                                                                                  |                                                          
+
+## HTTP
+Lightweight HTTP web server settings.
+
+| Option    | Description                                                                                                       |
+|-----------|-------------------------------------------------------------------------------------------------------------------|
+| `Enabled` | Determine whether the web server is enabled.  Default: `false`                                                    |
+| `Address` | Web server address to listen incoming requests. Using `0.0.0.0` may require admin privilege. Default: `127.0.0.1` |
+| `Port`    | HTTP port to listen incoming requests. Default: `15010`                                                           |
 
 ## Database
 Database connection setting.
