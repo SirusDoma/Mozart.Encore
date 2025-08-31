@@ -102,7 +102,7 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
             var list = (IList)Activator.CreateInstance(listType)!;
 
             foreach (object item in items)
-                list.Add(item);
+                list.Add(Convert.ChangeType(item, elementType));
 
             return list;
         }

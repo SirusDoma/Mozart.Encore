@@ -120,6 +120,18 @@ public class Room : Broadcastable, IRoom
         set => _metadata.ArenaRandomSeed = value;
     }
 
+    public IList<int> Skills
+    {
+        get => _metadata.Skills;
+        set => _metadata.Skills = value;
+    }
+
+    public int SkillsSeed
+    {
+        get => _metadata.SkillsSeed;
+        set => _metadata.SkillsSeed = value;
+    }
+
     public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
     public IReadOnlyList<ISlot> Slots => _slots;
@@ -137,6 +149,7 @@ public class Room : Broadcastable, IRoom
     public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
     public event EventHandler<RoomStateChangedEventArgs>? StateChanged;
     public event EventHandler<RoomSlotChangedEventArgs>? SlotChanged;
+    public event EventHandler<RoomSkillChangedEventArgs>? SkillChanged;
 
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
@@ -277,6 +290,14 @@ public class Room : Broadcastable, IRoom
             {
                 PreviousState = _previous.State,
                 CurrentState  = _metadata.State
+            });
+        }
+
+        if (!_previous.Skills.Equals(_metadata.Skills))
+        {
+            SkillChanged?.Invoke(this, new RoomSkillChangedEventArgs()
+            {
+                Skills = _metadata.Skills
             });
         }
 

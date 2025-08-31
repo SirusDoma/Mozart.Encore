@@ -113,16 +113,20 @@ public class Inventory
         {
             ItemType.Instrument         => Equip1,
             ItemType.Hair               => Equip2,
-            ItemType.Earring            => Equip3,
+            ItemType.Accessories        => Equip3,
             ItemType.Gloves             => Equip4,
-            ItemType.Accessories        => Equip5,
+            ItemType.Necklace           => Equip5,
             ItemType.Top                => Equip6,
             ItemType.Pants              => Equip7,
             ItemType.Glasses            => Equip8,
-            ItemType.Necklace           => Equip9,
+            ItemType.Earring            => Equip9,
             ItemType.ClothesAccessories => Equip10,
             ItemType.Shoes              => Equip11,
             ItemType.Face               => Equip12,
+            ItemType.Wings              => Equip13,
+            ItemType.MusicalAccessories => Equip14,
+            ItemType.Pet                => Equip15,
+            ItemType.HairAccessories    => Equip16,
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }
@@ -133,16 +137,20 @@ public class Inventory
         {
             case ItemType.Instrument         : Equip1  = itemId; break;
             case ItemType.Hair               : Equip2  = itemId; break;
-            case ItemType.Earring            : Equip3  = itemId; break;
+            case ItemType.Accessories        : Equip3  = itemId; break;
             case ItemType.Gloves             : Equip4  = itemId; break;
-            case ItemType.Accessories        : Equip5  = itemId; break;
+            case ItemType.Necklace           : Equip5  = itemId; break;
             case ItemType.Top                : Equip6  = itemId; break;
             case ItemType.Pants              : Equip7  = itemId; break;
             case ItemType.Glasses            : Equip8  = itemId; break;
-            case ItemType.Necklace           : Equip9  = itemId; break;
+            case ItemType.Earring            : Equip9  = itemId; break;
             case ItemType.ClothesAccessories : Equip10 = itemId; break;
             case ItemType.Shoes              : Equip11 = itemId; break;
             case ItemType.Face               : Equip12 = itemId; break;
+            case ItemType.Wings              : Equip13 = itemId; break;
+            case ItemType.MusicalAccessories : Equip14 = itemId; break;
+            case ItemType.Pet                : Equip15 = itemId; break;
+            case ItemType.HairAccessories    : Equip16 = itemId; break;
             default: throw new ArgumentOutOfRangeException(nameof(type), "Index must be between 1 and 30");
         }
     }

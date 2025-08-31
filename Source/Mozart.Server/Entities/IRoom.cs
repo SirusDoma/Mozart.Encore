@@ -20,6 +20,8 @@ public interface IRoom : IBroadcastable
     GameSpeed Speed { get; set; }
     Arena Arena { get; set; }
     byte ArenaRandomSeed { get; set; }
+    IList<int> Skills { get; set; }
+    int SkillsSeed { get; set; }
     Session Master { get; }
     IReadOnlyList<Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }

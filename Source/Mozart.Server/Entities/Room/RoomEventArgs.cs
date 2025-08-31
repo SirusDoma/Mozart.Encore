@@ -66,3 +66,8 @@ public class RoomSlotChangedEventArgs : EventArgs
     public required int Capacity                  { get; init; }
     public required int UserCount                 { get; init; }
 }
+
+public class RoomSkillChangedEventArgs : EventArgs
+{
+    public required IList<int> Skills { get; init; }
+}

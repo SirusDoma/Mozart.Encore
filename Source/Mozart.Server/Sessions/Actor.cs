@@ -45,6 +45,8 @@ public class Actor
 
     public required string Token { get; init; }
 
+    public required string ClientId { get; init; }
+
     public int UserId { get; init; }
 
     public string Username { get; init; }
@@ -75,7 +77,7 @@ public class Actor
 
     public IList<int> AttributiveItemIds { get; set; } = [];
 
-    public IReadOnlyList<int> MusicIds { get; set; } = [];
+    public IReadOnlyList<ushort> MusicIds { get; set; } = [];
 
     public override string ToString()
     {

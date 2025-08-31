@@ -1,4 +1,4 @@
-# Mozart.Encore
+# Amadeus.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
@@ -11,8 +11,8 @@ This project is inspired by the _Mozart Project 0.028_.
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Mozart.Web](Source/Mozart.Web/)               | Lightweight HTTP Web server                       |
-| [Mozart](Source/Mozart/)                       | Game server implementation for O2Jam client v3.10 |
+| [Amadeus.Web](Source/Mozart.Web/)              | Lightweight HTTP Web server                       |
+| [Amadeus](Source/Mozart/)                      | Game server implementation for O2Jam client v3.82 |
 
 # Configuration
 
