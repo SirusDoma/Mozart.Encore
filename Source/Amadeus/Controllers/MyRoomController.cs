@@ -4,6 +4,7 @@ using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
 using Mozart.Metadata.Items;
 using Mozart.Data.Repositories;
+using Mozart.Metadata;
 using Mozart.Sessions;
 
 namespace Amadeus.Controllers;
@@ -55,6 +56,56 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
             NewEquippedItemId       = newId,
             InventorySlotIndex      = index,
             PreviousEquippedItemId  = prevId
+        };
+    }
+
+    [CommandHandler]
+    public async Task<AcceptGiftResponse> AcceptGift(AcceptGiftRequest request, CancellationToken cancellationToken)
+    {
+        var actor = Session.Actor;
+        logger.LogInformation((int)RequestCommand.PurchaseItem,
+            "[{User}] Accept gift: ({Type}) {Item}", actor.Nickname, request.GiftType, request.ItemId);
+
+        var user = (await repository.Find(actor.UserId, cancellationToken))!;
+        bool success = false;
+
+        if (request.GiftType == GiftType.Item)
+        {
+            // TODO: Validate GiftId against gift db table
+
+            var inventory = user.Inventory;
+            for (int i = 0; i < inventory.Capacity; i++)
+            {
+                if (inventory[i] == 0)
+                {
+                    inventory[i] = (short)request.ItemId;
+                    success = true;
+
+                    break;
+                }
+            }
+
+            await repository.Update(user, cancellationToken);
+            await repository.Commit(cancellationToken);
+
+            actor.Sync(user);
+        }
+        else
+        {
+            // TODO: Support music gift
+
+            return new AcceptGiftResponse
+            {
+                Invalid = false,
+                Result  = AcceptGiftResponse.AcceptGiftResult.NotDefined
+            };
+        }
+
+        return new AcceptGiftResponse
+        {
+            Invalid = !success,
+            Result  = success ? AcceptGiftResponse.AcceptGiftResult.Success :
+                AcceptGiftResponse.AcceptGiftResult.UnknownError
         };
     }
 }
