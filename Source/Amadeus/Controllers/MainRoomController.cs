@@ -43,6 +43,14 @@ public class MainRoomController(Session session,IRoomService roomService, IMetad
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
             Inventory          = actor.Inventory,
+            AttributiveItems   = new List<CharacterInfoResponse.AttributiveItemInfo>()
+            {
+                new()
+                {
+                   AttributiveItemId = 256,
+                   ItemCount = 999
+                }
+            },
             MissingMusicIds    = [],
         });
     }

@@ -207,10 +207,15 @@ public class ScoreTracker : IScoreTracker
             Session  = session
         });
 
-        // Client send exit room, but just to be safe - let's remove the member here
-        // Probably need to revise in the future network version
-        if (Room.State == RoomState.Playing && Room.Metadata.Mode != GameMode.Single)
-            state.Session.Exit(Room);
+        if (Room.State == RoomState.Playing)
+        {
+            // Client send exit room, but just to be safe - let's remove the member here
+            // Probably need to revise in the future network version
+            if (Room.Metadata.Mode != GameMode.Single)
+                state.Session.Exit(Room);
+            else if (Completed)
+                Room.CompleteGame();
+        }
     }
 
     public void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,

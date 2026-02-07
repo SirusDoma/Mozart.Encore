@@ -409,7 +409,7 @@ public class Room : Broadcastable, IRoom
 
     public void CompleteGame()
     {
-        if (!ScoreTracker.Completed)
+        if (!ScoreTracker.Completed || _metadata.State != RoomState.Playing)
             return;
 
         _metadata.State = RoomState.Waiting;
