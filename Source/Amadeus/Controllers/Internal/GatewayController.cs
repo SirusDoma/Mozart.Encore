@@ -65,7 +65,7 @@ public class GatewayController(ChannelSession session, IChannelAggregator aggreg
                 ErrorCode = LoginErrorCode.Undefined,
                 Username = response.Username,
                 Nickname = response.Nickname,
-                Unknown = 0
+                Rank     = response.Rank
             }), cancellationToken);
         }
         catch (Exception ex)

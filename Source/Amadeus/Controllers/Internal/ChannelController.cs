@@ -71,6 +71,7 @@ public class ChannelController(
                 ClientId  = request.ClientId,
                 Username  = characterInfo.Username,
                 Nickname  = characterInfo.Nickname,
+                Rank      = 0, // TODO: Rank
                 ChannelId = channel.Id,
                 Capacity  = channel.Capacity,
                 UserCount = channel.UserCount,
@@ -87,6 +88,7 @@ public class ChannelController(
                 ClientId  = request.ClientId,
                 Username  = string.Empty,
                 Nickname  = string.Empty,
+                Rank      = 0,
                 ChannelId = channel?.Id        ?? -1,
                 Capacity  = channel?.Capacity  ?? 0,
                 UserCount = channel?.UserCount ?? 0,

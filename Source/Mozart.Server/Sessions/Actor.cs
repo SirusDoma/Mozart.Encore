@@ -8,6 +8,7 @@ public class Actor
 {
     public Actor(User user)
     {
+        // TODO: Rank
         UserId          = user.Id;
         Username        = user.Username;
         Nickname        = user.Nickname;
@@ -29,6 +30,7 @@ public class Actor
 
     public void Sync(User user)
     {
+        // TODO: Rank
         Gem             = user.Gem;
         Point           = user.Point;
         Level           = user.Level;
@@ -68,6 +70,8 @@ public class Actor
     public int Draw { get; set; }
 
     public int Experience { get; set; }
+
+    public int Rank { get; set; }
 
     public bool IsAdministrator { get; init; }
 

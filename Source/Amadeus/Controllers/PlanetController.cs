@@ -97,7 +97,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
                 ErrorCode = LoginErrorCode.Undefined,
                 Nickname  = Session.Actor.Nickname,
                 Username  = Session.Actor.Username,
-                Unknown   = 0
+                Rank      = Session.Actor.Rank
             };
         }
         catch (InvalidOperationException)
@@ -108,7 +108,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
                 ErrorCode = LoginErrorCode.Undefined,
                 Nickname  = string.Empty,
                 Username  = string.Empty,
-                Unknown   = 0
+                Rank      = 0
             };
         }
     }
