@@ -12,7 +12,7 @@ public class CharacterInfoResponse : IMessage
     public class GiftItemInfo : SubMessage
     {
         [MessageField(order: 0)]
-        public int Unknown { get; init; } = 0; // Flag?
+        public int GiftId { get; init; } = 0; // Flag?
 
         [MessageField(order: 1)]
         public int ItemId { get; init; }
@@ -24,7 +24,7 @@ public class CharacterInfoResponse : IMessage
     public class GiftMusicInfo : SubMessage
     {
         [MessageField(order: 0)]
-        public int Unknown { get; init; } = 0; // Flag?
+        public int GiftId { get; init; } = 0; // Flag?
 
         [MessageField(order: 1)]
         public int MusicId { get; init; }
@@ -42,9 +42,8 @@ public class CharacterInfoResponse : IMessage
         public int ItemCount { get; init; }
     }
 
-    // Suspended?
     [MessageField<MessageFieldCodec<int>>(order: 0)]
-    public bool DisableInventory { get; init; }
+    public bool Invalid { get; init; } = false;
 
     [StringMessageField(order: 1)]
     public required string Nickname { get; init; }
@@ -59,7 +58,7 @@ public class CharacterInfoResponse : IMessage
     public int Point { get; set; }
 
     [MessageField(order: 5)]
-    public int Unknown1 { get; set; }
+    public int O2Cash { get; set; }
 
     [MessageField(order: 6)]
     public int Level { get; set; }
@@ -76,8 +75,10 @@ public class CharacterInfoResponse : IMessage
     [MessageField(order: 10)]
     public int Experience { get; set; }
 
+    // Client address: 0x5C69A4
+    // Value is reset to 0 after STATE_RESULT
     [MessageField(order: 11)]
-    public int Unknown2 { get; set; }
+    public int Unknown1 { get; set; }
 
     [MessageField(order: 12)]
     public bool IsAdministrator { get; init; }
@@ -91,8 +92,12 @@ public class CharacterInfoResponse : IMessage
     [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
     public IList<ushort> MissingMusicIds { get; init; } = [];
 
+    // This doesn't work!
+    // Moreover, it uses troublesome semantic (only consider the highest byte order)
+    //
+    // Refer to the client address: 0x5C69A8 and 0x440B50 (wrong command code)
     [MessageField(order: 16)]
-    public int Unknown3 { get; set; } // Cash point?
+    public int Whisperable { get; set; }
 
     [CollectionMessageField(order: 17, prefixSizeType: TypeCode.Int16)]
     public IList<GiftItemInfo> ItemGiftBox { get; init; } = [];
@@ -101,10 +106,10 @@ public class CharacterInfoResponse : IMessage
     public IList<GiftMusicInfo> MusicGiftBox { get; init; } = [];
 
     [MessageField(order: 19)]
-    public int Unknown4 { get; set; } // Number of penalties?
+    public int ItemCash { get; set; }
 
     [MessageField(order: 20)]
-    public int Unknown5 { get; set; } // Current penalty level?
+    public int MusicCash { get; set; }
 
     [CollectionMessageField(order: 21, prefixSizeType: TypeCode.Int32)]
     public IList<AttributiveItemInfo> AttributiveItems { get; init; } = [];

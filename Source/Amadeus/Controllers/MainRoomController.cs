@@ -31,7 +31,6 @@ public class MainRoomController(Session session,IRoomService roomService, IMetad
 
         return Task.FromResult(new CharacterInfoResponse
         {
-            DisableInventory   = false,
             Nickname           = actor.Nickname,
             Gender             = actor.Gender,
             Gem                = actor.Gem,
