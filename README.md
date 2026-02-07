@@ -3,6 +3,9 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
+> [!Tip]
+> Check the [amadeus-prototype-dev](https://github.com/SirusDoma/Mozart.Encore/tree/amadeus-prototype-dev) branch for the prototype of mid-to-late NX client network implementation (v3.82 - might support v3.73).
+
 ## Project Structure
 
 | Project                                        | Description                                       |
