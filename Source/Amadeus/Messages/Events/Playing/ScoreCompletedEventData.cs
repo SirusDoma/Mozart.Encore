@@ -2,9 +2,9 @@ using Encore.Messaging;
 
 namespace Amadeus.Messages.Events;
 
-public class GameCompletedEventData : IMessage
+public class ScoreCompletedEventData : IMessage
 {
-    public static Enum Command => EventCommand.GameCompleted;
+    public static Enum Command => EventCommand.ScoreCompleted;
 
     public class ScoreEntry : SubMessage
     {

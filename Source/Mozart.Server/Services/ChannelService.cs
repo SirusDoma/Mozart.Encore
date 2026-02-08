@@ -21,11 +21,18 @@ public class ChannelService : Broadcastable, IChannelService
 {
     private readonly ConcurrentDictionary<int, IChannel> _channels;
 
+    private readonly IMetadataResolver _metadataResolver;
+
     private readonly ILogger<ChannelService> _logger;
 
-    public ChannelService(IOptions<ServerOptions> options, ILogger<ChannelService> logger,
-        IOptions<GatewayOptions> gatewayOptions)
+    public ChannelService(
+        IMetadataResolver metadataResolver,
+        IOptions<ServerOptions> options,
+        IOptions<GatewayOptions> gatewayOptions,
+        ILogger<ChannelService> logger
+    )
     {
+        _metadataResolver = metadataResolver;
         _logger = logger;
 
         if (options.Value.Mode != DeploymentMode.Gateway)
@@ -34,7 +41,7 @@ public class ChannelService : Broadcastable, IChannelService
                 c => c.Id,
                 IChannel (c) =>
                 {
-                    var channel = new Channel(c);
+                    var channel = new Channel(_metadataResolver, c);
                     channel.SessionDisconnected += OnChannelSessionDisconnected;
 
                     return channel;
@@ -69,7 +76,7 @@ public class ChannelService : Broadcastable, IChannelService
     {
         ArgumentOutOfRangeException.ThrowIfNegative(channelOptions.Id, nameof(channelOptions));
 
-        var channel = new Channel(channelOptions);
+        var channel = new Channel(_metadataResolver, channelOptions);
         if (!_channels.TryAdd(channelOptions.Id, channel))
             throw new ArgumentOutOfRangeException(nameof(channelOptions));
 

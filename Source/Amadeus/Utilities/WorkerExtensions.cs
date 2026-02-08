@@ -14,6 +14,16 @@ public static class WorkerExtensions
             foreach (var channel in channelService.GetChannels())
                 _ = resolver.GetMusicList(channel);
 
+            try
+            {
+                foreach (var channel in channelService.GetChannels())
+                    _ = resolver.GetAlbumList(channel);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to validate album list file");
+            }
+
             foreach (var channel in channelService.GetChannels())
                 _ = resolver.GetItemData(channel);
         }

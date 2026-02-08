@@ -23,7 +23,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         tracker.UserLifeUpdated    += OnUserLifeUpdated;
         tracker.UserJamIncreased   += OnUserJamIncreased;
         tracker.UserScoreSubmitted += OnUserScoreSubmitted;
-        tracker.GameCompleted      += OnGameCompleted;
+        tracker.ScoreCompleted     += OnScoreCompleted;
     }
 
     private async void OnUserTracked(object? sender, ScoreTrackEventArgs e)
@@ -123,21 +123,34 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
     }
 
 
-    private async void OnGameCompleted(object? sender, ScoreTrackedEventArgs e)
+    private async void OnScoreCompleted(object? sender, ScoreTrackedEventArgs e)
     {
         try
         {
-            // TODO: Implement proper OJNList
+            e.Room.Channel.GetMusicList().TryGetValue(e.MusicId, out var music);
+            int level = e.Difficulty switch
+            {
+                Difficulty.EX => music?.LevelEx,
+                Difficulty.NX => music?.LevelNx,
+                _             => music?.LevelHx,
+            } ?? 0;
+
+            int totalNotes = e.Difficulty switch
+            {
+                Difficulty.EX => music?.NoteCountEx,
+                Difficulty.NX => music?.NoteCountNx,
+                _             => music?.NoteCountHx,
+            } ?? 0;
+
             static int CountTotalNotes(ScoreTracker.UserScore score)
                 => score.Cool + score.Good + score.Bad + score.Miss;
 
             var scores = e.States;
-            if (scores.Where(s => s.Clear).GroupBy(CountTotalNotes).Count() > 1)
+            if (scores.Where(s => s.Clear).Any(score => CountTotalNotes(score) > totalNotes))
                 throw new InvalidOperationException("Unbalance total notes"); // someone probably cheating?
 
-            var entries    = new List<GameCompletedEventData.ScoreEntry>();
-            bool safe      = scores.Any(s => s.Life > 0);
-            int totalNotes = scores.Max(CountTotalNotes);
+            var entries = new List<ScoreCompletedEventData.ScoreEntry>();
+            bool safe   = music != null && scores.Any(s => s.Life > 0);
 
             var room    = e.Room;
             var channel = e.Room.Channel;
@@ -150,7 +163,6 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     continue;
 
                 // Compute reward only when it is safe
-                // (because we have no information about total notes without OJNList)
                 int reward = 0;
                 if (safe && (room.Metadata.Mode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
                 {
@@ -178,7 +190,6 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     int xpNext = (int)(2.8333f * (2 * Math.Pow(nextUserLevel, 2.0f) + (3 * Math.Pow(nextUserLevel, 2.0f)
                         + (307 * nextUserLevel))));
 
-                    const int level = 15; // music level
                     int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes);
 
                     user.Gem        += reward;
@@ -190,7 +201,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     state.Session.Actor.Sync(user);
                 }
 
-                entries.Add(new GameCompletedEventData.ScoreEntry
+                entries.Add(new ScoreCompletedEventData.ScoreEntry
                 {
                     MemberId   = (byte)id,
                     Active     = true,
@@ -208,16 +219,12 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 });
             }
 
-            await room.Broadcast(new GameCompletedEventData
+            entries = entries.OrderByDescending(s => s.Score).ToList();
+            switch (e.Mode)
             {
-                Scores = entries.OrderByDescending(s => s.Score).ToList()
-            }, CancellationToken.None);
-
-            await channel.Broadcast(new RoomStateChangedEventData
-            {
-                Number = room.Id,
-                State = RoomState.Waiting
-            }, CancellationToken.None);
+                case GameMode.Jam: await room.Broadcast(new AlbumScoreCompletedEventData { Scores = entries }, CancellationToken.None); break;
+                default:           await room.Broadcast(new ScoreCompletedEventData { Scores = entries }, CancellationToken.None);      break;
+            }
         }
         catch (Exception ex)
         {

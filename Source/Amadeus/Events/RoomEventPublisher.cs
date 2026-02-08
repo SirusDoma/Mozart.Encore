@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using Amadeus.Messages;
 using Amadeus.Messages.Events;
 using Amadeus.Messages.Events.Waiting;
 using Amadeus.Messages.Responses;
@@ -24,6 +23,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
 
         room.TitleChanged += OnTitleChanged;
         room.MusicChanged += OnMusicChanged;
+        room.AlbumChanged += OnAlbumChanged;
         room.ArenaChanged += OnArenaChanged;
         room.StateChanged += OnStateChanged;
         room.SlotChanged  += OnSlotChanged;
@@ -136,7 +136,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Master.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
             {
                 Number = room.Id,
                 Title  = room.Title
@@ -160,12 +160,15 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Master.Channel!.Broadcast(session => !room.IsMember(session), new RoomMusicChangedEventData
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
-                Number     = room.Id,
-                MusicId    = (ushort)room.MusicId,
-                Difficulty = room.Difficulty,
-                Speed      = room.Speed,
+                Number = room.Id,
+                Parameter = new RoomParameterChangedEventData.MusicParameter
+                {
+                    MusicId    = (ushort)room.MusicId,
+                    Difficulty = room.Difficulty,
+                    Speed      = room.Speed,
+                }
             }, CancellationToken.None);
 
             await room.Broadcast(sender: room.Master, new WaitingMusicChangedEventData
@@ -173,8 +176,44 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 MusicId    = (ushort)room.MusicId,
                 Difficulty = room.Difficulty,
                 Speed      = room.Speed,
-
             }, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Failed to broadcast [Room::OnMusicChanged] event to one or more subscribers");
+        }
+    }
+
+    private async void OnAlbumChanged(object? sender, RoomAlbumChangedEventArgs e)
+    {
+        try
+        {
+            var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
+            room.Channel.GetAlbumList().TryGetValue(room.MusicId, out var album);
+
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
+            {
+                Number = room.Id,
+                Parameter = new RoomParameterChangedEventData.AlbumParameter
+                {
+                    AlbumId = (ushort)e.AlbumId,
+                    Speed = e.Speed
+                }
+            }, CancellationToken.None);
+
+            await room.Broadcast(sender: room.Master, new WaitingAlbumChangedEventData
+            {
+                AlbumId = e.AlbumId,
+                Speed = e.Speed
+            }, CancellationToken.None);
+
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomAlbumMusicListEventData
+            {
+                Number = room.Id,
+                MusicIds = album?.Entries.Select(m => m.Id).ToList() ?? []
+            }, CancellationToken.None);
+
         }
         catch (Exception ex)
         {
@@ -208,7 +247,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Master.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
             {
                 Number = room.Id,
                 State  = room.State
@@ -249,7 +288,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Type  = e.ActionType
             }, CancellationToken.None);
 
-            await room.Master.Channel!.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
             {
                 Number    = room.Id,
                 Capacity  = (byte)e.Capacity,

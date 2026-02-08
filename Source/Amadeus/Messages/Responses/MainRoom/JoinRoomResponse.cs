@@ -5,7 +5,7 @@ using Mozart.Metadata.Items;
 
 namespace Amadeus.Messages.Responses;
 
-public class JoinRoomResponse() : IMessage
+public class JoinRoomResponse : IMessage
 {
     public enum JoinResult : uint
     {

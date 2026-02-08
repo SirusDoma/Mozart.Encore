@@ -31,6 +31,12 @@ public class RoomMusicChangedEventArgs : EventArgs
     public required Difficulty Difficulty { get; init; }
 }
 
+public class RoomAlbumChangedEventArgs : EventArgs
+{
+    public required int AlbumId  { get; init; }
+    public required GameSpeed Speed { get; init; }
+}
+
 public class RoomArenaChangedEventArgs : EventArgs
 {
     public required Arena Arena    { get; init; }

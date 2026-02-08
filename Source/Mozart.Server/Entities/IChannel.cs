@@ -1,5 +1,6 @@
-using Mozart.Services;
+using Mozart.Metadata.Items;
 using Mozart.Sessions;
+using Mozart.Metadata.Music;
 
 namespace Mozart.Entities;
 
@@ -13,9 +14,14 @@ public interface IChannel : IBroadcastable
     float ExpRates { get; }
 
     string MusicListFileName { get; }
+    string AlbumListFileName { get; }
     string ItemDataFileName { get; }
 
     void Register(Session session);
 
     void Remove(Session session);
+
+    IReadOnlyDictionary<int, MusicHeader> GetMusicList();
+    IReadOnlyDictionary<int, AlbumHeader> GetAlbumList();
+    IReadOnlyDictionary<int, ItemData> GetItemData();
 }

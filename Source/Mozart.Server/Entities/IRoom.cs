@@ -16,6 +16,7 @@ public interface IRoom : IBroadcastable
     string Title { get; set; }
     string Password { get; }
     int MusicId { get; set; }
+    GameMode Mode { get; }
     Difficulty Difficulty { get; set; }
     GameSpeed Speed { get; set; }
     Arena Arena { get; set; }

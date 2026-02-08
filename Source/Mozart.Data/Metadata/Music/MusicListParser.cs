@@ -4,14 +4,14 @@ namespace Mozart.Metadata.Music;
 
 public static class MusicListParser
 {
-    public static IReadOnlyList<MusicHeader> Parse(String filename)
+    public static IReadOnlyDictionary<int, MusicHeader> Parse(String filename)
     {
         return Parse(File.Open(filename, FileMode.Open));
     }
 
-    public static IReadOnlyList<MusicHeader> Parse(Stream stream)
+    public static IReadOnlyDictionary<int, MusicHeader> Parse(Stream stream)
     {
-        var headers = new List<MusicHeader>();
+        var headers = new Dictionary<int, MusicHeader>();
         byte[] inputData = new byte[0];
 
         using var reader = new BinaryReader(stream);
@@ -25,7 +25,10 @@ public static class MusicListParser
 
         // Retrieve all OJN Headers
         for (int i = 0; i < songCount; i++)
-            headers.Add(MusicHeaderParser.Parse(reader.ReadBytes(300)));
+        {
+            var header = MusicHeaderParser.Parse(reader.ReadBytes(300));
+            headers.Add(header.Id, header);
+        }
 
         // Parse the extra payload of new OJNList
         if (newVersion)

@@ -17,8 +17,12 @@ using Mozart.Sessions;
 namespace Amadeus.Controllers;
 
 [ChannelAuthorize]
-public class MainRoomController(Session session,IRoomService roomService, IMetadataResolver resolver,
-    IEventPublisher<Room> publisher, ILogger<MainRoomController> logger) : CommandController<Session>(session)
+public class MainRoomController(
+    Session session,
+    IRoomService roomService,
+    IEventPublisher<Room> publisher,
+    ILogger<MainRoomController> logger
+) : CommandController<Session>(session)
 {
     private IChannel Channel => Session.Channel!;
 
@@ -61,39 +65,46 @@ public class MainRoomController(Session session,IRoomService roomService, IMetad
         logger.LogInformation((int)RequestCommand.SendMusicList,
             "Report client music list: {Count} music", request.MusicIds.Count);
 
-        // For some unknown reason, the music ids are in big-endian order and also has `0xF` in the very first bit.
-        // For example, o2ma100 = [0xF0, 0x64]
-        // TODO: Find out the meaning of the first bit
+        // For some stupid reasons, the most significant 4 bits of the music id is masked with 0xF
+        // So, o2ma100 become 0xF064
+        //
+        // However, DO NOT attempt to store the unmasked ids, because the format is being relied on other places.
+        // If the server need to access to these ids for whatever reason, use the following code to unmask it:
+        //
+        //   var musicIds = new List<ushort>();
+        //   foreach (ushort id in request.MusicIds)
+        //   {
+        //       // Using o2ma100 (0xF064) as example:
+        //       int flag = id & 0xF000; // 0xF000
+        //       int val  = id & 0x0FFF; // 0x64
+        //
+        //       // The rest is the logic from the client, effectively equal to no-op in most (if not, all) of the time
+        //       flag = flag > 0 ? flag << 16 : flag;
+        //       ushort musicId = (ushort)(val | flag);
+        //
+        //       musicIds.Add(musicId);
+        //   }
+        //
+        // As you might aware, this imposes limitation on the maximum valid id (4096 or 0x1000 to be precise)
+        // This is because the most significant 4 bits are rendered unusable
+        //
+        // Why? Go figure yourself, probably because randomizer stuff, but it is stupid regardless!
 
-        var musicIds = new List<ushort>();
-        foreach (ushort id in request.MusicIds)
-        {
-            // Using o2ma100 ([0xF0, 0x64]) as example:
-            byte high = (byte)(id >> 8);   // 0xF0
-            byte low  = (byte)(id & 0xFF); // 0x64
-
-            // Get rid of that `0xF` using xor
-            high = (byte)(high ^ 0xF0);
-
-            // Parse the actual id
-            musicIds.Add((ushort)((high << 8) | low));
-        }
-
-        Session.Actor.MusicIds = musicIds;
+        Session.Actor.MusicIds = request.MusicIds;
     }
 
     [CommandHandler(RequestCommand.GetMusicList)]
     public MusicListResponse GetMusicList()
     {
-        var musicList = resolver.GetMusicList(Channel);
+        var musicList = Channel.GetMusicList();
 
         logger.LogInformation((int)RequestCommand.GetMusicList,
             "Get music list: [0/{channelId:00}] {Count} music", Channel.Id, musicList.Count);
 
         var musicInfoList = new List<MusicListResponse.MusicInfo>();
-        foreach (var music in musicList)
+        foreach (var music in musicList.Values)
         {
-            musicInfoList.Add(new MusicListResponse.MusicInfo()
+            musicInfoList.Add(new MusicListResponse.MusicInfo
             {
                 Id          = (ushort)music.Id,
                 NoteCountEx = (ushort)music.NoteCountEx,
@@ -102,7 +113,7 @@ public class MainRoomController(Session session,IRoomService roomService, IMetad
             });
         }
 
-        return new MusicListResponse()
+        return new MusicListResponse
         {
             MusicList = musicInfoList
         };
@@ -195,14 +206,6 @@ public class MainRoomController(Session session,IRoomService roomService, IMetad
             {
                 Result = JoinRoomResponse.JoinResult.InProgress
             };
-        }
-
-        if (room.Mode == GameMode.Jam)
-        {
-            logger.LogWarning(
-                (int)RequestCommand.JoinWaiting,
-                "  Joining unsupported Jam Mode room."
-            );
         }
 
         try

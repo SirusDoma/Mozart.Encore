@@ -1,22 +1,28 @@
+using Mozart.Metadata.Items;
+using Mozart.Metadata.Music;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
 namespace Mozart.Entities;
 
-public class Channel() : Broadcastable, IChannel
+public class Channel : Broadcastable, IChannel
 {
     private readonly List<Session> _sessions = [];
 
-    public Channel(ChannelOptions options)
-        : this()
+    private readonly IMetadataResolver _metadataResolver;
+
+    public Channel(IMetadataResolver metadataResolver, ChannelOptions options)
     {
+        _metadataResolver = metadataResolver;
+
         Id       = options.Id;
         Capacity = options.Capacity;
         GemRates = options.Gem;
         ExpRates = options.Exp;
 
         MusicListFileName = options.MusicList;
+        AlbumListFileName = options.AlbumList;
         ItemDataFileName  = options.ItemData;
     }
 
@@ -30,6 +36,7 @@ public class Channel() : Broadcastable, IChannel
     public float ExpRates  { get; init; }
 
     public string MusicListFileName { get; init; } = string.Empty;
+    public string AlbumListFileName { get; init; } = string.Empty;
     public string ItemDataFileName  { get; init; } = string.Empty;
 
     public int UserCount => _sessions.Count;
@@ -62,6 +69,21 @@ public class Channel() : Broadcastable, IChannel
 
         _sessions.Remove(session);
         session.Disconnected -= OnSessionDisconnected;
+    }
+
+    public IReadOnlyDictionary<int, MusicHeader> GetMusicList()
+    {
+        return _metadataResolver.GetMusicList(this);
+    }
+
+    public IReadOnlyDictionary<int, AlbumHeader> GetAlbumList()
+    {
+        return _metadataResolver.GetAlbumList(this);
+    }
+
+    public IReadOnlyDictionary<int, ItemData> GetItemData()
+    {
+        return _metadataResolver.GetItemData(this);
     }
 
     public override void Invalidate()

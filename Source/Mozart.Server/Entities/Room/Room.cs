@@ -1,4 +1,5 @@
 using Mozart.Metadata;
+using Mozart.Metadata.Music;
 using Mozart.Metadata.Room;
 using Mozart.Services;
 using Mozart.Sessions;
@@ -20,8 +21,8 @@ public class Room : Broadcastable, IRoom
 
     public Room(IRoomService service, Session master, RoomMetadata metadata, TimeSpan? musicLoadTimeout = null)
     {
-        _service = service;
-        _previous = metadata;
+        _service  = service;
+        _previous = (RoomMetadata)metadata.Clone();
         _metadata = metadata;
         _slots = [
             new MemberSlot
@@ -146,6 +147,7 @@ public class Room : Broadcastable, IRoom
 
     public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
     public event EventHandler<RoomMusicChangedEventArgs>? MusicChanged;
+    public event EventHandler<RoomAlbumChangedEventArgs>? AlbumChanged;
     public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
     public event EventHandler<RoomStateChangedEventArgs>? StateChanged;
     public event EventHandler<RoomSlotChangedEventArgs>? SlotChanged;
@@ -266,12 +268,23 @@ public class Room : Broadcastable, IRoom
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
-            MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
+            if (_metadata.Mode == GameMode.Jam)
             {
-                MusicId    = _metadata.MusicId,
-                Difficulty = _metadata.Difficulty,
-                Speed      = _metadata.Speed,
-            });
+                AlbumChanged?.Invoke(this, new RoomAlbumChangedEventArgs
+                {
+                    AlbumId = _metadata.MusicId,
+                    Speed  = _metadata.Speed
+                });
+            }
+            else
+            {
+                MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
+                {
+                    MusicId = _metadata.MusicId,
+                    Difficulty = _metadata.Difficulty,
+                    Speed = _metadata.Speed,
+                });
+            }
         }
 
         if (_previous.Arena != _metadata.Arena ||
@@ -295,7 +308,7 @@ public class Room : Broadcastable, IRoom
 
         if (!_previous.Skills.Equals(_metadata.Skills))
         {
-            SkillChanged?.Invoke(this, new RoomSkillChangedEventArgs()
+            SkillChanged?.Invoke(this, new RoomSkillChangedEventArgs
             {
                 Skills = _metadata.Skills
             });

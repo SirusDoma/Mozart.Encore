@@ -49,6 +49,51 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
 
     [RoomMasterAuthorize]
     [CommandHandler]
+    public WaitingAlbumChangedEventData SetRoomAlbum(SetRoomAlbumRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] album settings: [{Speed} / {AlbumId}]",
+            Room.Id, request.Speed, request.AlbumId
+        );
+
+        Room.MusicId = request.AlbumId;
+        Room.Speed = request.Speed;
+        Room.SaveMetadataChanges();
+
+        return new WaitingAlbumChangedEventData
+        {
+            AlbumId = request.AlbumId,
+            Speed = request.Speed
+        };
+    }
+
+    [CommandHandler]
+    public async Task<UserAlbumEligibilityChangedEventData> CheckUserAlbumEligibility(
+        CheckUserAlbumEligibilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomArena,
+            "Update room [{RoomId:000}] [{Member:00}] album eligibility status",
+            Room.Id, request.MemberId
+        );
+
+        await Room.Broadcast(Session, new UserAlbumEligibilityChangedEventData
+        {
+            MemberId = request.MemberId,
+            Ineligible = false
+        }, cancellationToken);
+
+        return new UserAlbumEligibilityChangedEventData
+        {
+            MemberId   = request.MemberId,
+            Ineligible = false
+        };
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
     public WaitingRoomTitleEventData SetRoomTitle(SetRoomTitleRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomTitle,
