@@ -264,6 +264,9 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
             if (memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 memberType = Nullable.GetUnderlyingType(memberType)!;
 
+            if (typeof(IMessage).IsAssignableFrom(memberType) && memberType.IsAbstract && value != null)
+                memberType = value.GetType();
+
             if (codec != null && value != null)
                 codec.Encode(writer, value, memberType);
             else
@@ -290,6 +293,9 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
 
             if (memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 memberType = Nullable.GetUnderlyingType(memberType)!;
+
+            if (typeof(IMessage).IsAssignableFrom(memberType) && memberType.IsAbstract && codec == null)
+                throw new InvalidOperationException("Cannot determine abstract type for decoding");
 
             if (codec != null)
                 value = codec.Decode(reader, memberType);
