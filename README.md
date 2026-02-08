@@ -98,14 +98,15 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                        |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                          |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                           |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                    |
-| `Capacity`  | EXP reward rate. Default: `1.0`                                                                                                                    |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
+| Option      | Description                                                                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                           |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                            |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                     |
+| `Capacity`  | EXP reward rate. Default: `1.0`                                                                                                                     |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)   |
+| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database. 
@@ -113,10 +114,11 @@ The metadata files are not optional and can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                              |
-|-------------|------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.  |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`. |
+| Option      | Description                                                                               |
+|-------------|-------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.   |
+| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`3.82`. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`.  |
 
 ## Game settings
 Gameplay-specific settings.
