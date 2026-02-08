@@ -3,10 +3,8 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.10 (Pre-NX)**  
-
-> [!Tip]
-> Check the [amadeus-prototype-dev](https://github.com/SirusDoma/Mozart.Encore/tree/amadeus-prototype-dev) branch for the prototype of mid-to-late NX client network implementation (v3.82 - might support v3.73).
+Supported client version: **v3.82\* (NX)**  
+<sub>* v3.73 and older might work but not fully tested.</sub>
 
 ## Project Structure
 
@@ -16,8 +14,8 @@ Supported client version: **v3.10 (Pre-NX)**
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Amadeus.Web](Source/Mozart.Web/)              | Lightweight HTTP Web server                       |
-| [Amadeus](Source/Mozart/)                      | Game server implementation for O2Jam client v3.82 |
+| [Amadeus.Web](Source/Amadeus.Web/)             | Lightweight HTTP Web server                       |
+| [Amadeus](Source/Amadeus/)                     | Game server implementation for O2Jam client v3.82 |
 
 # Configuration
 
@@ -100,13 +98,14 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option     | Description                                                                                                                                        |
-|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`       | The channel id (required)                                                                                                                          |
-| `Capacity` | Channel maximum capacity. Default: `100`                                                                                                           |
-| `Gem`      | GEM reward rate. Default: `1.0`                                                                                                                    |
-| `Capacity` | EXP reward rate. Default: `1.0`                                                                                                                    |
-| `ItemData` | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.10`. Default: (Empty) using global [Metadata](#Metadata) |
+| Option      | Description                                                                                                                                        |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                          |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                           |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                    |
+| `Capacity`  | EXP reward rate. Default: `1.0`                                                                                                                    |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database. 
@@ -114,12 +113,10 @@ The metadata files are not optional and can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-> [!WARNING]
-> client v3.10 does not support `OJNList.dat`
-
-| Option     | Description                                                                              |
-|------------|------------------------------------------------------------------------------------------|
-| `ItemData` | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.10`. |
+| Option      | Description                                                                              |
+|-------------|------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.  |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`. |
 
 ## Game settings
 Gameplay-specific settings.
