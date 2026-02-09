@@ -76,7 +76,7 @@ public enum ResponseCommand : ushort
     EquipItem            = 0x138D, // 5004
     SyncPurchase         = 0x1389, // 5001
     SellItem             = 0x138B, // 5003
-    PurchaseMusic        = 0x1393, // 5011
+    SyncMusicPurchase    = 0x1393, // 5011
     SyncPoint            = 0x1396, // 5014
     StartPayment         = 0x1398, // 5016
     AcceptGift           = 0x13A0, // 5024

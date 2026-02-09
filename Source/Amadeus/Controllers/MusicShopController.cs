@@ -16,19 +16,17 @@ public class MusicShopController(
 ) : CommandController<Session>(session)
 {
     [CommandHandler(RequestCommand.SyncMusicPurchase)]
-    public async Task<PurchaseMusicResponse> PurchaseMusic(CancellationToken cancellationToken)
+    public async Task<SyncMusicPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.SyncItemPurchase,
             "Sync music purchase");
 
         // The actual transaction happen within the web page, we only need to sync the latest user info
-        var user      = (await repository.Find(actor.UserId, cancellationToken))!;
-        var inventory = user.Inventory;
-
+        var user = (await repository.Find(actor.UserId, cancellationToken))!;
         actor.Sync(user);
 
-        return new PurchaseMusicResponse
+        return new SyncMusicPurchaseResponse
         {
             Gem       = user.Gem,
             Point     = user.Point,

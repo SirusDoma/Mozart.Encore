@@ -2,9 +2,9 @@ using Encore.Messaging;
 
 namespace Amadeus.Messages.Responses;
 
-public class PurchaseMusicResponse : IMessage
+public class SyncMusicPurchaseResponse : IMessage
 {
-    public static Enum Command => ResponseCommand.PurchaseMusic;
+    public static Enum Command => ResponseCommand.SyncMusicPurchase;
 
     [MessageField(order: 0)]
     public int Gem { get; init; }
