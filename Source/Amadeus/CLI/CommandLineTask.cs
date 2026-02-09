@@ -14,6 +14,6 @@ public interface ICommandLineTask
     int Execute()
         => 0;
 
-    Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
+    Task<int> ExecuteAsync(CancellationToken cancellationToken)
         => Task.FromResult(Execute());
 }

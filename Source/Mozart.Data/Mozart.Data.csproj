@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <InvariantGlobalization>true</InvariantGlobalization>
@@ -26,16 +25,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.6" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
-        <PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
+        <PackageReference Include="MongoDB.EntityFrameworkCore" Version="10.0.0" />
+        <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.1" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     </ItemGroup>
 
 </Project>

@@ -18,35 +18,48 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
     public void ConfigureCommand(Command command)
     {
         // Add required arguments
-        var usernameArgument = new Argument<string>("username", "The username for the new user (will be used for nickname too)");
-        var passwordArgument = new Argument<string>("password", "The password for the new user");
+        var usernameArgument = new Argument<string>("username") { Description = "The username for the new user (will be used for nickname too)" };
+        var passwordArgument = new Argument<string>("password") { Description = "The password for the new user" };
 
-        command.AddArgument(usernameArgument);
-        command.AddArgument(passwordArgument);
+        command.Arguments.Add(usernameArgument);
+        command.Arguments.Add(passwordArgument);
 
         // Add optional options
-        var genderOption = new Option<Gender>("--gender", () => Gender.Male, "The gender of character (default: Male)");
-        var adminOption  = new Option<bool>("--admin", () => false, "Specify whether the user has admin right");
+        var genderOption = new Option<Gender>("--gender")
+        {
+            DefaultValueFactory = _ => Gender.Male,
+            Description = "The gender of character (default: Male)"
+        };
+        var adminOption  = new Option<bool>("--admin")
+        {
+            DefaultValueFactory = _  => false,
+            Description = "Specify whether the user has admin right"
+        };
 
-        command.AddOption(genderOption);
+        command.Options.Add(genderOption);
 
         // Set the handler with all parameters
-        command.SetHandler(async (username, password, gender, admin) =>
+        command.SetAction(async (parsedResult, cancellationToken) =>
         {
-            int exitCode = await ExecuteAsync(username, password, gender, admin);
+            string username = parsedResult.GetRequiredValue(usernameArgument);
+            string password = parsedResult.GetRequiredValue(passwordArgument);
+            var gender      = parsedResult.GetRequiredValue(genderOption);
+            bool admin      = parsedResult.GetRequiredValue(adminOption);
+
+            int exitCode = await ExecuteAsync(username, password, gender, admin, cancellationToken);
             Environment.ExitCode = exitCode;
-        }, usernameArgument, passwordArgument, genderOption, adminOption);
+        });
     }
 
-    public Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
+    public Task<int> ExecuteAsync(CancellationToken cancellationToken)
     {
         // This won't be called since we override the handler in ConfigureCommand
         throw new NotSupportedException("Use overload of ExecuteAsync instead");
     }
 
-    private async Task<int> ExecuteAsync(string username, string password, Gender gender, bool admin)
+    private async Task<int> ExecuteAsync(string username, string password, Gender gender, bool admin, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
 
         var user = new User
         {
@@ -64,8 +77,8 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
             Gem             = 0,
             Point           = 0
         };
-        await context.AddAsync(user);
-        await context.SaveChangesAsync();
+        await context.AddAsync(user, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
         user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
 
@@ -78,10 +91,10 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
             Password = authOptions.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
         };
 
-        await context.AddAsync(credential);
-        await context.SaveChangesAsync();
+        await context.AddAsync(credential, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(cancellationToken);
         Console.WriteLine("User has been registered successfully");
 
         return 0;

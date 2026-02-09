@@ -1,7 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -58,8 +55,7 @@ public class CommandLineTaskProcessor
         List<string> helps    = ["--help", "-h", "-?", "help"];
         List<string> versions = ["--version", "version"];
 
-        var root = new CommandLineBuilder()
-            .UseDefaults();
+        var root = new RootCommand();
 
         var host = _builder.Build();
         foreach ((string name, var descriptor) in _types)
@@ -68,32 +64,27 @@ public class CommandLineTaskProcessor
             var command = new Command(name, descriptor.Description);
 
             task.ConfigureCommand(command);
-            if (command.Handler == null)
+            if (command.Action == null)
             {
-                command.SetHandler(async () =>
+                command.SetAction(async (_, cancellationToken) =>
                 {
-                    int exitCode = await task.ExecuteAsync(CancellationToken.None);
+                    int exitCode = await task.ExecuteAsync(cancellationToken);
                     Environment.ExitCode = exitCode;
                 });
             }
 
             if (versions.Any(v => v == name))
             {
-                root.UseVersionOption(versions.ToArray())
-                    .AddMiddleware(async void (ctx) =>
-                    {
-                        if (ctx.ParseResult.Tokens.Any(t => versions.Contains(t.Value.ToLowerInvariant())))
-                            Environment.Exit(await task.ExecuteAsync());
-
-                    }, MiddlewareOrder.ExceptionHandler);
+                var option = root.Options.First(o => o.Name == "--version" || o.Aliases.Contains(name));
+                option.Aliases.Add(name);
+                option.Action = command.Action;
             }
             else
-                root.Command.Add(command);
+                root.Subcommands.Add(command);
         }
 
-        return await root.Build().InvokeAsync(_args);
+        return await root.Parse(_args).InvokeAsync();
     }
-
 }
 
 public interface ICommandLineTasksBuilder

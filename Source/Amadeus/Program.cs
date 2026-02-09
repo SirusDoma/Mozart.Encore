@@ -265,7 +265,7 @@ public class Program
                             }),
 
                         DatabaseDriver.MySql =>
-                            builder.UseMySql(options.Url, ServerVersion.AutoDetect(options.Url), ctx =>
+                            builder.UseMySQL(options.Url, ctx =>
                             {
                                 ctx.MigrationsAssembly("Mozart.Migrations.MySql");
                                 if (options.CommandTimeout != null)
