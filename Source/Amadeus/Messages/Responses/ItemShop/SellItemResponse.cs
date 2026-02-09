@@ -10,5 +10,5 @@ public class SellItemResponse : IMessage
     public bool Invalid { get; init; } = false;
 
     [MessageField(order: 1)]
-    public int Unknown { get; init; } // Slot index?
+    public int Gem { get; init; }
 }

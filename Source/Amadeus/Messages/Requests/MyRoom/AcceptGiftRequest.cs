@@ -17,5 +17,5 @@ public class AcceptGiftRequest : IMessage
     public int ItemId { get; init; }
 
     [MessageField(order: 3)]
-    private byte Unused { get; init; } = 0;
+    public bool IsAttributiveItem { get; init; }
 }

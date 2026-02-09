@@ -23,7 +23,7 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
     public async Task<EquipItemResponse> EquipItem(EquipItemRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.PurchaseItem,
+        logger.LogInformation((int)RequestCommand.SyncItemPurchase,
             "[{User}] Equip item slot: {Item}", actor.Nickname, request.InventorySlotIndex);
 
         var user       = (await repository.Find(actor.UserId, cancellationToken))!;
@@ -63,7 +63,7 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
     public async Task<AcceptGiftResponse> AcceptGift(AcceptGiftRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.PurchaseItem,
+        logger.LogInformation((int)RequestCommand.SyncItemPurchase,
             "[{User}] Accept gift: ({Type}) {Item}", actor.Nickname, request.GiftType, request.ItemId);
 
         var user = (await repository.Find(actor.UserId, cancellationToken))!;
@@ -92,8 +92,6 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
         }
         else
         {
-            // TODO: Support music gift
-
             return new AcceptGiftResponse
             {
                 Invalid = false,

@@ -78,7 +78,7 @@ public class CharacterInfoResponse : IMessage
     // Client address: 0x5C69A4
     // Value is reset to 0 after STATE_RESULT
     [MessageField(order: 11)]
-    public int Unknown1 { get; set; }
+    public int Unknown { get; set; }
 
     [MessageField(order: 12)]
     public bool IsAdministrator { get; init; }
@@ -90,7 +90,7 @@ public class CharacterInfoResponse : IMessage
     public IList<int> Inventory { get; init; } = [];
 
     [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
-    public IList<ushort> MissingMusicIds { get; init; } = [];
+    public IReadOnlyList<ushort> MissingMusicIds { get; init; } = [];
 
     // This doesn't work!
     // Moreover, it uses troublesome semantic (only consider the highest byte order)

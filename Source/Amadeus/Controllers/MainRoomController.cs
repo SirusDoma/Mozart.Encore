@@ -65,10 +65,10 @@ public class MainRoomController(
         logger.LogInformation((int)RequestCommand.SendMusicList,
             "Report client music list: {Count} music", request.MusicIds.Count);
 
-        // For some stupid reasons, the most significant 4 bits of the music id is masked with 0xF
+        // For some stupid reasons, the most significant 4 bits of the music id is occupied with 0xF flag
         // So, o2ma100 become 0xF064
         //
-        // However, DO NOT attempt to store the unmasked ids, because the format is being relied on other places.
+        // However, DO NOT attempt to store the unflagged ids, because the format is being relied on other places.
         // If the server need to access to these ids for whatever reason, use the following code to unmask it:
         //
         //   var musicIds = new List<ushort>();
@@ -78,17 +78,19 @@ public class MainRoomController(
         //       int flag = id & 0xF000; // 0xF000
         //       int val  = id & 0x0FFF; // 0x64
         //
-        //       // The rest is the logic from the client, effectively equal to no-op in most (if not, all) of the time
+        //       // The rest is the logic from the client
         //       flag = flag > 0 ? flag << 16 : flag;
         //       ushort musicId = (ushort)(val | flag);
         //
         //       musicIds.Add(musicId);
         //   }
         //
+        // The flag then used to mark the music with labels (e.g, "New" label)
+        //
         // As you might aware, this imposes limitation on the maximum valid id (4096 or 0x1000 to be precise)
         // This is because the most significant 4 bits are rendered unusable
         //
-        // Why? Go figure yourself, probably because randomizer stuff, but it is stupid regardless!
+        // Why this over a new field? Go figure yourself, but it is stupid regardless!
 
         Session.Actor.MusicIds = request.MusicIds;
     }

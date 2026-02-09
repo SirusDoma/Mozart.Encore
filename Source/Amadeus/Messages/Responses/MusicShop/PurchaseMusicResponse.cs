@@ -4,29 +4,23 @@ namespace Amadeus.Messages.Responses;
 
 public class PurchaseMusicResponse : IMessage
 {
-    public enum PurchaseResult : int
-    {
-        Success         = 0x00000000, // 0
-        AlreadyUnlocked = 0x00000001, // 1
-    }
-
     public static Enum Command => ResponseCommand.PurchaseMusic;
 
     [MessageField(order: 0)]
-    public PurchaseResult Result { get; init; } = PurchaseResult.Success;
+    public int Gem { get; init; }
 
     [MessageField(order: 1)]
-    public int Unknown1 { get; init; }
+    public int Point { get; init; }
 
     [MessageField(order: 2)]
-    public int Unknown2 { get; init; }
+    public int O2Cash { get; init; }
 
-    [CollectionMessageField(order: 3)]
-    public IReadOnlyList<ushort> Unknown3 { get; init; } = []; // Music ids?
+    [CollectionMessageField(order: 3, prefixSizeType: TypeCode.Int32)]
+    public IReadOnlyList<ushort> MusicIds { get; init; } = [];
 
     [MessageField(order: 4)]
-    public int Unknown4 { get; init; }
+    public int ItemCash { get; init; }
 
     [MessageField(order: 5)]
-    public int Unknown5 { get; init; }
+    public int MusicCash { get; init; }
 }
