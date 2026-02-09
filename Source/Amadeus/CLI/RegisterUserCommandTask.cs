@@ -37,6 +37,7 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
         };
 
         command.Options.Add(genderOption);
+        command.Options.Add(adminOption);
 
         // Set the handler with all parameters
         command.SetAction(async (parsedResult, cancellationToken) =>
