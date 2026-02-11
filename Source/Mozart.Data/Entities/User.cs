@@ -5,7 +5,7 @@ namespace Mozart.Data.Entities;
 
 public class User
 {
-    public required int Id { get; set; }
+    public int Id { get; set; }
 
     public required string Username { get; set; }
 

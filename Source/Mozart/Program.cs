@@ -177,7 +177,7 @@ public class Program
 
     private static async Task<int?> ProcessCommandLine(IHostBuilder hostBuilder, string[] args)
     {
-        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder, args)
+        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder)
             .ConfigureCommandTasks(builder =>
             {
                 builder.AddCommandLineTask<DatabaseInitCommandTask>()
@@ -185,7 +185,7 @@ public class Program
                     .AddCommandLineTask<AuthorizeUserCommandTask>()
                     .AddCommandLineTask<VersionCommandTask>();
             })
-            .ProcessAsync();
+            .ExecuteAsync(args);
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration config)
@@ -263,7 +263,7 @@ public class Program
                             }),
 
                         DatabaseDriver.MySql =>
-                            builder.UseMySql(options.Url, ServerVersion.AutoDetect(options.Url), ctx =>
+                            builder.UseMySQL(options.Url, ctx =>
                             {
                                 ctx.MigrationsAssembly("Mozart.Migrations.MySql");
                                 if (options.CommandTimeout != null)
