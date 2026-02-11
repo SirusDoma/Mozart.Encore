@@ -68,9 +68,9 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
                     flag    => flag != 0
                 );
 
-            entity.HasOne<Inventory>("Items")
+            entity.HasOne<Loadout>("Items")
                 .WithOne()
-                .HasForeignKey<Inventory>(i => i.UserId)
+                .HasForeignKey<Loadout>(i => i.UserId)
                 .IsRequired(false);
 
             entity.HasOne<Wallet>("Wallet")
@@ -186,7 +186,7 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
 
     private void ConfigureInventory(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Inventory>(entity =>
+        modelBuilder.Entity<Loadout>(entity =>
         {
             entity.ToTable("t_o2jam_item");
 

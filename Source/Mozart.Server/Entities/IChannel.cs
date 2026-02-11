@@ -1,4 +1,4 @@
-using Mozart.Services;
+using Mozart.Metadata.Items;
 using Mozart.Sessions;
 
 namespace Mozart.Entities;
@@ -18,4 +18,6 @@ public interface IChannel : IBroadcastable
     void Register(Session session);
 
     void Remove(Session session);
+
+    IReadOnlyDictionary<int, ItemData> GetItemData();
 }

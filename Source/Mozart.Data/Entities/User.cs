@@ -43,11 +43,11 @@ public class User
 
     private Wallet Wallet { get; init; } = new();
 
-    private Inventory Items { get; init; } = new();
+    private Loadout Loadout { get; init; } = new();
 
     [NotMapped]
-    public InventoryItems Inventory => new(Items);
+    public Inventory Inventory => new(Loadout);
 
     [NotMapped]
-    public EquipmentItems Equipments => new(Items);
+    public EquipmentItems Equipments => new(Loadout);
 }

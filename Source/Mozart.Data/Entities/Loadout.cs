@@ -3,7 +3,7 @@ using Mozart.Metadata.Items;
 
 namespace Mozart.Data.Entities;
 
-public class Inventory
+public class Loadout
 {
     public int UserId { get; init; }
 
@@ -148,32 +148,32 @@ public class Inventory
     }
 }
 
-public class InventoryItems(Inventory items) : IReadOnlyList<short>, IEnumerator
+public class Inventory(Loadout loadout) : IReadOnlyList<short>, IEnumerator
 {
     private int _pointer = -1;
 
     private class InventoryEnumerator : IEnumerator<short>
     {
-        private readonly InventoryItems _items;
+        private readonly Inventory _inventory;
 
-        public InventoryEnumerator(InventoryItems items)
+        public InventoryEnumerator(Inventory inventory)
         {
-            _items = items;
+            _inventory = inventory;
         }
 
         public bool MoveNext()
         {
-            return ((IEnumerator)_items).MoveNext();
+            return ((IEnumerator)_inventory).MoveNext();
         }
 
         public void Reset()
         {
-            ((IEnumerator)_items).Reset();
+            ((IEnumerator)_inventory).Reset();
         }
 
-        public short Current => _items[_items._pointer];
+        public short Current => _inventory[_inventory._pointer];
 
-        object? IEnumerator.Current => _items[_items._pointer];
+        object? IEnumerator.Current => _inventory[_inventory._pointer];
 
         public void Dispose()
         {
@@ -182,8 +182,8 @@ public class InventoryItems(Inventory items) : IReadOnlyList<short>, IEnumerator
 
     public short this[int index]
     {
-        get => items.GetBagItemId(index + 1);
-        set => items.SetBagItemId(index + 1, value);
+        get => loadout.GetBagItemId(index + 1);
+        set => loadout.SetBagItemId(index + 1, value);
     }
 
     public IEnumerator<short> GetEnumerator()
@@ -205,7 +205,7 @@ public class InventoryItems(Inventory items) : IReadOnlyList<short>, IEnumerator
             int count = 0;
             for (int i = 0; i < Capacity; i ++)
             {
-                if (items.GetBagItemId(i + 1) != 0)
+                if (loadout.GetBagItemId(i + 1) != 0)
                     count++;
             }
 
@@ -217,7 +217,7 @@ public class InventoryItems(Inventory items) : IReadOnlyList<short>, IEnumerator
     {
         for (int i = 0; i < Capacity; i ++)
         {
-            if (items.GetBagItemId(i + 1) == id)
+            if (loadout.GetBagItemId(i + 1) == id)
                 return i;
         }
 
@@ -241,11 +241,11 @@ public class InventoryItems(Inventory items) : IReadOnlyList<short>, IEnumerator
     object? IEnumerator.Current => this[_pointer <= 0 ? 0 : _pointer];
 }
 
-public class EquipmentItems(Inventory items) : IReadOnlyDictionary<ItemType, short>
+public class EquipmentItems(Loadout loadout) : IReadOnlyDictionary<ItemType, short>
 {
     public bool ContainsKey(ItemType key)
     {
-        return items.GetEquipmentItemId(key) != 0;
+        return loadout.GetEquipmentItemId(key) != 0;
     }
 
     public bool TryGetValue(ItemType key, out short value)
@@ -256,8 +256,8 @@ public class EquipmentItems(Inventory items) : IReadOnlyDictionary<ItemType, sho
 
     public short this[ItemType type]
     {
-        get => items.GetEquipmentItemId(type);
-        set => items.SetEquipmentItemId(type, value);
+        get => loadout.GetEquipmentItemId(type);
+        set => loadout.SetEquipmentItemId(type, value);
     }
 
     public IEnumerable<ItemType> Keys => Enum.GetValues<ItemType>();

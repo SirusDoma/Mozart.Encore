@@ -308,6 +308,8 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
 
                             return message;
                         }
+                        else if (descriptor.ResponseType == null && descriptor.ResponseCommand != null)
+                            return descriptor.ResponseCommand;
 
                         return null;
                     }
@@ -376,11 +378,16 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return new CommandResponse(frames);
 
         Exception? exception = null;
-        
+
         try
         {
             object? message = await handler.Execute(session, request, cancellationToken).ConfigureAwait(false);
-            response = message is IMessage msg ? CommandResponse.Single(request, _codec.Encode(msg)) : response;
+            response = message switch
+            {
+                IMessage m => CommandResponse.Single(request, _codec.Encode(m)),
+                Enum     c => CommandResponse.Single(request, _codec.EncodeCommand(c)),
+                _          => response
+            };
         }
         catch (Exception ex)
         {
@@ -485,7 +492,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         try
         {
             command = _codec.DecodeCommand(payload);
-            if ((request != null && !_handlers.TryGetValue(command, out handlers)) || !_handlers.TryGetValue(command, out handlers))
+            if (!_handlers.TryGetValue(command, out handlers))
                 throw new NotSupportedException($"Command '0x{command:X4}' is not recognized");
         }
         catch (Exception ex)

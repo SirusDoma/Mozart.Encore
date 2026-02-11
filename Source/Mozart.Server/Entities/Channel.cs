@@ -1,20 +1,25 @@
+using Encore.Sessions;
+using Mozart.Metadata.Items;
 using Mozart.Options;
 using Mozart.Services;
-using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Entities;
 
-public class Channel() : Broadcastable, IChannel
+public class Channel : Broadcastable, IChannel
 {
     private readonly List<Session> _sessions = [];
 
-    public Channel(ChannelOptions options)
-        : this()
+    private readonly IMetadataResolver _metadataResolver;
+
+    public Channel(IMetadataResolver metadataResolver, ChannelOptions options)
     {
-        Id       = options.Id;
-        Capacity = options.Capacity;
-        GemRates = options.Gem;
-        ExpRates = options.Exp;
+        _metadataResolver = metadataResolver;
+
+        Id        = options.Id;
+        Capacity  = options.Capacity;
+        GemRates  = options.Gem;
+        ExpRates  = options.Exp;
 
         MusicListFileName = options.MusicList;
         ItemDataFileName  = options.ItemData;
@@ -64,6 +69,11 @@ public class Channel() : Broadcastable, IChannel
         session.Disconnected -= OnSessionDisconnected;
     }
 
+    public IReadOnlyDictionary<int, ItemData> GetItemData()
+    {
+        return _metadataResolver.GetItemData(this);
+    }
+
     public override void Invalidate()
     {
         foreach (var session in Sessions)
@@ -93,7 +103,7 @@ public class Channel() : Broadcastable, IChannel
         }
         catch (Exception ex)
         {
-            SessionDisconnected?.Invoke(sender, new Encore.Sessions.SessionErrorEventArgs()
+            SessionDisconnected?.Invoke(sender, new SessionErrorEventArgs()
             {
                 Session   = ((Session?)sender)!,
                 Exception = ex
