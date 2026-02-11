@@ -8,12 +8,12 @@ Supported client version: **v3.82\* (NX)**
 
 ## Features
 
-- Zero-Configuration for quick start
-- Full online and local network multiplayer support
-- Complete packet op-code coverage
-- Compatible with multiple SQL RDBMS
-- Support multi planet and channels deployment
-- Highly customizable with high-level network protocol implementation
+- Zero-Configuration for quick start.
+- Full online and local network multiplayer support.
+- Complete packet op-code coverage.
+- Compatible with multiple SQL database systems.
+- Support multi planet and channels deployment.
+- Highly customizable with high-level network protocol implementation.
 
 <sub>* In-game web server features are not included.</sub>
 
