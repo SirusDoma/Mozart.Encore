@@ -1,6 +1,6 @@
+using Amadeus.Messages.Requests;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
-using Amadeus.Messages.Requests;
 using Mozart.Sessions;
 
 namespace Amadeus.Controllers.Filters;

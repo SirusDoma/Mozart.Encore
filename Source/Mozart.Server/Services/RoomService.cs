@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Encore.Sessions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Entities;
@@ -7,6 +8,7 @@ using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Options;
 using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Services;
 
@@ -152,7 +154,7 @@ public class RoomService : Broadcastable, IRoomService
         }
     }
 
-    private void OnRoomSessionDisconnected(object? sender, Encore.Sessions.SessionEventArgs e)
+    private void OnRoomSessionDisconnected(object? sender, SessionEventArgs e)
     {
         _logger.LogWarning("Session [{User}] removed from the room due to connection lost",
             e.Session.Socket.RemoteEndPoint);

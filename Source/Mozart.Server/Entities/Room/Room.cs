@@ -1,8 +1,9 @@
+using Encore.Sessions;
 using Mozart.Metadata;
-using Mozart.Metadata.Music;
 using Mozart.Metadata.Room;
 using Mozart.Services;
 using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Entities;
 
@@ -156,7 +157,7 @@ public class Room : Broadcastable, IRoom
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
 
-    public event EventHandler<Encore.Sessions.SessionEventArgs>? SessionDisconnected;
+    public event EventHandler<SessionEventArgs>? SessionDisconnected;
 
     void IRoom.Register(Session session)
     {
@@ -434,7 +435,7 @@ public class Room : Broadcastable, IRoom
         IRoom room = this;
         room.Remove(session);
 
-        SessionDisconnected?.Invoke(this, new Encore.Sessions.SessionEventArgs { Session = session });
+        SessionDisconnected?.Invoke(this, new SessionEventArgs { Session = session });
     }
 
     public override void Invalidate()

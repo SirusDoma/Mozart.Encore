@@ -1,8 +1,9 @@
+using Encore.Sessions;
 using Mozart.Metadata.Items;
 using Mozart.Metadata.Music;
 using Mozart.Options;
 using Mozart.Services;
-using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Entities;
 
@@ -117,7 +118,7 @@ public class Channel : Broadcastable, IChannel
         }
         catch (Exception ex)
         {
-            SessionDisconnected?.Invoke(sender, new Encore.Sessions.SessionErrorEventArgs()
+            SessionDisconnected?.Invoke(sender, new SessionErrorEventArgs()
             {
                 Session   = ((Session?)sender)!,
                 Exception = ex

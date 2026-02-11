@@ -1,9 +1,7 @@
-using Microsoft.Extensions.Logging;
-
 using Amadeus.Messages.Events;
 using Amadeus.Messages.Events.Waiting;
 using Amadeus.Messages.Responses;
-
+using Microsoft.Extensions.Logging;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;

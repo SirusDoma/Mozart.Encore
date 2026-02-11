@@ -1,6 +1,5 @@
-using Microsoft.Extensions.Options;
-
 using Encore.Server;
+using Microsoft.Extensions.Options;
 
 namespace Amadeus.Workers.Gateway;
 

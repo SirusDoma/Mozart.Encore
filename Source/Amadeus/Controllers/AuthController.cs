@@ -1,16 +1,11 @@
-using System.Net;
 using System.Security.Cryptography;
-using System.Text;
-using Microsoft.Extensions.Logging;
-
-using Encore.Server;
-using Mozart.Data.Entities;
-using Mozart.Data.Repositories;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
+using Encore.Server;
+using Microsoft.Extensions.Logging;
+using Mozart.Data.Repositories;
 using Mozart.Services;
 using Mozart.Sessions;
-
 using Session = Mozart.Sessions.Session;
 
 namespace Amadeus.Controllers;

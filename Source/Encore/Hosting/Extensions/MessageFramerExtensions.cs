@@ -1,10 +1,8 @@
-
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Sockets;
+using Encore.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-using Encore.Messaging;
 
 namespace Encore.Hosting.Extensions;
 

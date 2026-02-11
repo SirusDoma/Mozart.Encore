@@ -1,9 +1,7 @@
 using System.Text;
-using Encore.Server;
-
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages.Responses;
-
+using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Mozart.Data.Repositories;
 using Mozart.Sessions;

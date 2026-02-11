@@ -1,14 +1,15 @@
 using System.Collections.Concurrent;
+using Encore.Sessions;
 
 namespace Mozart.Sessions;
 
-public interface ISessionManager : Encore.Sessions.ISessionManager<Session>
+public interface ISessionManager : ISessionManager<Session>
 {
     void StartExpiry(Session session, TimeSpan expiry, Action<Session>? callback = null);
     bool CancelExpiry(Session session);
 }
 
-public class SessionManager : Encore.Sessions.SessionManager<Session>, ISessionManager
+public class SessionManager : SessionManager<Session>, ISessionManager
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _expiryCancellations = new();
 

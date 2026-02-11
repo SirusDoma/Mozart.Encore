@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Diagnostics;
-using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace Encore.Messaging;
 

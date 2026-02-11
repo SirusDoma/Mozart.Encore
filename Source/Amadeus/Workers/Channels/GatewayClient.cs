@@ -2,17 +2,13 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Microsoft.Extensions.Options;
-
+using Amadeus.Internal.Requests;
 using Encore;
 using Encore.Messaging;
 using Encore.Server;
-
 using Microsoft.Extensions.Logging;
-using Mozart.Data.Repositories;
-using Amadeus.Internal.Requests;
+using Microsoft.Extensions.Options;
 using Mozart.Options;
-using Mozart.Services;
 using Mozart.Sessions;
 
 namespace Amadeus.Workers.Channels;

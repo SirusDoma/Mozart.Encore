@@ -1,5 +1,4 @@
 using Encore.Messaging;
-using Mozart.Data.Entities;
 
 namespace Amadeus.Messages.Responses;
 

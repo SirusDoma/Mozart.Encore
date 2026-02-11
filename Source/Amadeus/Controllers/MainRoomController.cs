@@ -1,22 +1,17 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
-
-using Encore.Server;
-
-using Mozart.Metadata;
-using Mozart.Options;
-using Mozart.Services;
-using Mozart.Sessions;
-using Mozart.Entities;
-using Mozart.Events;
-
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
-
+using Encore.Server;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mozart.Entities;
+using Mozart.Events;
+using Mozart.Metadata;
+using Mozart.Options;
+using Mozart.Services;
+using Mozart.Sessions;
 
 namespace Amadeus.Controllers;
 

@@ -1,4 +1,6 @@
 using System.Net.Sockets;
+using Amadeus.Internal.Requests;
+using Amadeus.Workers.Gateway;
 using Encore.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,11 +8,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Contexts;
-using Amadeus.Internal.Requests;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
-using Amadeus.Workers.Gateway;
 
 namespace Amadeus;
 

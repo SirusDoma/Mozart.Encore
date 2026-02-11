@@ -1,33 +1,30 @@
 ﻿using System.Net.Sockets;
+using Amadeus.CLI;
+using Amadeus.Controllers;
+using Amadeus.Controllers.Filters;
+using Amadeus.Controllers.Internal;
+using Amadeus.Events;
+using Amadeus.Workers.Channels;
+using Amadeus.Workers.Gateway;
+using Encore.Hosting.Extensions;
+using Encore.Hosting.Logging;
+using Encore.Messaging;
+using Encore.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using Encore.Hosting.Extensions;
-using Encore.Hosting.Logging;
-using Encore.Messaging;
-using Encore.Server;
-
+using Mozart.Contexts;
 using Mozart.Data.Contexts;
 using Mozart.Data.Repositories;
-using Mozart.Options;
-using Mozart.Contexts;
-using Mozart.Services;
 using Mozart.Entities;
 using Mozart.Events;
+using Mozart.Options;
+using Mozart.Services;
 using Mozart.Sessions;
 using Mozart.Web;
-
-using Amadeus.CLI;
-using Amadeus.Controllers;
-using Amadeus.Controllers.Internal;
-using Amadeus.Controllers.Filters;
-using Amadeus.Events;
-using Amadeus.Workers.Channels;
-using Amadeus.Workers.Gateway;
 
 namespace Amadeus;
 

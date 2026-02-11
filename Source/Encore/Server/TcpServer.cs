@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
-using Microsoft.Extensions.Options;
-using Encore.Sessions;
 using Encore.Messaging;
+using Encore.Sessions;
+using Microsoft.Extensions.Options;
 
 namespace Encore.Server;
 

@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
+using Encore.Sessions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
 using Mozart.Entities;
 using Mozart.Options;
 using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Services;
 
@@ -104,7 +105,7 @@ public class ChannelService : Broadcastable, IChannelService
 
     private void OnChannelSessionDisconnected(object? sender, EventArgs args)
     {
-        if (args is Encore.Sessions.SessionErrorEventArgs argsEx)
+        if (args is SessionErrorEventArgs argsEx)
         {
             _logger.LogError(
                 argsEx.Exception,

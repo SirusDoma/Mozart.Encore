@@ -1,5 +1,5 @@
-using Encore.Messaging;
 using Amadeus.Messages.Codecs;
+using Encore.Messaging;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 

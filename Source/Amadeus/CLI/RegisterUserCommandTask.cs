@@ -1,11 +1,11 @@
 using System.CommandLine;
 using System.Text;
 using Microsoft.Extensions.Options;
+using Mozart.Data.Contexts;
+using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 using Mozart.Options;
-using Mozart.Data.Contexts;
-using Mozart.Data.Entities;
 using Mozart.Services;
 
 namespace Amadeus.CLI;

@@ -1,11 +1,8 @@
-using Microsoft.Extensions.Logging;
-
-using Encore.Server;
-
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
-
+using Encore.Server;
+using Microsoft.Extensions.Logging;
 using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
 using Mozart.Entities;

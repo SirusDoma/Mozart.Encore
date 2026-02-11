@@ -1,10 +1,8 @@
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
-
-using Encore.Server;
-
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
+using Encore.Server;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;

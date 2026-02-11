@@ -1,14 +1,11 @@
+using Amadeus.Messages.Events;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using Amadeus.Messages;
-using Amadeus.Messages.Events;
-
-using Mozart.Entities;
-using Mozart.Options;
 using Mozart.Data.Repositories;
+using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
+using Mozart.Options;
 using Mozart.Services;
 
 namespace Amadeus.Events;

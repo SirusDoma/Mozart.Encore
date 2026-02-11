@@ -1,6 +1,6 @@
 using System.Net.Sockets;
-using Microsoft.Extensions.DependencyInjection;
 using Encore.Sessions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Amadeus.Workers.Channels;
 

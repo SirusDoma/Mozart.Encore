@@ -1,10 +1,5 @@
-using System.Net;
-using System.Net.Sockets;
-using Microsoft.Extensions.Options;
-
 using Encore.Server;
-using Encore.Sessions;
-
+using Microsoft.Extensions.Options;
 using Mozart.Options;
 
 namespace Amadeus.Workers.Gateway;

@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Text;
-using Microsoft.Extensions.Options;
-
 using Encore;
 using Encore.Messaging;
 using Encore.Server;
+using Encore.Sessions;
+using Microsoft.Extensions.Options;
 
 namespace Amadeus.Workers.Gateway;
 
@@ -17,7 +17,7 @@ public class ChannelStats
     public int UserCount { get; init; }
 }
 
-public class ChannelSession : Encore.Sessions.Session
+public class ChannelSession : Session
 {
     private readonly ConcurrentDictionary<string, ClientSession> _clients = [];
 

@@ -1,6 +1,5 @@
-using Microsoft.Extensions.Options;
-
 using Encore.Server;
+using Microsoft.Extensions.Options;
 using Mozart.Sessions;
 
 namespace Amadeus;

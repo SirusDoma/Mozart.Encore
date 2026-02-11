@@ -2,7 +2,6 @@ using System.Net.Sockets;
 using Encore.Messaging;
 using Encore.Server;
 using Microsoft.Extensions.Options;
-using Mozart.Options;
 using Mozart.Sessions;
 
 namespace Amadeus.Workers.Gateway;

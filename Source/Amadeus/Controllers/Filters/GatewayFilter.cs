@@ -1,11 +1,11 @@
-using Encore.Messaging;
-using Encore.Server;
-using Microsoft.Extensions.Options;
 using Amadeus.Internal.Requests;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
-using Mozart.Options;
 using Amadeus.Workers.Gateway;
+using Encore.Messaging;
+using Encore.Server;
+using Microsoft.Extensions.Options;
+using Mozart.Options;
 
 namespace Amadeus.Controllers.Filters;
 

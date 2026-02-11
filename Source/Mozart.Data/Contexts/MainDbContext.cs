@@ -2,8 +2,8 @@ using System.Net;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Mozart.Metadata;
 using Mozart.Data.Entities;
+using Mozart.Metadata;
 using Mozart.Options;
 
 namespace Mozart.Data.Contexts;

@@ -1,10 +1,14 @@
+#region
+
 using Mozart.Metadata.Items;
+
+#endregion
 
 namespace Mozart.Data.Entities;
 
 public class GiftBox(User user, List<GiftItem> items, List<GiftMusic> musics)
 {
-    public IReadOnlyList<GiftItem> Items   => items;
+    public IReadOnlyList<GiftItem> Items => items;
 
     public IReadOnlyList<GiftMusic> Musics => musics;
 
@@ -12,11 +16,11 @@ public class GiftBox(User user, List<GiftItem> items, List<GiftMusic> musics)
     {
         items.Add(new GiftItem
         {
-            UserId         = user.Id,
-            ItemId         = item.Id,
-            SenderId       = sender.Id,
+            UserId = user.Id,
+            ItemId = item.Id,
+            SenderId = sender.Id,
             SenderNickname = sender.Nickname,
-            SendDate       = DateTime.UtcNow
+            SendDate = DateTime.UtcNow
         });
     }
 
@@ -24,11 +28,11 @@ public class GiftBox(User user, List<GiftItem> items, List<GiftMusic> musics)
     {
         musics.Add(new GiftMusic
         {
-            UserId         = user.Id,
-            MusicId        = musicId,
-            SenderId       = sender.Id,
+            UserId = user.Id,
+            MusicId = musicId,
+            SenderId = sender.Id,
             SenderNickname = sender.Nickname,
-            SendDate       = DateTime.UtcNow,
+            SendDate = DateTime.UtcNow,
         });
     }
 
@@ -51,7 +55,7 @@ public class GiftBox(User user, List<GiftItem> items, List<GiftMusic> musics)
 
                 inventory[i] = new Inventory.BagItem
                 {
-                    Id    = (short)item.Id,
+                    Id = (short)item.Id,
                     Count = count
                 };
 
@@ -74,7 +78,7 @@ public class GiftBox(User user, List<GiftItem> items, List<GiftMusic> musics)
             {
                 user.AcquiredMusicList.Add(new AcquiredMusic
                 {
-                    UserId  = user.Id,
+                    UserId = user.Id,
                     MusicId = musicId
                 });
 

@@ -1,5 +1,5 @@
-using Encore.Server;
 using Amadeus.Messages.Responses;
+using Encore.Server;
 
 namespace Amadeus.Controllers.Filters;
 

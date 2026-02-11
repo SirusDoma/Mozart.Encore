@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace Mozart.Web;
 
 public static class PingEndpoint
