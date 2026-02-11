@@ -25,8 +25,8 @@ public interface ISessionRepository : IRepository<AuthSession>
     Task Clear(int serverId, int channelId, CancellationToken cancellationToken = default);
 }
 
-public class SessionRepository(IDbContextFactory<UserDbContext> factory)
-    : Repository<AuthSession, UserDbContext>(factory.CreateDbContext()), ISessionRepository
+public class SessionRepository(IDbContextFactory<MainDbContext> factory)
+    : Repository<AuthSession, MainDbContext>(factory.CreateDbContext()), ISessionRepository
 {
     public Task<AuthSession?> Find(string token, CancellationToken cancellationToken)
     {

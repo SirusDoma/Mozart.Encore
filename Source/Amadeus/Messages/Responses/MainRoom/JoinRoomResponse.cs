@@ -7,6 +7,8 @@ namespace Amadeus.Messages.Responses;
 
 public class JoinRoomResponse : IMessage
 {
+    public static Enum Command => ResponseCommand.JoinRoom;
+
     public enum JoinResult : uint
     {
         Success         = 0x00000000, // 0
@@ -45,7 +47,7 @@ public class JoinRoomResponse : IMessage
         public bool Ready { get; init; }
 
         [MessageField(order: 6)]
-        public byte Unknown1 { get; init; } // is admin?
+        public bool IsAdministrator { get; init; }
 
         [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
@@ -65,8 +67,6 @@ public class JoinRoomResponse : IMessage
         [MessageField(order: 2)]
         public RoomMemberInfo? MemberInfo { get; init; } = null;
     }
-
-    public static Enum Command => ResponseCommand.JoinRoom;
 
     [MessageField(order: 0)]
     public JoinResult Result = JoinResult.Success;
@@ -102,5 +102,5 @@ public class JoinRoomResponse : IMessage
     public IReadOnlyList<RoomSlotInfo> Slots { get; init; } = [];
 
     [CollectionMessageField(order: 11, prefixSizeType: TypeCode.Int32)]
-    public IReadOnlyList<int> Unknown { get; init; } = []; // Skills?
+    public IReadOnlyList<int> Skills { get; init; } = [];
 }

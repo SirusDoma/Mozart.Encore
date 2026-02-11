@@ -4,21 +4,26 @@ using Microsoft.Extensions.Logging;
 
 using Encore.Server;
 
-using Amadeus.Controllers.Filters;
+using Mozart.Metadata;
+using Mozart.Options;
+using Mozart.Services;
+using Mozart.Sessions;
 using Mozart.Entities;
 using Mozart.Events;
+
+using Amadeus.Controllers.Filters;
 using Amadeus.Messages;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
-using Mozart.Metadata;
-using Mozart.Services;
-using Mozart.Sessions;
+
+using Microsoft.Extensions.Options;
 
 namespace Amadeus.Controllers;
 
 [ChannelAuthorize]
 public class MainRoomController(
     Session session,
+    IOptions<GameOptions> gameOptions,
     IRoomService roomService,
     IEventPublisher<Room> publisher,
     ILogger<MainRoomController> logger
@@ -46,16 +51,36 @@ public class MainRoomController(
             Experience         = actor.Experience,
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
-            Inventory          = actor.Inventory,
-            AttributiveItems   = new List<CharacterInfoResponse.AttributiveItemInfo>()
-            {
-                new()
+            Inventory          = actor.Inventory.Select(i => (int)i.Id).ToList(),
+            AcquiredMusicIds   = Channel.FreeMusic ?? gameOptions.Value.FreeMusic
+                ? Channel.GetMusicList()
+                    .Values.Where(m => m.IsPurchasable)
+                    .Select(m => (ushort)m.Id)
+                    .ToList()
+                : actor.AcquiredMusicIds,
+            ItemGiftBox        = actor.GiftItems.Select(i =>
+                new CharacterInfoResponse.GiftItemInfo
                 {
-                   AttributiveItemId = 256,
-                   ItemCount = 999
+                    GiftId = i.Id,
+                    ItemId = i.ItemId,
+                    Sender = i.SenderNickname
                 }
-            },
-            MissingMusicIds    = [],
+            ).ToList(),
+            MusicGiftBox        = actor.GiftMusics.Select(m =>
+                new CharacterInfoResponse.GiftMusicInfo
+                {
+                    GiftId  = m.Id,
+                    MusicId = m.MusicId,
+                    Sender  = m.SenderNickname
+                }
+            ).ToList(),
+            AttributiveItems   = actor.Inventory.Where(i => i.Count > 0).Select(i =>
+                new CharacterInfoResponse.AttributiveItemInfo
+                {
+                    AttributiveItemId = i.Id,
+                    ItemCount         = i.Count
+                }
+            ).ToList(),
         });
     }
 
@@ -92,7 +117,7 @@ public class MainRoomController(
         //
         // Why this over a new field? Go figure yourself, but it is stupid regardless!
 
-        Session.Actor.MusicIds = request.MusicIds;
+        Session.Actor.InstalledMusicIds = request.MusicIds;
     }
 
     [CommandHandler(RequestCommand.GetMusicList)]
@@ -112,6 +137,7 @@ public class MainRoomController(
                 NoteCountEx = (ushort)music.NoteCountEx,
                 NoteCountNx = (ushort)music.NoteCountNx,
                 NoteCountHx = (ushort)music.NoteCountHx,
+                Unknown     = 0 // Some sort of music flags. 0 most of the time, but it could be anything
             });
         }
 
@@ -139,7 +165,8 @@ public class MainRoomController(
                 return new UserListResponse.UserInfo
                 {
                     Level    = actor.Level,
-                    Unknown  = string.Empty,
+                    Username = actor.Nickname, // Supposed to be username, but the server inject nickname anyway
+                                               // This may affect user list webpage function (see `CTuser_id`)
                     Nickname = actor.Nickname
                 };
             }).ToList()
@@ -163,18 +190,19 @@ public class MainRoomController(
             var room = rooms.SingleOrDefault(r => r.Id == i);
             states.Add(new RoomListResponse.RoomInfo
             {
-                Number         = room?.Id ?? 0,
-                State          = room?.State ?? new RoomState(),
-                Title          = room?.Title ?? string.Empty,
-                HasPassword    = !string.IsNullOrEmpty(room?.Password),
-                MusicId        = (ushort)(room?.MusicId ?? 0),
-                Difficulty     = room?.Difficulty ?? Difficulty.EX,
-                Mode           = room?.Mode ?? GameMode.Single,
-                Speed          = room?.Speed ?? GameSpeed.X10,
-                Capacity       = (byte)(room?.Capacity ?? 0),
-                UserCount      = (byte)(room?.UserCount ?? 0),
-                MinLevelLimit  = (byte)(room?.MinLevelLimit ?? 0),
-                MaxLevelLimit  = (byte)(room?.MaxLevelLimit ?? 0)
+                Number           = room?.Id ?? 0,
+                State            = room?.State ?? new RoomState(),
+                Title            = room?.Title ?? string.Empty,
+                HasPassword      = !string.IsNullOrEmpty(room?.Password),
+                MusicId          = (ushort)(room?.MusicId ?? 0),
+                Difficulty       = room?.Difficulty ?? Difficulty.EX,
+                Mode             = room?.Mode ?? GameMode.Single,
+                Speed            = room?.Speed ?? GameSpeed.X10,
+                Capacity         = (byte)(room?.Capacity ?? 0),
+                UserCount        = (byte)(room?.UserCount ?? 0),
+                MinLevelLimit    = (byte)(room?.MinLevelLimit ?? 0),
+                MaxLevelLimit    = (byte)(room?.MaxLevelLimit ?? 0),
+                AcquiredMusicIds = [] // Unused despite playing premium music
             });
         }
 
@@ -231,6 +259,7 @@ public class MainRoomController(
                 Difficulty = room.Difficulty,
                 Speed      = room.Speed,
                 UserCount  = room.UserCount,
+                Skills     = room.Skills.ToList(),
                 Slots      = room.Slots.Select((slot, i) =>
                 {
                     return slot switch
@@ -251,14 +280,15 @@ public class MainRoomController(
                             State = JoinRoomResponse.RoomSlotState.Occupied,
                             MemberInfo = new JoinRoomResponse.RoomMemberInfo
                             {
-                                Nickname     = m.Actor.Nickname,
-                                Level        = m.Actor.Level,
-                                Gender       = m.Actor.Gender,
-                                IsRoomMaster = m.IsMaster,
-                                Team         = m.Team,
-                                Ready        = m.IsReady,
-                                Equipments   = m.Actor.Equipments,
-                                MusicIds     = m.Actor.MusicIds
+                                Nickname        = m.Actor.Nickname,
+                                Level           = m.Actor.Level,
+                                Gender          = m.Actor.Gender,
+                                IsRoomMaster    = m.IsMaster,
+                                Team            = m.Team,
+                                Ready           = m.IsReady,
+                                IsAdministrator = m.IsReady,
+                                Equipments      = m.Actor.Equipments,
+                                MusicIds        = m.Actor.InstalledMusicIds
                             }
                         },
                         _ => throw new UnreachableException()

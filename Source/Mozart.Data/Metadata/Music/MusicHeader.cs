@@ -57,4 +57,10 @@ public class MusicHeader
     public int CoverOffset { get; set; }
 
     public bool Encrypted { get; set; }
+
+    public bool IsNew { get; set; }
+
+    public bool IsPurchasable { get; set; }
+
+    public DateOnly ReleaseDate { get; set; }
 }

@@ -6,16 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>Library</OutputType>
         <RootNamespace>Mozart.Web</RootNamespace>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <OutputPath>..\..\Build\Debug\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Web\</IntermediateOutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <OutputPath>..\..\Build\Release\</OutputPath>
-        <IntermediateOutputPath>..\..\Temp\Mozart.Web\</IntermediateOutputPath>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86;x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>

@@ -16,10 +16,11 @@ public class Channel : Broadcastable, IChannel
     {
         _metadataResolver = metadataResolver;
 
-        Id       = options.Id;
-        Capacity = options.Capacity;
-        GemRates = options.Gem;
-        ExpRates = options.Exp;
+        Id        = options.Id;
+        Capacity  = options.Capacity;
+        GemRates  = options.Gem;
+        ExpRates  = options.Exp;
+        FreeMusic = options.FreeMusic;
 
         MusicListFileName = options.MusicList;
         AlbumListFileName = options.AlbumList;
@@ -34,6 +35,7 @@ public class Channel : Broadcastable, IChannel
     public int Capacity    { get; init; }
     public float GemRates  { get; init; }
     public float ExpRates  { get; init; }
+    public bool? FreeMusic { get; init; }
 
     public string MusicListFileName { get; init; } = string.Empty;
     public string AlbumListFileName { get; init; } = string.Empty;

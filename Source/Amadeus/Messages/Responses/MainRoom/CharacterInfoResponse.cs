@@ -55,10 +55,10 @@ public class CharacterInfoResponse : IMessage
     public int Gem { get; set; }
 
     [MessageField(order: 4)]
-    public int Point { get; set; }
+    public int Point { get; set; } // Distribution-specific premium currency (a.k.a MCash)
 
     [MessageField(order: 5)]
-    public int O2Cash { get; set; }
+    public int O2Cash { get; set; } // Global premium currency
 
     [MessageField(order: 6)]
     public int Level { get; set; }
@@ -90,7 +90,7 @@ public class CharacterInfoResponse : IMessage
     public IList<int> Inventory { get; init; } = [];
 
     [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
-    public IReadOnlyList<ushort> MissingMusicIds { get; init; } = [];
+    public IReadOnlyList<ushort> AcquiredMusicIds { get; init; } = [];
 
     // This doesn't work!
     // Moreover, it uses troublesome semantic (only consider the highest byte order)

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
@@ -41,7 +42,7 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
                 {
                     return new AuthResponse
                     {
-                        Result = AuthResult.DuplicateSessions,
+                        Result = AuthResult.ClientDuplicateSessions,
                         Subscription = new AuthResponse.SubscriptionInfo()
                     };
                 }
@@ -70,7 +71,7 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
             logger.LogWarning((int)RequestCommand.Authorize, ex, "Failed to authorize [{token}]", request.Token);
             return new AuthResponse
             {
-                Result = AuthResult.InvalidCredentials,
+                Result = AuthResult.MemberTableQueryError,
                 Subscription = new AuthResponse.SubscriptionInfo()
             };
         }
@@ -81,10 +82,25 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
             Result = AuthResult.Success,
             Subscription = new AuthResponse.SubscriptionInfo
             {
-                Billing                   = BillingCode.TB,
+                Billing                   = BillingCode.HB,
                 CurrentTimestamp          = DateTime.Now,
                 SubscriptionRemainingTime = TimeSpan.FromMinutes(0)
             }
+        };
+    }
+
+    [CommandHandler(RequestCommand.SessionKeys)]
+    public SessionKeysResponse GenerateSessionKeys()
+    {
+        Session.Properties["SessionKeys.Primary"]   = RandomNumberGenerator.GetBytes(32);
+        Session.Properties["SessionKeys.Secondary"] = RandomNumberGenerator.GetBytes(16);
+
+        return new SessionKeysResponse
+        {
+            Seed         = 0,
+            Prefix       = 0,
+            PrimaryKey   = (byte[])Session.Properties["SessionKeys.Primary"],
+            SecondaryKey = (byte[])Session.Properties["SessionKeys.Secondary"]
         };
     }
 
@@ -105,10 +121,9 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
         await manager.StopSession(Session);
     }
 
-    [CommandHandler(GenericCommand.LegacyPing)]
-    public LegacyPingResponse LegacyPing()
+    [CommandHandler(GenericCommand.LegacyPing, GenericCommand.LegacyPing)]
+    public void LegacyPing()
     {
-        return new LegacyPingResponse();
     }
 
     [Authorize]

@@ -24,7 +24,7 @@ public static class RegisterEndpoint
     public static async Task<IResult> Post(
         IIdentityService identityService,
         HttpContext http,
-        UserDbContext context,
+        MainDbContext context,
         IOptions<AuthOptions> auth,
         RegisterRequest request,
         ILogger<WebServer> logger,
@@ -62,7 +62,6 @@ public static class RegisterEndpoint
             var rawPassword = Encoding.UTF8.GetBytes(request.Password);
             var credential = new Credential
             {
-                UserId = user.Id,
                 Username = request.Username,
                 Password = auth.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
             };

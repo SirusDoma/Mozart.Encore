@@ -10,7 +10,7 @@ using Mozart.Services;
 
 namespace Amadeus.CLI;
 
-public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
+public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
 {
     public static string Name => "user:register";
     public static string Description => "Register the user to the configured database";
@@ -64,7 +64,6 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
 
         var user = new User
         {
-            Id              = 0,
             Username        = username,
             Nickname        = username,
             Gender          = gender,
@@ -86,8 +85,6 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
         var rawPassword = Encoding.UTF8.GetBytes(password);
         var credential = new Credential
         {
-            Id       = 0,
-            UserId   = user.Id,
             Username = username,
             Password = authOptions.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
         };

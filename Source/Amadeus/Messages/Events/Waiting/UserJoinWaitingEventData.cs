@@ -28,7 +28,7 @@ public class UserJoinWaitingEventData : IMessage
     public bool Ready { get; init; }
 
     [MessageField(order: 6)]
-    public byte Unknown1 { get; init; } // is admin?
+    public bool IsAdministrator { get; init; }
 
     [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
     public Dictionary<ItemType, int> Equipments { get; init; } = [];

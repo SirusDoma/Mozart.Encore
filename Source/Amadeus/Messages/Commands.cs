@@ -11,6 +11,7 @@ public enum RequestCommand : ushort
     Authorize           = 0x03E8, // 1000
     GetChannelList      = 0x03EA, // 1002
     ChannelLogin        = 0x03EC, // 1004
+    SessionKeys         = 0x03EF, // 1007
     GetCharacterInfo    = 0x07D0, // 2000
     GetChannelInfo      = 0x07D2, // 2002
     CreateRoom          = 0x07D4, // 2004
@@ -44,10 +45,11 @@ public enum RequestCommand : ushort
     EquipItem           = 0x138C, // 5004
     EnterShop           = 0x138E, // 5006
     ExitShop            = 0x138F, // 5007
-    AcceptGift          = 0x139F, // 5023
+    ClaimGift           = 0x139F, // 5023
     SyncMusicPurchase   = 0x1392, // 5010
     SyncPoint           = 0x1395, // 5013
     StartPayment        = 0x1397, // 5015
+    PurchasableMusic     = 0x1399, // 5017
     Terminate           = 0xFFF0  // -16
 }
 
@@ -59,6 +61,7 @@ public enum ResponseCommand : ushort
     Authorize            = 0x03E9, // 1001
     GetChannelList       = 0x03EB, // 1003
     ChannelLogin         = 0x03ED, // 1005
+    SessionKeys          = 0x03F0, // 1008
     GetCharacterInfo     = 0x07D1, // 2001
     GetRoomList          = 0x07D3, // 2003
     CreateRoom           = 0x07D6, // 2006
@@ -73,13 +76,14 @@ public enum ResponseCommand : ushort
     WaitingUserMessage   = 0x0BC4, // 3012
     WaitingAdminMessage  = 0x0BC5, // 3013
     GetMusicList         = 0x0FBF, // 4031
-    EquipItem            = 0x138D, // 5004
+    EquipItem            = 0x138D, // 5005
     SyncPurchase         = 0x1389, // 5001
     SellItem             = 0x138B, // 5003
     SyncMusicPurchase    = 0x1393, // 5011
     SyncPoint            = 0x1396, // 5014
     StartPayment         = 0x1398, // 5016
-    AcceptGift           = 0x13A0, // 5024
+    PurchasableMusic     = 0x139A, // 5018
+    ClaimGift            = 0x13A0, // 5024
 }
 
 public enum EventCommand : ushort

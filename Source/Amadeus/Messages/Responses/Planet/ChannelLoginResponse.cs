@@ -25,5 +25,5 @@ public class ChannelLoginResponse : IMessage
     public required string Username { get; init; }
 
     [MessageField(order: 4)]
-    public int Rank { get; init; }
+    public int Ranking { get; init; }
 }

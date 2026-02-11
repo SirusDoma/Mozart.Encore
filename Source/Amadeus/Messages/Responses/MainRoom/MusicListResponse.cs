@@ -21,7 +21,7 @@ public class MusicListResponse : IMessage
         public ushort NoteCountHx { get; init; }
 
         [MessageField(order: 4)]
-        private int Unknown { get; init; } = 0; // Album id? Event?
+        public int Unknown { get; init; } = 0;
     }
 
     [CollectionMessageField(order: 0, prefixSizeType: TypeCode.Int16)]

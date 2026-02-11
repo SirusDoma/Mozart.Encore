@@ -6,6 +6,17 @@ This project is inspired by the _Mozart Project 0.028_.
 Supported client version: **v3.82\* (NX)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
+## Features
+
+- Zero-Configuration for quick start
+- Full online and local network multiplayer support
+- Complete packet op-code coverage
+- Compatible with multiple SQL RDBMS
+- Support multi planet and channels deployment
+- Highly customizable with high-level network protocol implementation
+
+<sub>* In-game web server features are not included.</sub>
+
 ## Project Structure
 
 | Project                                        | Description                                       |
@@ -98,15 +109,16 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                         |
-|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                           |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                            |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                     |
-| `Capacity`  | EXP reward rate. Default: `1.0`                                                                                                                     |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)   |
-| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata) |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)  |
+| Option      | Description                                                                                                                                                   |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                                     |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
+| `FreeMusic` | Unlock all premium music based on the provided `MusicList` exclusive for this channel. Default: Default: (Empty) using global [Game settings](#Game-settings) |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)             |
+| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)           |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)            |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database. 
@@ -129,6 +141,7 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                         |
 | `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
+| `FreeMusic`                  | Unlock all premium music based on the provided `MusicList`. Default: `true`                                                                                                                                                                                                                                  |
 | `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
 
 # Database Migration
@@ -139,8 +152,17 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >[!IMPORTANT]
 > You may notice that the database schema look funky with premature normalizations here and there.  
 > This is intentional because the app need to support the existing official database schema.
+> 
+> The table structure represents a best-effort attempt to follow the e-Games database distribution.
+> Structures that are known exclusive to the foreign database distribution are omitted.
 >
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
+
+>[!CAUTION]
+> A breaking change was introduced to the database schema and its migrations starting with Mozart v1.10.0.
+> Manual adjustments to existing database schemas may be required when upgrading from Mozart v1.8.0.
+> 
+> Foreign database schema remain supported with proper `Auth:Mode` configuration.
 
 ## Add Migration
 
@@ -150,8 +172,8 @@ Use the following command to create a new migration:
 ```shell
  # Replace "MySql" with your preferred database driver
  dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Mozart\Mozart.csproj \
-                             --context Mozart.Data.Contexts.UserDbContext \
+                             --startup-project Source\Amadeus\Amadeus.csproj \
+                             --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
                              -- --Auth:Mode=<auth mode> \
                              --Db:Driver=<driver> \
@@ -180,12 +202,26 @@ Run the following command to execute the migration:
 
 ```shell
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Mozart\Mozart.csproj \
-                           --context Mozart.Data.Contexts.UserDbContext \
+                           --startup-project Source\Amadeus\Amadeus.csproj \
+                           --context Mozart.Data.Contexts.MainDbContext \
                            -- --Auth:Mode=<auth mode> \
                            --Db:Driver=<driver> \
                            --Db:Url="<connection string>"
 ```
+
+# Web Server
+
+By default, the server exposes user registration and login APIs used to generate the authentication tokens required to run the game.
+
+The original web server files (ASP Classic) are not included and cannot be hosted within this project.
+This functionality considered out-of-scope, and unlikely to be added in the future.
+
+> [!WARNING]
+> Official e-Games clients does not allow custom web server url by default.
+> The game simply does not respect the web server address in the launch argument.
+>
+> Therefore, even if the original web server is ported into this Web Server module,
+> enabling in-game shop functionality still requires either modifying the game client or configuring client-side host settings.
 
 # Scaling
 
@@ -265,5 +301,6 @@ The server application has built-in utilities to help local player usage or serv
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
 - `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
+- `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
 
 Run the CLI with `--help` flag for more details.

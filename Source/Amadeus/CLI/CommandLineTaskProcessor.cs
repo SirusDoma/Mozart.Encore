@@ -6,21 +6,19 @@ namespace Amadeus.CLI;
 
 public class CommandLineTaskProcessor
 {
-    private readonly string[] _args;
     private readonly IHostBuilder _builder;
 
     private IReadOnlyDictionary<string, CommandLineTasksBuilder.CommandLineTaskType> _types =
         new Dictionary<string, CommandLineTasksBuilder.CommandLineTaskType>();
 
-    private CommandLineTaskProcessor(IHostBuilder builder, string[] args)
+    private CommandLineTaskProcessor(IHostBuilder builder)
     {
         _builder = builder;
-        _args    = args;
     }
 
-    public static CommandLineTaskProcessor CreateDefaultProcessor(IHostBuilder builder, string[] args)
+    public static CommandLineTaskProcessor CreateDefaultProcessor(IHostBuilder builder)
     {
-        return new CommandLineTaskProcessor(builder, args);
+        return new CommandLineTaskProcessor(builder);
     }
 
     public CommandLineTaskProcessor ConfigureCommandTasks(Action<ICommandLineTasksBuilder> configureDelegate)
@@ -32,24 +30,24 @@ public class CommandLineTaskProcessor
         return this;
     }
 
-    public bool Processable()
+    public bool IsExecutable(string[] args)
     {
-        if (_args.Length == 0)
+        if (args.Length == 0)
             return false;
 
-        string arg = _args[0];
+        string arg = args[0];
         if (arg is "--help" or "-h" or "-?" or "--version")
             return true;
 
-        if (_args.Length > 1 && _args[0] == "--")
+        if (args.Length > 1 && args[0] == "--")
             return true;
 
         return !arg.StartsWith("--");
     }
 
-    public async Task<int?> ProcessAsync()
+    public async Task<int?> ExecuteAsync(string[] args)
     {
-        if (!Processable())
+        if (!IsExecutable(args))
             return null;
 
         List<string> helps    = ["--help", "-h", "-?", "help"];
@@ -83,7 +81,7 @@ public class CommandLineTaskProcessor
                 root.Subcommands.Add(command);
         }
 
-        return await root.Parse(_args).InvokeAsync();
+        return await root.Parse(args).InvokeAsync();
     }
 }
 

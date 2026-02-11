@@ -9,8 +9,8 @@ public interface ICredentialRepository : IRepository<Credential>
     public Task<Credential?> FindByUsername(string username, CancellationToken cancellationToken = default);
 }
 
-public class CredentialRepository(IDbContextFactory<UserDbContext> factory)
-    : Repository<Credential, UserDbContext>(factory.CreateDbContext()), ICredentialRepository
+public class CredentialRepository(IDbContextFactory<MainDbContext> factory)
+    : Repository<Credential, MainDbContext>(factory.CreateDbContext()), ICredentialRepository
 {
     public Task<Credential?> FindByUsername(string username, CancellationToken cancellationToken)
     {

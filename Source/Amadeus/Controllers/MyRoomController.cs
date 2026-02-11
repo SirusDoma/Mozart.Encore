@@ -2,6 +2,7 @@ using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
+using Mozart.Data.Entities;
 using Mozart.Metadata.Items;
 using Mozart.Data.Repositories;
 using Mozart.Metadata;
@@ -32,17 +33,14 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
         var inventory  = user.Inventory;
         var equipments = user.Equipments;
 
-        if (index < 0 || index >= inventory.Capacity)
-            return new EquipItemResponse { Invalid = true };
-
-        if (type is < 0 or > ItemType.Face)
+        if (index < 0 || index >= inventory.Capacity || !Enum.IsDefined(typeof(ItemType), type))
             return new EquipItemResponse { Invalid = true };
 
         short prevId = equipments[type];
-        short newId  = inventory[index];
+        short newId  = inventory[index].Id;
 
         equipments[type] = newId;
-        inventory[index] = prevId;
+        inventory[index] = new Inventory.BagItem { Id = prevId };
 
         await repository.Update(user, cancellationToken);
         await repository.Commit(cancellationToken);
@@ -60,50 +58,38 @@ public class MyRoomController(Session session, IUserRepository repository, ILogg
     }
 
     [CommandHandler]
-    public async Task<AcceptGiftResponse> AcceptGift(AcceptGiftRequest request, CancellationToken cancellationToken)
+    public async Task<ClaimGiftResponse> ClaimGift(ClaimGiftRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.SyncItemPurchase,
-            "[{User}] Accept gift: ({Type}) {Item}", actor.Nickname, request.GiftType, request.ItemId);
+            "[{User}] Claim gift: ({Type}) {Item}", actor.Nickname, request.GiftType, request.ResourceId);
 
         var user = (await repository.Find(actor.UserId, cancellationToken))!;
         bool success = false;
 
         if (request.GiftType == GiftType.Item)
         {
-            // TODO: Validate GiftId against gift db table
-
-            var inventory = user.Inventory;
-            for (int i = 0; i < inventory.Capacity; i++)
-            {
-                if (inventory[i] == 0)
-                {
-                    inventory[i] = (short)request.ItemId;
-                    success = true;
-
-                    break;
-                }
-            }
-
-            await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
-
-            actor.Sync(user);
+            var items = Session.Channel!.GetItemData();
+            success   = user.GiftBox.ClaimItem(request.GiftId, items[request.ResourceId]);
         }
         else
         {
-            return new AcceptGiftResponse
-            {
-                Invalid = false,
-                Result  = AcceptGiftResponse.AcceptGiftResult.NotDefined
-            };
+            success = user.GiftBox.ClaimMusic(request.GiftId, request.ResourceId);
         }
 
-        return new AcceptGiftResponse
+        if (success)
+        {
+            await repository.Update(user, cancellationToken);
+            await repository.Commit(cancellationToken);
+        }
+
+        actor.Sync(user);
+
+        return new ClaimGiftResponse
         {
             Invalid = !success,
-            Result  = success ? AcceptGiftResponse.AcceptGiftResult.Success :
-                AcceptGiftResponse.AcceptGiftResult.UnknownError
+            Result  = success ? ClaimGiftResponse.ClaimGiftResult.Success :
+                ClaimGiftResponse.ClaimGiftResult.UnknownError
         };
     }
 }

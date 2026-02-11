@@ -47,7 +47,7 @@ public class RoomListResponse : IMessage
         public byte MaxLevelLimit { get; set; } = 0;
 
         [CollectionMessageField(12, prefixSizeType: TypeCode.Int32)]
-        public IReadOnlyList<int> Unknown1 { get; set; } = []; // Music list?
+        public IReadOnlyList<int> AcquiredMusicIds { get; set; } = [];
     }
 
     [CollectionMessageField(order: 0, maxCount: 100, minCount: 100, prefixSizeType: TypeCode.Int32)]

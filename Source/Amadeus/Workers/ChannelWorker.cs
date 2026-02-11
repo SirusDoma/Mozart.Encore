@@ -13,7 +13,7 @@ using Amadeus.Workers.Channels;
 namespace Amadeus;
 
 public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime lifetime, IGatewayClient gatewayClient,
-    ISessionManager manager, IMetadataResolver resolver, IChannelService channelService, UserDbContext context,
+    ISessionManager manager, IMetadataResolver resolver, IChannelService channelService, MainDbContext context,
     IOptions<DatabaseOptions> dbOptions, IOptions<AuthOptions> authOptions, IOptions<GatewayOptions> gatewayOptions,
     ILogger<ChannelWorker> logger, IHostEnvironment env) : BackgroundService
 {

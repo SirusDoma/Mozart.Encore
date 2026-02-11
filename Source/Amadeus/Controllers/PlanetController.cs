@@ -77,7 +77,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
             {
                 await Session.WriteMessage(new AuthResponse
                 {
-                    Result = AuthResult.DuplicateSessions,
+                    Result = AuthResult.ClientDuplicateSessions,
                     Subscription = new AuthResponse.SubscriptionInfo()
                 }, cancellationToken);
 
@@ -97,7 +97,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
                 ErrorCode = LoginErrorCode.Undefined,
                 Nickname  = Session.Actor.Nickname,
                 Username  = Session.Actor.Username,
-                Rank      = Session.Actor.Rank
+                Ranking   = Session.Actor.Ranking
             };
         }
         catch (InvalidOperationException)
@@ -108,7 +108,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
                 ErrorCode = LoginErrorCode.Undefined,
                 Nickname  = string.Empty,
                 Username  = string.Empty,
-                Rank      = 0
+                Ranking   = 0
             };
         }
     }

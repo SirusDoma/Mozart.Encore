@@ -61,11 +61,11 @@ public class GatewayController(ChannelSession session, IChannelAggregator aggreg
 
             await client.WriteFrame(codec.Encode(new ChannelLoginResponse
             {
-                Failed = !response.Success,
+                Failed    = !response.Success,
                 ErrorCode = LoginErrorCode.Undefined,
-                Username = response.Username,
-                Nickname = response.Nickname,
-                Rank     = response.Rank
+                Username  = response.Username,
+                Nickname  = response.Nickname,
+                Ranking   = response.Ranking
             }), cancellationToken);
         }
         catch (Exception ex)

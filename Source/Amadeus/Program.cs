@@ -71,8 +71,8 @@ public class Program
 
         var hostBuilder = CreateHostBuilder(args, config);
 
-        // Check for custom command
-        int? code = await ProcessCommandLine(hostBuilder, args);
+        // Execute custom command if any
+        int? code = await ExecuteCommandLine(hostBuilder, args);
         if (code != null)
             return code.Value;
 
@@ -157,6 +157,7 @@ public class Program
                         break;
                     case DeploymentMode.Full:
                         services.AddHostedService<DefaultWorker>();
+
                         break;
                 }
             });
@@ -177,17 +178,18 @@ public class Program
         return 0;
     }
 
-    private static async Task<int?> ProcessCommandLine(IHostBuilder hostBuilder, string[] args)
+    private static async Task<int?> ExecuteCommandLine(IHostBuilder hostBuilder, string[] args)
     {
-        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder, args)
+        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder)
             .ConfigureCommandTasks(builder =>
             {
                 builder.AddCommandLineTask<DatabaseInitCommandTask>()
                     .AddCommandLineTask<RegisterUserCommandTask>()
                     .AddCommandLineTask<AuthorizeUserCommandTask>()
+                    .AddCommandLineTask<UpsertUserRankingCommandTask>()
                     .AddCommandLineTask<VersionCommandTask>();
             })
-            .ProcessAsync();
+            .ExecuteAsync(args);
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration config)
@@ -228,7 +230,7 @@ public class Program
                     .BindConfiguration(GameOptions.Section);
 
                 // Database contexts
-                services.AddDbContextFactory<UserDbContext>((provider, builder) =>
+                services.AddDbContextFactory<MainDbContext>((provider, builder) =>
                 {
                     var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
                     _ = options.Driver switch

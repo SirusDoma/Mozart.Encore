@@ -122,12 +122,12 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         }
     }
 
-
     private async void OnScoreCompleted(object? sender, ScoreTrackedEventArgs e)
     {
         try
         {
             e.Room.Channel.GetMusicList().TryGetValue(e.MusicId, out var music);
+
             int level = e.Difficulty switch
             {
                 Difficulty.EX => music?.LevelEx,
@@ -162,14 +162,17 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 if (state == null)
                     continue;
 
+                bool win  = scores.Max(s => s.Score) == state.Score;
+                bool draw = scores.Count(s => s.Score == state.Score) > 1;
+
+                var user = await repository.Find(state.Session.Actor.UserId);
+                if (user == null)
+                    throw new InvalidOperationException("User not found");
+
                 // Compute reward only when it is safe
                 int reward = 0;
                 if (safe && (room.Metadata.Mode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
                 {
-                    var user = await repository.Find(state.Session.Actor.UserId, CancellationToken.None);
-                    if (user == null)
-                        throw new InvalidOperationException("User not found");
-
                     int maxJams    = (int)Math.Floor((totalNotes - 2f) / 25f);
                     int maxScore   = (200 * totalNotes) + (10 * maxJams * totalNotes) - (135 * maxJams) -
                                      (125 * maxJams * maxJams);
@@ -196,10 +199,18 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     user.Experience += (int)(xpGain * channel.ExpRates);
                     if (user.Experience > xpNext)
                         user.Level++;
-
-                    await repository.Commit(CancellationToken.None);
-                    state.Session.Actor.Sync(user);
                 }
+
+                user.Battle++;
+                if (draw)
+                    user.Draw++;
+                else if (win)
+                    user.Win++;
+                else
+                    user.Lose++;
+
+                await repository.Commit();
+                state.Session.Actor.Sync(user);
 
                 entries.Add(new ScoreCompletedEventData.ScoreEntry
                 {
@@ -215,7 +226,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     Reward     = (ushort)Math.Max(0, reward),
                     Level      = state.Session.Actor.Level,
                     Experience = state.Session.Actor.Experience,
-                    Win        = scores.Max(s => s.Score) == state.Score,
+                    Win        = win,
                 });
             }
 

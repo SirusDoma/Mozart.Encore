@@ -6,8 +6,9 @@ using Amadeus.Controllers.Filters;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
 
-using Mozart.Entities;
+using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
+using Mozart.Entities;
 using Mozart.Sessions;
 
 namespace Amadeus.Controllers;
@@ -52,7 +53,7 @@ public class ItemShopController(
     }
 
     [CommandHandler(RequestCommand.SyncItemPurchase)]
-    public async Task<SyncPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)
+    public async Task<SyncItemPurchaseResponse> SyncItemPurchase(CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.SyncItemPurchase,
@@ -64,12 +65,12 @@ public class ItemShopController(
 
         actor.Sync(user);
 
-        return new SyncPurchaseResponse
+        return new SyncItemPurchaseResponse
         {
             Gem              = user.Gem,
             Point            = user.Point,
             O2Cash           = 0,
-            Inventory        = inventory.Take(inventory.Capacity).Select(id => (int)id).ToList(),
+            Inventory        = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
             ItemCash         = 0,
             MusicCash        = 0,
             AttributiveItems = []
@@ -91,12 +92,12 @@ public class ItemShopController(
             return new SellItemResponse { Invalid = true };
 
         var itemData = Channel.GetItemData();
-        int itemId   = inventory[index];
+        int itemId   = inventory[index].Id;
 
         if (!itemData.TryGetValue(itemId, out var item))
             return new SellItemResponse { Invalid = true };
 
-        inventory[index] = 0;
+        inventory[index] = Inventory.BagItem.Empty;
         user.Gem += item.Price.Gem;
 
         await repository.Update(user, cancellationToken);

@@ -22,7 +22,7 @@ public class GrantSessionResponse : IMessage
     public required string Nickname { get; init; }
 
     [MessageField(order: 5)]
-    public required int Rank { get; init; }
+    public required int Ranking { get; init; }
 
     [MessageField(order: 6)]
     public required int ChannelId { get; init; }

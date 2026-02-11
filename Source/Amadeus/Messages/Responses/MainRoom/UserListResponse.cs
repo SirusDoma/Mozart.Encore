@@ -9,10 +9,10 @@ public class UserListResponse : IMessage
     public class UserInfo : SubMessage
     {
         [StringMessageField(order: 0)]
-        public required string Nickname { get; init; }
+        public required string Username { get; init; }
 
         [StringMessageField(order: 1)]
-        public required string Unknown { get; init; } // Guild?
+        public required string Nickname { get; init; }
 
         [MessageField(order: 2)]
         public int Level { get; init; }

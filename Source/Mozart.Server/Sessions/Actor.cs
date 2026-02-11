@@ -8,7 +8,6 @@ public class Actor
 {
     public Actor(User user)
     {
-        // TODO: Rank
         UserId          = user.Id;
         Username        = user.Username;
         Nickname        = user.Nickname;
@@ -20,17 +19,20 @@ public class Actor
         Lose            = user.Lose;
         Draw            = user.Draw;
         Experience      = user.Experience;
+        Ranking         = user.Ranking;
         IsAdministrator = user.IsAdministrator;
         Equipments      = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory = user.Inventory.Select(e => (int)e).ToList();
+        Inventory        = user.Inventory.ToList();
+        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        GiftItems        = user.GiftBox.Items;
+        GiftMusics       = user.GiftBox.Musics;
     }
 
     public void Sync(User user)
     {
-        // TODO: Rank
         Gem             = user.Gem;
         Point           = user.Point;
         Level           = user.Level;
@@ -38,11 +40,15 @@ public class Actor
         Lose            = user.Lose;
         Draw            = user.Draw;
         Experience      = user.Experience;
+        Ranking         = user.Ranking;
         Equipments      = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory = user.Inventory.Select(e => (int)e).ToList();
+        Inventory        = user.Inventory.ToList();
+        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        GiftItems        = user.GiftBox.Items;
+        GiftMusics       = user.GiftBox.Musics;
     }
 
     public required string Token { get; init; }
@@ -71,17 +77,21 @@ public class Actor
 
     public int Experience { get; set; }
 
-    public int Rank { get; set; }
+    public int Ranking { get; set; }
 
     public bool IsAdministrator { get; init; }
 
     public Dictionary<ItemType, int> Equipments { get; set; }
 
-    public IList<int> Inventory { get; set; }
+    public IList<Inventory.BagItem> Inventory { get; set; }
 
-    public IList<int> AttributiveItemIds { get; set; } = [];
+    public IReadOnlyList<GiftItem> GiftItems { get; set; }
 
-    public IReadOnlyList<ushort> MusicIds { get; set; } = [];
+    public IReadOnlyList<GiftMusic> GiftMusics { get; set; }
+
+    public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
+
+    public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
 
     public override string ToString()
     {
