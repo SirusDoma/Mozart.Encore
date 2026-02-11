@@ -2,14 +2,16 @@ using System.Net;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Mozart.Metadata;
 using Mozart.Data.Entities;
+using Mozart.Metadata;
 using Mozart.Options;
 
 namespace Mozart.Data.Contexts;
 
-public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions,
-    IOptions<AuthOptions> authOptions) : DbContext(contextOptions)
+public sealed class MainDbContext(
+    DbContextOptions<MainDbContext> contextOptions,
+    IOptions<AuthOptions> authOptions
+) : DbContext(contextOptions)
 {
     public DbSet<User> Users { get; init; }
 
@@ -23,8 +25,8 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
 
         ConfigureUser(modelBuilder);
         ConfigureAuth(modelBuilder);
-        ConfigureInventory(modelBuilder);
         ConfigureWallet(modelBuilder);
+        ConfigureLoadout(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -52,7 +54,7 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
                 .HasConversion(
                     str => str.Trim(),
                     str => str.Trim()
-                );;
+                );
 
             entity.Property(e => e.Gender)
                 .HasColumnName("Sex")
@@ -68,63 +70,54 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
                     flag    => flag != 0
                 );
 
-            entity.HasOne<Loadout>("Items")
-                .WithOne()
-                .HasForeignKey<Loadout>(i => i.UserId)
-                .IsRequired(false);
-
             entity.HasOne<Wallet>("Wallet")
                 .WithOne()
                 .HasForeignKey<Wallet>(c => c.UserId)
                 .IsRequired(false);
 
-            entity.Navigation("Items")
-                .AutoInclude();
+            entity.HasOne<Loadout>("Loadout")
+                .WithOne()
+                .HasForeignKey<Loadout>(b => b.UserId)
+                .IsRequired(false);
 
             entity.Navigation("Wallet")
                 .AutoInclude();
 
-            entity.Ignore(e => e.Gem);
-            entity.Ignore(e => e.Point);
-            entity.Ignore(e => e.Inventory);
-            entity.Ignore(e => e.Equipments);
+            entity.Navigation("Loadout")
+                .AutoInclude();
 
-            entity.HasIndex(e => new { e.Username, e.Nickname })
+            entity.HasIndex(e => e.Username)
+                .IsUnique();
+
+            entity.HasIndex(e => e.Nickname)
                 .IsUnique();
         });
     }
 
     private void ConfigureAuth(ModelBuilder modelBuilder)
     {
-        if (authOptions.Value.Mode == AuthMode.Default)
+
+        modelBuilder.Entity<Credential>(entity =>
         {
-            modelBuilder.Entity<Credential>(entity =>
+            entity.ToTable("member");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
+
+            if (authOptions.Value.Mode == AuthMode.Default)
             {
-                entity.ToTable("t_o2jam_credentials");
-
-                entity.HasKey(e => e.Id);
-
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd();
-
                 entity.Property(e => e.Username)
-                    .HasMaxLength(12);
+                    .HasColumnName("userid")
+                    .HasMaxLength(50);
 
-                entity.HasIndex(e => e.Username)
-                    .IsUnique();
-            });
-        }
-        else
-        {
-            modelBuilder.Entity<Credential>(entity =>
+                entity.Property(e => e.Password)
+                    .HasColumnName("passwd");
+            }
+            else
             {
-                entity.ToTable("member");
-
-                entity.HasKey(e => e.Id);
-
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd();
-
                 entity.Property(e => e.Username)
                     .HasColumnName("userid")
                     .HasMaxLength(12);
@@ -136,13 +129,14 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
                         pwd => Encoding.UTF8.GetString(pwd),
                         str => Encoding.UTF8.GetBytes(str)
                     );
+            }
 
-                entity.Ignore(e => e.UserId);
+            entity.Property<DateTime>("registdate")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
 
-                entity.HasIndex(e => e.Username)
-                    .IsUnique();
-            });
-        }
+            entity.HasIndex(e => e.Username)
+                .IsUnique();
+        });
 
         modelBuilder.Entity<AuthSession>(entity =>
         {
@@ -152,7 +146,7 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
                 .HasColumnName("USER_INDEX_ID")
                 .ValueGeneratedNever();
 
-            entity.HasKey("UserId");
+            entity.HasKey(e => e.UserId);
 
             entity.Property(e => e.GatewayId)
                 .HasColumnName("GATEWAY_ID")
@@ -184,11 +178,11 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
         });
     }
 
-    private void ConfigureInventory(ModelBuilder modelBuilder)
+    private void ConfigureWallet(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Loadout>(entity =>
+        modelBuilder.Entity<Wallet>(entity =>
         {
-            entity.ToTable("t_o2jam_item");
+            entity.ToTable("t_o2jam_charcash");
 
             entity.HasKey(e => e.UserId);
 
@@ -198,11 +192,11 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> contextOptions
         });
     }
 
-    private void ConfigureWallet(ModelBuilder modelBuilder)
+    private void ConfigureLoadout(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Wallet>(entity =>
+        modelBuilder.Entity<Loadout>(entity =>
         {
-            entity.ToTable("t_o2jam_charcash");
+            entity.ToTable("t_o2jam_item");
 
             entity.HasKey(e => e.UserId);
 

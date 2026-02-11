@@ -16,7 +16,7 @@ namespace Mozart;
 
 public class GatewayWorker(IServiceProvider provider, IClientServer clientServer, IGatewayServer gatewayServer,
     ISessionManager clientManager, IChannelService channelService, IChannelSessionManager channelManager, IChannelAggregator aggregator,
-    UserDbContext context, IOptions<DatabaseOptions> dbOptions, IOptions<AuthOptions> authOptions, IOptions<GatewayOptions> gatewayOptions,
+    MainDbContext context, IOptions<DatabaseOptions> dbOptions, IOptions<AuthOptions> authOptions, IOptions<GatewayOptions> gatewayOptions,
     ILogger<GatewayWorker> logger, IMessageCodec codec, IHostEnvironment env) : BackgroundService
 {
 

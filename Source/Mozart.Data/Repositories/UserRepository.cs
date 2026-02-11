@@ -13,8 +13,8 @@ public interface IUserRepository : IRepository<User>
     Task Update(User user, CancellationToken cancellation = default);
 }
 
-public class UserRepository(IDbContextFactory<UserDbContext> factory)
-    : Repository<User, UserDbContext>(factory.CreateDbContext()), IUserRepository
+public class UserRepository(IDbContextFactory<MainDbContext> factory)
+    : Repository<User, MainDbContext>(factory.CreateDbContext()), IUserRepository
 {
     public Task<User?> Find(int id, CancellationToken cancellationToken)
     {

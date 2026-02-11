@@ -2,60 +2,65 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Migrations.Sqlite.Migrations
+namespace Mozart.Migrations.SqlServer.Migrations
 {
-    [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MainDbContext))]
+    partial class MainDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Mozart.Data.Entities.AuthSession", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("ADDR_IP");
 
                     b.Property<int>("ChannelId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("SUB_CH");
 
                     b.Property<string>("GatewayId")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("GATEWAY_ID");
 
                     b.Property<DateTime>("LoginTime")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasColumnName("LOGIN_TIME");
 
                     b.Property<int>("ServerId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("MAIN_CH");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("TUSER_ID");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("USER_ID");
 
                     b.HasKey("UserId");
@@ -67,171 +72,181 @@ namespace Mozart.Migrations.Sqlite.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("passwd");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("userid");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("t_o2jam_credentials", (string)null);
+                    b.ToTable("member", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<short>("Bag1")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag10")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag11")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag12")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag13")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag14")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag15")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag16")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag17")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag18")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag19")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag2")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag20")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag21")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag22")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag23")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag24")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag25")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag26")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag27")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag28")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag29")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag3")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag30")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag4")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag5")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag6")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag7")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag8")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Bag9")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip1")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip10")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip11")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip12")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip13")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip14")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip15")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip16")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip2")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip3")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip4")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip5")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip6")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip7")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip8")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<short>("Equip9")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.HasKey("UserId");
 
@@ -242,50 +257,55 @@ namespace Mozart.Migrations.Sqlite.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("Battle")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Draw")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Experience")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<bool>("Gender")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasColumnName("Sex");
 
                     b.Property<int>("IsAdministrator")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("AdminLevel");
 
                     b.Property<int>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Lose")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("USER_NICKNAME");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username", "Nickname")
+                    b.HasIndex("Nickname")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
@@ -294,25 +314,25 @@ namespace Mozart.Migrations.Sqlite.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<int>("Gem")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("O2Cash")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
-                        .WithOne("Items")
-                        .HasForeignKey("Mozart.Data.Entities.Inventory", "UserId");
+                        .WithOne("Loadout")
+                        .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -324,7 +344,7 @@ namespace Mozart.Migrations.Sqlite.Migrations
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
-                    b.Navigation("Items")
+                    b.Navigation("Loadout")
                         .IsRequired();
 
                     b.Navigation("Wallet")

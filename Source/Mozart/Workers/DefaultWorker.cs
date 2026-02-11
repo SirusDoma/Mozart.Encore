@@ -13,7 +13,7 @@ using Mozart.Sessions;
 namespace Mozart;
 
 public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISessionManager manager,
-    IMetadataResolver resolver, IChannelService channelService, UserDbContext context, IOptions<DatabaseOptions> dbOptions,
+    IMetadataResolver resolver, IChannelService channelService, MainDbContext context, IOptions<DatabaseOptions> dbOptions,
     IOptions<AuthOptions> authOptions, ILogger<DefaultWorker> logger, IHostEnvironment env) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
