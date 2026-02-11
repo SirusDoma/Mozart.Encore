@@ -226,7 +226,7 @@ public class Program
                     .BindConfiguration(GameOptions.Section);
 
                 // Database contexts
-                services.AddDbContextFactory<UserDbContext>((provider, builder) =>
+                services.AddDbContextFactory<MainDbContext>((provider, builder) =>
                 {
                     var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
                     _ = options.Driver switch

@@ -8,16 +8,16 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mozart.Migrations.Postgres
+namespace Mozart.Migrations.Postgres.Migrations
 {
-    [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MainDbContext))]
+    partial class MainDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -72,31 +72,39 @@ namespace Mozart.Migrations.Postgres
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("passwd");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("character varying(12)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("userid");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("t_o2jam_credentials", (string)null);
+                    b.ToTable("member", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -294,7 +302,10 @@ namespace Mozart.Migrations.Postgres
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username", "Nickname")
+                    b.HasIndex("Nickname")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
@@ -317,11 +328,11 @@ namespace Mozart.Migrations.Postgres
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
-                        .WithOne("Items")
-                        .HasForeignKey("Mozart.Data.Entities.Inventory", "UserId");
+                        .WithOne("Loadout")
+                        .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -333,7 +344,7 @@ namespace Mozart.Migrations.Postgres
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
-                    b.Navigation("Items")
+                    b.Navigation("Loadout")
                         .IsRequired();
 
                     b.Navigation("Wallet")

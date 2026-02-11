@@ -24,7 +24,7 @@ public static class RegisterEndpoint
     public static async Task<IResult> Post(
         IIdentityService identityService,
         HttpContext http,
-        UserDbContext context,
+        MainDbContext context,
         IOptions<AuthOptions> auth,
         RegisterRequest request,
         ILogger<WebServer> logger,

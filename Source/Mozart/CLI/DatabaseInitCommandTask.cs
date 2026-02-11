@@ -3,7 +3,7 @@ using Mozart.Data.Contexts;
 
 namespace Mozart.CLI;
 
-public class DatabaseInitCommandTask(UserDbContext context) : ICommandLineTask
+public class DatabaseInitCommandTask(MainDbContext context) : ICommandLineTask
 {
     public static string Name => "db:migrate";
     public static string Description => "Execute database migration with configured database settings.";

@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using MySql.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
-namespace Mozart.Migrations.MySql.Migrations
+namespace Mozart.Migrations.SqlServer.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -12,18 +11,30 @@ namespace Mozart.Migrations.MySql.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySQL:Charset", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "member",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    userid = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    passwd = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    registdate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_member", x => x.id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "t_o2jam_charinfo",
                 columns: table => new
                 {
                     USER_INDEX_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    USER_ID = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    USER_NICKNAME = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Sex = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    USER_ID = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    USER_NICKNAME = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Sex = table.Column<bool>(type: "bit", nullable: false),
                     Level = table.Column<int>(type: "int", nullable: false),
                     Battle = table.Column<int>(type: "int", nullable: false),
                     Win = table.Column<int>(type: "int", nullable: false),
@@ -35,43 +46,25 @@ namespace Mozart.Migrations.MySql.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_o2jam_charinfo", x => x.USER_INDEX_ID);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "t_o2jam_credentials",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Username = table.Column<string>(type: "varchar(12)", maxLength: 12, nullable: false),
-                    Password = table.Column<byte[]>(type: "longblob", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_t_o2jam_credentials", x => x.Id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "t_o2jam_login",
                 columns: table => new
                 {
                     USER_INDEX_ID = table.Column<int>(type: "int", nullable: false),
-                    GATEWAY_ID = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    GATEWAY_ID = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     MAIN_CH = table.Column<int>(type: "int", nullable: false),
                     SUB_CH = table.Column<int>(type: "int", nullable: false),
-                    USER_ID = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
-                    TUSER_ID = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    ADDR_IP = table.Column<string>(type: "longtext", nullable: false),
-                    LOGIN_TIME = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    USER_ID = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TUSER_ID = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ADDR_IP = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LOGIN_TIME = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_o2jam_login", x => x.USER_INDEX_ID);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "t_o2jam_charcash",
@@ -89,8 +82,7 @@ namespace Mozart.Migrations.MySql.Migrations
                         column: x => x.USER_INDEX_ID,
                         principalTable: "t_o2jam_charinfo",
                         principalColumn: "USER_INDEX_ID");
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "t_o2jam_item",
@@ -152,19 +144,24 @@ namespace Mozart.Migrations.MySql.Migrations
                         column: x => x.USER_INDEX_ID,
                         principalTable: "t_o2jam_charinfo",
                         principalColumn: "USER_INDEX_ID");
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
+                });
 
             migrationBuilder.CreateIndex(
-                name: "IX_t_o2jam_charinfo_USER_ID_USER_NICKNAME",
-                table: "t_o2jam_charinfo",
-                columns: new[] { "USER_ID", "USER_NICKNAME" },
+                name: "IX_member_userid",
+                table: "member",
+                column: "userid",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_t_o2jam_credentials_Username",
-                table: "t_o2jam_credentials",
-                column: "Username",
+                name: "IX_t_o2jam_charinfo_USER_ID",
+                table: "t_o2jam_charinfo",
+                columns: new[] { "USER_ID" },
+                unique: true);
+            
+            migrationBuilder.CreateIndex(
+                name: "IX_t_o2jam_charinfo_USER_NICKNAME",
+                table: "t_o2jam_charinfo",
+                columns: new[] { "USER_NICKNAME" },
                 unique: true);
         }
 
@@ -172,10 +169,10 @@ namespace Mozart.Migrations.MySql.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "t_o2jam_charcash");
+                name: "member");
 
             migrationBuilder.DropTable(
-                name: "t_o2jam_credentials");
+                name: "t_o2jam_charcash");
 
             migrationBuilder.DropTable(
                 name: "t_o2jam_item");

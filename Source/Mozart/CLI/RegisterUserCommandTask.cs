@@ -10,7 +10,7 @@ using Mozart.Services;
 
 namespace Mozart.CLI;
 
-public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
+public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
 {
     public static string Name => "user:register";
     public static string Description => "Register the user to the configured database";

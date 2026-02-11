@@ -20,11 +20,11 @@ public interface IAuthContext : IContext
 
 public class AuthContext : IAuthContext
 {
-    private readonly UserDbContext _context;
+    private readonly MainDbContext _context;
 
-    public AuthContext(IDbContextFactory<UserDbContext> factory)
+    public AuthContext(IDbContextFactory<MainDbContext> factory)
     {
-        var staticFactory = new StaticDbContextFactory<UserDbContext>(factory);
+        var staticFactory = new StaticDbContextFactory<MainDbContext>(factory);
 
         _context     = staticFactory.CreateDbContext();
         Credentials  = new CredentialRepository(staticFactory);

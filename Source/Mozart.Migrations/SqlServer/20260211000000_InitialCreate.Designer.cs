@@ -3,21 +3,24 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mozart.Data.Contexts;
 
 #nullable disable
 
-namespace Mozart.Migrations.SqlServer
+namespace Mozart.Migrations.SqlServer.Migrations
 {
-    [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MainDbContext))]
+    [Migration("20260211000000_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -72,31 +75,36 @@ namespace Mozart.Migrations.SqlServer
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("passwd");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("userid");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("t_o2jam_credentials", (string)null);
+                    b.ToTable("member", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int")
@@ -294,7 +302,10 @@ namespace Mozart.Migrations.SqlServer
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username", "Nickname")
+                    b.HasIndex("Username")
+                        .IsUnique();
+                    
+                    b.HasIndex("Nickname")
                         .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
@@ -317,11 +328,11 @@ namespace Mozart.Migrations.SqlServer
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Inventory", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
-                        .WithOne("Items")
-                        .HasForeignKey("Mozart.Data.Entities.Inventory", "UserId");
+                        .WithOne("Loadout")
+                        .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -333,7 +344,7 @@ namespace Mozart.Migrations.SqlServer
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
-                    b.Navigation("Items")
+                    b.Navigation("Loadout")
                         .IsRequired();
 
                     b.Navigation("Wallet")
