@@ -49,7 +49,7 @@ public enum RequestCommand : ushort
     SyncMusicPurchase   = 0x1392, // 5010
     SyncPoint           = 0x1395, // 5013
     StartPayment        = 0x1397, // 5015
-    PurchasableMusic     = 0x1399, // 5017
+    PurchasableMusic    = 0x1399, // 5017
     Terminate           = 0xFFF0  // -16
 }
 
