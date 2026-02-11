@@ -1,7 +1,9 @@
+using Encore.Sessions;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Services;
 using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Entities;
 
@@ -21,7 +23,7 @@ public class Room : Broadcastable, IRoom
     public Room(IRoomService service, Session master, RoomMetadata metadata, TimeSpan? musicLoadTimeout = null)
     {
         _service = service;
-        _previous = metadata;
+        _previous = (RoomMetadata)metadata.Clone();
         _metadata = metadata;
         _slots = [
             new MemberSlot
@@ -388,7 +390,7 @@ public class Room : Broadcastable, IRoom
 
     public void CompleteGame()
     {
-        if (!ScoreTracker.Completed)
+        if (!ScoreTracker.Completed || _metadata.State != RoomState.Playing)
             return;
 
         _metadata.State = RoomState.Waiting;
@@ -400,7 +402,7 @@ public class Room : Broadcastable, IRoom
         IRoom room = this;
         room.Remove(session);
 
-        SessionDisconnected?.Invoke(this, new Encore.Sessions.SessionEventArgs { Session = session });
+        SessionDisconnected?.Invoke(this, new SessionEventArgs { Session = session });
     }
 
     public override void Invalidate()

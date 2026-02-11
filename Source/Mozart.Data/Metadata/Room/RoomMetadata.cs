@@ -1,6 +1,6 @@
 namespace Mozart.Metadata.Room;
 
-public class RoomMetadata
+public class RoomMetadata : ICloneable
 {
     public required int Id { get; init; }
 
@@ -25,4 +25,9 @@ public class RoomMetadata
     public string Password { get; init; } = string.Empty;
 
     public RoomState State { get; set; } = RoomState.Waiting;
+
+    public object Clone()
+    {
+        return MemberwiseClone();
+    }
 }

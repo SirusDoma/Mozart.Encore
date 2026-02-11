@@ -7,14 +7,16 @@ using Mozart.Entities;
 using Mozart.Messages.Requests;
 using Mozart.Messages.Responses;
 using Mozart.Data.Repositories;
-using Mozart.Services;
 using Mozart.Sessions;
 
 namespace Mozart.Controllers;
 
 [ChannelAuthorize]
-public class ItemShopController(Session session, IMetadataResolver resolver, IUserRepository repository,
-    ILogger<ItemShopController> logger) : CommandController<Session>(session)
+public class ItemShopController(
+    Session session,
+    IUserRepository repository,
+    ILogger<ItemShopController> logger
+) : CommandController<Session>(session)
 {
     private IChannel Channel => Session.Channel!;
 
@@ -35,7 +37,7 @@ public class ItemShopController(Session session, IMetadataResolver resolver, IUs
         var user      = (await repository.Find(actor.UserId, cancellationToken))!;
         var inventory = user.Inventory;
 
-        var itemData = resolver.GetItemData(Channel);
+        var itemData = Channel.GetItemData();
         int itemId   = request.ItemId;
         int index    = inventory.FindSlot(0);
 
@@ -92,7 +94,7 @@ public class ItemShopController(Session session, IMetadataResolver resolver, IUs
         if (index < 0 || index >= inventory.Capacity)
             return new SellItemResponse { Invalid = true };
 
-        var itemData = resolver.GetItemData(Channel);
+        var itemData = Channel.GetItemData();
         int itemId   = inventory[index];
 
         if (!itemData.TryGetValue(itemId, out var item))

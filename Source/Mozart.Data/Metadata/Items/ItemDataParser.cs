@@ -89,7 +89,7 @@ public static class ItemDataParser
 
             foreach (ItemRenderPart renderPart in Enum.GetValues(typeof(ItemRenderPart)))
             {
-                if (renderPart == ItemRenderPart.SmallPreview || renderPart == ItemRenderPart.LargePreview)
+                if (renderPart is ItemRenderPart.SmallPreview or ItemRenderPart.LargePreview)
                 {
                     bool valid = reader.ReadBoolean();
                     if (!valid)
