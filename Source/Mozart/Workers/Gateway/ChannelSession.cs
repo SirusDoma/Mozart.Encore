@@ -112,4 +112,5 @@ public class ChannelSession : Encore.Sessions.Session
 
         await WriteFrame(stream.ToArray(), cancellationToken);
     }
-} 
+}
+ 

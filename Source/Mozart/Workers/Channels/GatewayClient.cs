@@ -284,4 +284,5 @@ public class GatewayClient : IGatewayClient
         _client.Dispose();
         _disposed = true;
     }
-} 
+}
+ 

@@ -130,4 +130,5 @@ public class CommandLineTasksBuilder : ICommandLineTasksBuilder
     }
 
     public IReadOnlyDictionary<string, CommandLineTaskType> GetRegisteredTaskTypes() => _types;
-} 
+}
+ 
