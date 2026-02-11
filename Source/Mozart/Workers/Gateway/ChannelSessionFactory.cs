@@ -19,4 +19,5 @@ public class ChannelSessionFactory : IChannelSessionFactory
     {
         return ActivatorUtilities.CreateInstance<ChannelSession>(_provider, parameters.Prepend(client).ToArray());
     }
-} 
+}
+ 

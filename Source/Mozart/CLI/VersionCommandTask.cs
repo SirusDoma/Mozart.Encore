@@ -18,4 +18,5 @@ public class VersionCommandTask : ICommandLineTask
 
         return 0;
     }
-} 
+}
+ 

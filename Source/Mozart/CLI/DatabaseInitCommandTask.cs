@@ -15,4 +15,5 @@ public class DatabaseInitCommandTask(UserDbContext context) : ICommandLineTask
 
         return 0;
     }
-} 
+}
+ 

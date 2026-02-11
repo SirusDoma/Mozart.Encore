@@ -86,4 +86,5 @@ public class RegisterUserCommandTask(UserDbContext context, IOptions<AuthOptions
 
         return 0;
     }
-} 
+}
+ 
