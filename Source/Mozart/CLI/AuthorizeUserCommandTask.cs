@@ -15,38 +15,41 @@ public class AuthorizeUserCommandTask(IIdentityService identityService) : IComma
     public void ConfigureCommand(Command command)
     {
         // Add required arguments
-        var usernameArgument = new Argument<string>("username", "The username of the user");
-        var passwordArgument = new Argument<string>("password", "The password of the user");
+        var usernameArgument = new Argument<string>("username") { Description = "The username of the user" };
+        var passwordArgument = new Argument<string>("password") { Description = "The password of the user" };
 
-        command.AddArgument(usernameArgument);
-        command.AddArgument(passwordArgument);
+        command.Arguments.Add(usernameArgument);
+        command.Arguments.Add(passwordArgument);
 
         // Set the handler with all parameters
-        command.SetHandler(async (username, password) =>
+        command.SetAction(async (parseResult, cancellationToken) =>
         {
-            int exitCode = await ExecuteAsync(username, password);
+            string username = parseResult.GetRequiredValue(usernameArgument);
+            string password = parseResult.GetRequiredValue(passwordArgument);
+
+            int exitCode = await ExecuteAsync(username, password, cancellationToken);
             Environment.ExitCode = exitCode;
-        }, usernameArgument, passwordArgument);
+        });
     }
 
-    public Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
+    public Task<int> ExecuteAsync(CancellationToken cancellationToken)
     {
         // This won't be called since we override the handler in ConfigureCommand
         throw new NotSupportedException("Use the overload of ExecuteAsync instead");
     }
 
-    private async Task<int> ExecuteAsync(string username, string password)
+    private async Task<int> ExecuteAsync(string username, string password, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Generating auth token for: [{username}]..");
 
         try
         {
-            string token = await identityService.Authenticate(new UsernamePasswordCredentialRequest()
+            string token = await identityService.Authenticate(new UsernamePasswordCredentialRequest
             {
                 Username = username,
                 Password = Encoding.UTF8.GetBytes(password),
                 Address  = IPAddress.Any
-            }, CancellationToken.None);
+            }, cancellationToken);
 
             Console.WriteLine();
             Console.WriteLine($"  Token: {token}");
@@ -60,4 +63,3 @@ public class AuthorizeUserCommandTask(IIdentityService identityService) : IComma
         }
     }
 }
- 

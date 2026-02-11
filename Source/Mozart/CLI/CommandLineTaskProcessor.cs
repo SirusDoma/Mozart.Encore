@@ -1,7 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -9,21 +6,19 @@ namespace Mozart.CLI;
 
 public class CommandLineTaskProcessor
 {
-    private readonly string[] _args;
     private readonly IHostBuilder _builder;
 
     private IReadOnlyDictionary<string, CommandLineTasksBuilder.CommandLineTaskType> _types =
         new Dictionary<string, CommandLineTasksBuilder.CommandLineTaskType>();
 
-    private CommandLineTaskProcessor(IHostBuilder builder, string[] args)
+    private CommandLineTaskProcessor(IHostBuilder builder)
     {
         _builder = builder;
-        _args    = args;
     }
 
-    public static CommandLineTaskProcessor CreateDefaultProcessor(IHostBuilder builder, string[] args)
+    public static CommandLineTaskProcessor CreateDefaultProcessor(IHostBuilder builder)
     {
-        return new CommandLineTaskProcessor(builder, args);
+        return new CommandLineTaskProcessor(builder);
     }
 
     public CommandLineTaskProcessor ConfigureCommandTasks(Action<ICommandLineTasksBuilder> configureDelegate)
@@ -35,31 +30,30 @@ public class CommandLineTaskProcessor
         return this;
     }
 
-    public bool Processable()
+    public bool IsExecutable(string[] args)
     {
-        if (_args.Length == 0)
+        if (args.Length == 0)
             return false;
 
-        string arg = _args[0];
+        string arg = args[0];
         if (arg is "--help" or "-h" or "-?" or "--version")
             return true;
 
-        if (_args.Length > 1 && _args[0] == "--")
+        if (args.Length > 1 && args[0] == "--")
             return true;
 
         return !arg.StartsWith("--");
     }
 
-    public async Task<int?> ProcessAsync()
+    public async Task<int?> ExecuteAsync(string[] args)
     {
-        if (!Processable())
+        if (!IsExecutable(args))
             return null;
 
         List<string> helps    = ["--help", "-h", "-?", "help"];
         List<string> versions = ["--version", "version"];
 
-        var root = new CommandLineBuilder()
-            .UseDefaults();
+        var root = new RootCommand();
 
         var host = _builder.Build();
         foreach ((string name, var descriptor) in _types)
@@ -68,32 +62,27 @@ public class CommandLineTaskProcessor
             var command = new Command(name, descriptor.Description);
 
             task.ConfigureCommand(command);
-            if (command.Handler == null)
+            if (command.Action == null)
             {
-                command.SetHandler(async () =>
+                command.SetAction(async (_, cancellationToken) =>
                 {
-                    int exitCode = await task.ExecuteAsync(CancellationToken.None);
+                    int exitCode = await task.ExecuteAsync(cancellationToken);
                     Environment.ExitCode = exitCode;
                 });
             }
 
             if (versions.Any(v => v == name))
             {
-                root.UseVersionOption(versions.ToArray())
-                    .AddMiddleware(async void (ctx) =>
-                    {
-                        if (ctx.ParseResult.Tokens.Any(t => versions.Contains(t.Value.ToLowerInvariant())))
-                            Environment.Exit(await task.ExecuteAsync());
-
-                    }, MiddlewareOrder.ExceptionHandler);
+                var option = root.Options.First(o => o.Name == "--version" || o.Aliases.Contains(name));
+                option.Aliases.Add(name);
+                option.Action = command.Action;
             }
             else
-                root.Command.Add(command);
+                root.Subcommands.Add(command);
         }
 
-        return await root.Build().InvokeAsync(_args);
+        return await root.Parse(args).InvokeAsync();
     }
-
 }
 
 public interface ICommandLineTasksBuilder
@@ -131,4 +120,3 @@ public class CommandLineTasksBuilder : ICommandLineTasksBuilder
 
     public IReadOnlyDictionary<string, CommandLineTaskType> GetRegisteredTaskTypes() => _types;
 }
- 
