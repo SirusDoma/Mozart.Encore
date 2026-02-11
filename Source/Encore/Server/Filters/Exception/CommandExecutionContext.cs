@@ -46,4 +46,3 @@ public class CommandExecutedContext : CommandExecutionContext
 
     public bool ExceptionHandled { get; set; } = false;
 }
- 

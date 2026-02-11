@@ -1,0 +1,116 @@
+using Amadeus.Messages.Codecs;
+using Encore.Messaging;
+using Mozart.Metadata;
+using Mozart.Metadata.Items;
+
+namespace Amadeus.Messages.Responses;
+
+public class CharacterInfoResponse : IMessage
+{
+    public static Enum Command => ResponseCommand.GetCharacterInfo;
+
+    public class GiftItemInfo : SubMessage
+    {
+        [MessageField(order: 0)]
+        public int GiftId { get; init; } = 0; // Flag?
+
+        [MessageField(order: 1)]
+        public int ItemId { get; init; }
+
+        [StringMessageField(order: 2)]
+        public string Sender { get; init; } = string.Empty;
+    }
+
+    public class GiftMusicInfo : SubMessage
+    {
+        [MessageField(order: 0)]
+        public int GiftId { get; init; } = 0; // Flag?
+
+        [MessageField(order: 1)]
+        public int MusicId { get; init; }
+
+        [StringMessageField(order: 2)]
+        public string Sender { get; init; } = string.Empty;
+    }
+
+    public class AttributiveItemInfo : SubMessage
+    {
+        [MessageField(order: 0)]
+        public int AttributiveItemId { get; init; }
+
+        [MessageField(order: 1)]
+        public int ItemCount { get; init; }
+    }
+
+    [MessageField<MessageFieldCodec<int>>(order: 0)]
+    public bool Invalid { get; init; } = false;
+
+    [StringMessageField(order: 1)]
+    public required string Nickname { get; init; }
+
+    [MessageField(order: 2)]
+    public Gender Gender { get; init; }
+
+    [MessageField(order: 3)]
+    public int Gem { get; set; }
+
+    [MessageField(order: 4)]
+    public int Point { get; set; } // Distribution-specific premium currency (a.k.a MCash)
+
+    [MessageField(order: 5)]
+    public int O2Cash { get; set; } // Global premium currency
+
+    [MessageField(order: 6)]
+    public int Level { get; set; }
+
+    [MessageField(order: 7)]
+    public int Win { get; set; }
+
+    [MessageField(order: 8)]
+    public int Lose { get; set; }
+
+    [MessageField(order: 9)]
+    public int Draw { get; set; }
+
+    [MessageField(order: 10)]
+    public int Experience { get; set; }
+
+    // Client address: 0x5C69A4
+    // Value is reset to 0 after STATE_RESULT
+    [MessageField(order: 11)]
+    public int Unknown { get; set; }
+
+    [MessageField(order: 12)]
+    public bool IsAdministrator { get; init; }
+
+    [MessageField<CharacterEquipmentInfoCodec>(order: 13)]
+    public Dictionary<ItemType, int> Equipments { get; init; } = [];
+
+    [CollectionMessageField(order: 14, minCount: 30, maxCount: 30)]
+    public IList<int> Inventory { get; init; } = [];
+
+    [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
+    public IReadOnlyList<ushort> AcquiredMusicIds { get; init; } = [];
+
+    // This doesn't work!
+    // Moreover, it uses troublesome semantic (only consider the highest byte order)
+    //
+    // Refer to the client address: 0x5C69A8 and 0x440B50 (wrong command code)
+    [MessageField(order: 16)]
+    public int Whisperable { get; set; }
+
+    [CollectionMessageField(order: 17, prefixSizeType: TypeCode.Int16)]
+    public IList<GiftItemInfo> ItemGiftBox { get; init; } = [];
+
+    [CollectionMessageField(order: 18, prefixSizeType: TypeCode.Int16)]
+    public IList<GiftMusicInfo> MusicGiftBox { get; init; } = [];
+
+    [MessageField(order: 19)]
+    public int ItemCash { get; set; }
+
+    [MessageField(order: 20)]
+    public int MusicCash { get; set; }
+
+    [CollectionMessageField(order: 21, prefixSizeType: TypeCode.Int32)]
+    public IList<AttributiveItemInfo> AttributiveItems { get; init; } = [];
+}

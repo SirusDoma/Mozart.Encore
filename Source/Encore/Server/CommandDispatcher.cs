@@ -378,7 +378,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return new CommandResponse(frames);
 
         Exception? exception = null;
-
+        
         try
         {
             object? message = await handler.Execute(session, request, cancellationToken).ConfigureAwait(false);

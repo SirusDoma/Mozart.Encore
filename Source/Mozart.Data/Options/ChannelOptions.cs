@@ -9,5 +9,7 @@ public class ChannelOptions
 
 
     public string MusicList { get; init; } = string.Empty;
+    public string AlbumList { get; init; } = string.Empty;
     public string ItemData  { get; init; } = string.Empty;
+    public bool? FreeMusic  { get; init; } = null;
 }

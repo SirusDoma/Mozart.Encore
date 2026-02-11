@@ -1,9 +1,10 @@
-# Mozart.Encore
+# Amadeus.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.10 (Pre-NX)**
+Supported client version: **v3.82\* (NX)**  
+<sub>* v3.73 and older might work but not fully tested.</sub>
 
 ## Features
 
@@ -24,16 +25,16 @@ Supported client version: **v3.10 (Pre-NX)**
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Mozart.Web](Source/Mozart.Web/)               | Lightweight HTTP Web server                       |
-| [Mozart](Source/Mozart/)                       | Game server implementation for O2Jam client v3.10 |
+| [Amadeus.Web](Source/Amadeus.Web/)             | Lightweight HTTP Web server                       |
+| [Amadeus](Source/Amadeus/)                     | Game server implementation for O2Jam client v3.82 |
 
 # Configuration
 
-The server can be configured either with `config.ini` or command-line arguments.
+The server can be configured either with `config.ini` or command-line arguments. 
 See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to set up command-line config.
 
 ## Server
-Server deployment mode and TCP connection setting.
+Server deployment mode and TCP connection setting.  
 
 Use `--Server:<Option>` to configure these settings via command-line arguments (e.g, `--Server:Port=15010`)
 
@@ -80,10 +81,10 @@ Use `--Auth:<Option>` to configure these settings via command-line arguments.
 | `RevokeOnStartup` | Clear login tables on start-up. Recommended to disable for local server. Default: `true`                                                                                                                                                                                                                                                   |
 
 ## Gateway &amp; Channels
-Gateway &amp; Channels network and economy rating configuration. There must be at least one channel for the server to work properly.
+Gateway &amp; Channels network and economy rating configuration. There must be at least one channel for the server to work properly.  
 
-Use `--Gateway:<Option>` &amp; `--Gateway:Channels:<N>:<Option>` to configure these settings via command-line arguments (e.g, `--Gateway:Channels:0:Id=0`).
-`<N>` is the index of channel table (not to be confused with channel id!).
+Use `--Gateway:<Option>` &amp; `--Gateway:Channels:<N>:<Option>` to configure these settings via command-line arguments (e.g, `--Gateway:Channels:0:Id=0`). 
+`<N>` is the index of channel table (not to be confused with channel id!).  
 
 The index (`<N>`) represents an array index and must always start from 0, ordered and with no gap in-between. The `Id` however, can be un-ordered and with gaps in-between.
 
@@ -100,7 +101,7 @@ These options can be configured under `Gateway` section.
 | `Timeout` | The maximum wait time (in seconds) for establishing connection between the gateway and the channel. Default: `30` seconds                                                                                                                                               |
 
 ### Channels
-These options can be configured under `Gateway:Channels:<N>` section as explained above.
+These options can be configured under `Gateway:Channels:<N>` section as explained above. 
 
 > [!TIP]
 > This configuration is ignored in the `Gateway` deployment mode.
@@ -114,20 +115,22 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
 | `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
 | `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.10`. Default: (Empty) using global [Metadata](#Metadata)            |
+| `FreeMusic` | Unlock all premium music based on the provided `MusicList` exclusive for this channel. Default: Default: (Empty) using global [Game settings](#Game-settings) |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)             |
+| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)           |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)            |
 
 ## Metadata
-Metadata files that act as source of truth of particular game data outside the database.
+Metadata files that act as source of truth of particular game data outside the database. 
 The metadata files are not optional and can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-> [!WARNING]
-> Client v3.10 does not support `OJNList.dat`
-
-| Option     | Description                                                                              |
-|------------|------------------------------------------------------------------------------------------|
-| `ItemData` | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.10`. |
+| Option      | Description                                                                               |
+|-------------|-------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.   |
+| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`3.82`. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`.  |
 
 ## Game settings
 Gameplay-specific settings.
@@ -138,6 +141,7 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                         |
 | `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
+| `FreeMusic`                  | Unlock all premium music based on the provided `MusicList`. Default: `true`                                                                                                                                                                                                                                  |
 | `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
 
 # Database Migration
@@ -148,7 +152,7 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >[!IMPORTANT]
 > You may notice that the database schema look funky with premature normalizations here and there.  
 > This is intentional because the app need to support the existing official database schema.
->
+> 
 > The table structure represents a best-effort attempt to follow the e-Games database distribution.
 > Structures that are known exclusive to the foreign database distribution are omitted.
 >
@@ -157,7 +161,7 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >[!CAUTION]
 > A breaking change was introduced to the database schema and its migrations starting with Mozart v1.10.0.
 > Manual adjustments to existing database schemas may be required when upgrading from Mozart v1.8.0.
->
+> 
 > Foreign database schema remain supported with proper `Auth:Mode` configuration.
 
 ## Add Migration
@@ -168,7 +172,7 @@ Use the following command to create a new migration:
 ```shell
  # Replace "MySql" with your preferred database driver
  dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Mozart\Mozart.csproj \
+                             --startup-project Source\Amadeus\Amadeus.csproj \
                              --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
                              -- --Auth:Mode=<auth mode> \
@@ -179,9 +183,9 @@ Use the following command to create a new migration:
 >[!IMPORTANT]
 > Database migration is automatically executed every start-up as long as the `Auth:Mode` equals to `Default`.  
 > This is because `Auth:Mode=Foreign` is a compatibility mode that enables Mozart to continue to work with an existing foreign database that has different auth schema than the original e-Games clients (such as 9you or GAMANIA).
->
+>  
 > Database migration will never be officially supported in `Foreign` mode<sup>*</sup>.
->
+> 
 > <sub>* The server will likely raise an exception with [`PendingModelChangesWarning`](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-9.0/breaking-changes#exception-is-thrown-when-applying-migrations-if-there-are-pending-model-changes) when running database migration with `Foreign` mode.
 > The errors can be suppressed, but there's no guarantee that migration will continue to work using foreign auth schema for the future releases.</sub>
 
@@ -198,7 +202,7 @@ Run the following command to execute the migration:
 
 ```shell
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Mozart\Mozart.csproj \
+                           --startup-project Source\Amadeus\Amadeus.csproj \
                            --context Mozart.Data.Contexts.MainDbContext \
                            -- --Auth:Mode=<auth mode> \
                            --Db:Driver=<driver> \
@@ -270,7 +274,7 @@ OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
 > [!TIP]
 > You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
 > For example:
->
+> 
 > ```shell 
 > OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
 > 192.168.10.1 15010 \
@@ -288,14 +292,15 @@ When the `Channel` lost its connection to its `Gateway`, it will automatically s
 ## Advanced scaling
 
 It might be possible to host and scale `Mozart.Encore` in kubernetes via [agones](https://agones.dev/). However, it may require code changes.
-Please refer to their [documentation](https://agones.dev/site/docs/) and [third-party examples](https://agones.dev/site/docs/third-party-content/examples/) to learn more.
+Please refer to their [documentation](https://agones.dev/site/docs/) and [third-party examples](https://agones.dev/site/docs/third-party-content/examples/) to learn more. 
 
 # CLI Command
 
-The server application has built-in utilities to help local player usage or server maintenance.
+The server application has built-in utilities to help local player usage or server maintenance. 
 
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
 - `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
+- `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
 
 Run the CLI with `--help` flag for more details.

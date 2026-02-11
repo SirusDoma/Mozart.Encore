@@ -39,4 +39,3 @@ public sealed class CommandHandlerAttribute : Attribute
 
     public Enum? ResponseCommand { get; }
 }
- 
