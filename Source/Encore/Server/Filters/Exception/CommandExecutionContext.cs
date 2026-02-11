@@ -45,4 +45,4 @@ public class CommandExecutedContext : CommandExecutionContext
     public Exception? Exception { get; set; }
 
     public bool ExceptionHandled { get; set; } = false;
-} 
+}

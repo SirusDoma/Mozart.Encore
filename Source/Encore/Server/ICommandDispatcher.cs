@@ -54,4 +54,4 @@ public interface ICommandDispatcher
     ICommandDispatcher AddExceptionLogger(ICommandExceptionLogger logger);
 
     Task Dispatch(Session session, byte[] payload, CancellationToken cancellationToken);
-} 
+}

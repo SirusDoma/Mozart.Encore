@@ -62,4 +62,4 @@ public class AuthorizeUserCommandTask(IIdentityService identityService) : IComma
             return -1;
         }
     }
-} 
+}

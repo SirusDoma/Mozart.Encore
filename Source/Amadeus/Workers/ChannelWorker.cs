@@ -164,4 +164,4 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
         await manager.ClearSessions();
         lifetime.StopApplication();
     }
-} 
+}

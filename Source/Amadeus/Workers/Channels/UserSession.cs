@@ -63,4 +63,4 @@ public sealed class UserSession : Session
     {
         await OnFrameReceived(frame, cancellationToken).ConfigureAwait(false);
     }
-} 
+}

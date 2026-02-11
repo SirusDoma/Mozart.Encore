@@ -19,4 +19,4 @@ public class UserSessionFactory : IUserSessionFactory
     {
         return ActivatorUtilities.CreateInstance<UserSession>(_provider, parameters.Prepend(client).ToArray());
     }
-} 
+}

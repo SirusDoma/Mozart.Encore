@@ -121,4 +121,4 @@ public class StringMessageFieldCodec : MessageFieldCodec
 
         throw new NotSupportedException($"{GetType().Name} does not support encoding '{targetType}'");
     }
-} 
+}
