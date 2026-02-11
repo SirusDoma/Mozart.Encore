@@ -22,7 +22,7 @@ public class Room : Broadcastable, IRoom
 
     public Room(IRoomService service, Session master, RoomMetadata metadata, TimeSpan? musicLoadTimeout = null)
     {
-        _service = service;
+        _service  = service;
         _previous = (RoomMetadata)metadata.Clone();
         _metadata = metadata;
         _slots = [
@@ -122,6 +122,18 @@ public class Room : Broadcastable, IRoom
         set => _metadata.ArenaRandomSeed = value;
     }
 
+    public IList<int> Skills
+    {
+        get => _metadata.Skills;
+        set => _metadata.Skills = value;
+    }
+
+    public int SkillsSeed
+    {
+        get => _metadata.SkillsSeed;
+        set => _metadata.SkillsSeed = value;
+    }
+
     public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
     public IReadOnlyList<ISlot> Slots => _slots;
@@ -136,14 +148,16 @@ public class Room : Broadcastable, IRoom
 
     public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
     public event EventHandler<RoomMusicChangedEventArgs>? MusicChanged;
+    public event EventHandler<RoomAlbumChangedEventArgs>? AlbumChanged;
     public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
     public event EventHandler<RoomStateChangedEventArgs>? StateChanged;
     public event EventHandler<RoomSlotChangedEventArgs>? SlotChanged;
+    public event EventHandler<RoomSkillChangedEventArgs>? SkillChanged;
 
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
 
-    public event EventHandler<Encore.Sessions.SessionEventArgs>? SessionDisconnected;
+    public event EventHandler<SessionEventArgs>? SessionDisconnected;
 
     void IRoom.Register(Session session)
     {
@@ -255,12 +269,23 @@ public class Room : Broadcastable, IRoom
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
-            MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
+            if (_metadata.Mode == GameMode.Jam)
             {
-                MusicId    = _metadata.MusicId,
-                Difficulty = _metadata.Difficulty,
-                Speed      = _metadata.Speed,
-            });
+                AlbumChanged?.Invoke(this, new RoomAlbumChangedEventArgs
+                {
+                    AlbumId = _metadata.MusicId,
+                    Speed  = _metadata.Speed
+                });
+            }
+            else
+            {
+                MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
+                {
+                    MusicId = _metadata.MusicId,
+                    Difficulty = _metadata.Difficulty,
+                    Speed = _metadata.Speed,
+                });
+            }
         }
 
         if (_previous.Arena != _metadata.Arena ||
@@ -279,6 +304,14 @@ public class Room : Broadcastable, IRoom
             {
                 PreviousState = _previous.State,
                 CurrentState  = _metadata.State
+            });
+        }
+
+        if (!_previous.Skills.Equals(_metadata.Skills))
+        {
+            SkillChanged?.Invoke(this, new RoomSkillChangedEventArgs
+            {
+                Skills = _metadata.Skills
             });
         }
 

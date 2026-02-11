@@ -15,6 +15,8 @@ public sealed class MainDbContext(
 {
     public DbSet<User> Users { get; init; }
 
+    public DbSet<UserRanking> UserRankings { get; init; }
+
     public DbSet<Credential> Credentials { get; init; }
 
     public DbSet<AuthSession> Sessions { get; init; }
@@ -27,6 +29,11 @@ public sealed class MainDbContext(
         ConfigureAuth(modelBuilder);
         ConfigureWallet(modelBuilder);
         ConfigureLoadout(modelBuilder);
+        ConfigureRanking(modelBuilder);
+        ConfigureAcquiredMusicList(modelBuilder);
+        ConfigureAttributiveItem(modelBuilder);
+        ConfigureGiftItem(modelBuilder);
+        ConfigureGiftMusic(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -80,10 +87,54 @@ public sealed class MainDbContext(
                 .HasForeignKey<Loadout>(b => b.UserId)
                 .IsRequired(false);
 
+            entity.HasOne<UserRanking>("UserRanking")
+                .WithOne()
+                .HasForeignKey<UserRanking>(r => r.UserId)
+                .IsRequired(false);
+
+            entity.HasMany<AcquiredMusic>(u => u.AcquiredMusicList)
+                .WithOne()
+                .HasForeignKey(a => a.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany<AttributiveItem>("AttributiveItems")
+                .WithOne()
+                .HasForeignKey(a => a.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany<GiftItem>("GiftItems")
+                .WithOne()
+                .HasForeignKey(i => i.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany<GiftMusic>("GiftMusics")
+                .WithOne()
+                .HasForeignKey(m => m.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Navigation("Wallet")
                 .AutoInclude();
 
             entity.Navigation("Loadout")
+                .AutoInclude();
+
+            entity.Navigation("UserRanking")
+                .AutoInclude();
+
+            entity.Navigation(e => e.AcquiredMusicList)
+                .AutoInclude();
+
+            entity.Navigation("AttributiveItems")
+                .AutoInclude();
+
+            entity.Navigation("GiftItems")
+                .AutoInclude();
+
+            entity.Navigation("GiftMusics")
                 .AutoInclude();
 
             entity.HasIndex(e => e.Username)
@@ -203,6 +254,141 @@ public sealed class MainDbContext(
             entity.Property(e => e.UserId)
                 .HasColumnName("USER_INDEX_ID")
                 .ValueGeneratedNever();
+        });
+    }
+
+    private void ConfigureRanking(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserRanking>(entity =>
+        {
+            entity.ToTable("t_o2jam_dumpranking");
+
+            entity.HasKey(e => e.Ranking);
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("User_Index_ID");
+
+            entity.Property(e => e.Ranking)
+                .HasColumnName("Ranking")
+                .ValueGeneratedOnAdd();
+
+            entity.HasIndex(e => e.UserId);
+        });
+    }
+
+    private void ConfigureAttributiveItem(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AttributiveItem>(entity =>
+        {
+            entity.ToTable("t_o2jam_char_attr_item");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("INDEX_ID")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("USER_INDEX_ID");
+
+            entity.Property(e => e.ItemId)
+                .HasColumnName("ITEM_INDEX_ID");
+
+            entity.Property(e => e.Count)
+                .HasColumnName("USED_COUNT");
+
+            entity.Property(e => e.AcquiredAt)
+                .HasColumnName("REG_DATE")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
+
+            entity.Property(e => e.PreviousCount)
+                .HasColumnName("OLD_USED_COUNT")
+                .HasDefaultValue(0);
+
+            entity.HasIndex(e => e.UserId);
+        });
+    }
+
+    private void ConfigureAcquiredMusicList(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AcquiredMusic>(entity =>
+        {
+            entity.ToTable("t_o2jam_musiclist");
+
+            entity.HasKey(e => e.UserId);
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("USER_INDEX_ID")
+                .ValueGeneratedNever();
+
+            entity.Property(e => e.MusicId)
+                .HasColumnName("MUSIC_ID");
+        });
+    }
+
+    private void ConfigureGiftItem(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GiftItem>(entity =>
+        {
+            entity.ToTable("t_o2jam_gift_item");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("Seq")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("User_Index_ID");
+
+            entity.Property(e => e.ItemId)
+                .HasColumnName("ItemID");
+
+            entity.Property(e => e.SenderId)
+                .HasColumnName("Sender_Index_ID");
+
+            entity.Property(e => e.SenderNickname)
+                .HasColumnName("SenderNickname")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.SendDate)
+                .HasColumnName("SendDate")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
+
+            entity.HasIndex(e => e.UserId);
+        });
+    }
+
+    private void ConfigureGiftMusic(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GiftMusic>(entity =>
+        {
+            entity.ToTable("t_o2jam_gift_music");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("Seq")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("User_Index_ID");
+
+            entity.Property(e => e.MusicId)
+                .HasColumnName("Music_ID");
+
+            entity.Property(e => e.SenderId)
+                .HasColumnName("Sender_Index_ID");
+
+            entity.Property(e => e.SenderNickname)
+                .HasColumnName("SenderNickname")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.SendDate)
+                .HasColumnName("SendDate")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
+
+            entity.HasIndex(e => e.UserId);
         });
     }
 }

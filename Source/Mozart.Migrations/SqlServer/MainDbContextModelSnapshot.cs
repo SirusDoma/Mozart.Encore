@@ -22,6 +22,61 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("int")
+                        .HasColumnName("MUSIC_ID");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("t_o2jam_musiclist", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("INDEX_ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("REG_DATE")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int")
+                        .HasColumnName("USED_COUNT");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int")
+                        .HasColumnName("ITEM_INDEX_ID");
+
+                    b.Property<int>("PreviousCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("OLD_USED_COUNT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_char_attr_item", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.AuthSession", b =>
                 {
                     b.Property<int>("UserId")
@@ -82,9 +137,6 @@ namespace Mozart.Migrations.SqlServer.Migrations
                         .HasColumnType("varbinary(max)")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -102,6 +154,86 @@ namespace Mozart.Migrations.SqlServer.Migrations
                         .IsUnique();
 
                     b.ToTable("member", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Seq");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int")
+                        .HasColumnName("ItemID");
+
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("SenderNickname");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_gift_item", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Seq");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("int")
+                        .HasColumnName("Music_ID");
+
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("SenderNickname");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_gift_music", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
@@ -302,13 +434,34 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+                    
                     b.HasIndex("Nickname")
                         .IsUnique();
 
-                    b.HasIndex("Username")
+                    b.ToTable("t_o2jam_charinfo", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.Property<int>("Ranking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Ranking");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ranking"));
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Ranking");
+
+                    b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("t_o2jam_charinfo", (string)null);
+                    b.ToTable("t_o2jam_dumpranking", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -328,11 +481,50 @@ namespace Mozart.Migrations.SqlServer.Migrations
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AcquiredMusicList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AttributiveItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftMusics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
                         .WithOne("Loadout")
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("UserRanking")
+                        .HasForeignKey("Mozart.Data.Entities.UserRanking", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -344,7 +536,18 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
+                    b.Navigation("AcquiredMusicList");
+
+                    b.Navigation("AttributiveItems");
+
+                    b.Navigation("GiftItems");
+
+                    b.Navigation("GiftMusics");
+
                     b.Navigation("Loadout")
+                        .IsRequired();
+
+                    b.Navigation("UserRanking")
                         .IsRequired();
 
                     b.Navigation("Wallet")

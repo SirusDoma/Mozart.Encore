@@ -4,4 +4,3 @@ namespace Encore.Server;
 public class AllowAnonymousAttribute : Attribute
 {
 }
- 

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Encore.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Encore.Sessions;
 
 namespace Encore.Hosting.Extensions;
 

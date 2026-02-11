@@ -1,11 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using Encore.Messaging;
+using Encore.Server;
+using Encore.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-
-using Encore.Server;
-using Encore.Messaging;
-using Encore.Sessions;
 
 namespace Encore.Hosting.Extensions;
 

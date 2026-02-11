@@ -22,6 +22,61 @@ namespace Mozart.Migrations.Postgres.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("integer")
+                        .HasColumnName("MUSIC_ID");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("t_o2jam_musiclist", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("INDEX_ID");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("REG_DATE")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("USED_COUNT");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ITEM_INDEX_ID");
+
+                    b.Property<int>("PreviousCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("OLD_USED_COUNT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_char_attr_item", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.AuthSession", b =>
                 {
                     b.Property<int>("UserId")
@@ -82,9 +137,6 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -102,6 +154,86 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .IsUnique();
 
                     b.ToTable("member", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ItemID");
+
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("SenderNickname");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_gift_item", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("integer")
+                        .HasColumnName("Music_ID");
+
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("SenderNickname");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_gift_music", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
@@ -298,17 +430,38 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
+                    
+                    b.HasIndex("Username")
+                        .IsUnique();
+                    
                     b.HasIndex("Nickname")
                         .IsUnique();
 
-                    b.HasIndex("Username")
+                    b.ToTable("t_o2jam_charinfo", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.Property<int>("Ranking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Ranking");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Ranking"));
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Ranking");
+
+                    b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("t_o2jam_charinfo", (string)null);
+                    b.ToTable("t_o2jam_dumpranking", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -328,11 +481,50 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AcquiredMusicList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AttributiveItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftMusics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
                         .WithOne("Loadout")
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("UserRanking")
+                        .HasForeignKey("Mozart.Data.Entities.UserRanking", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -344,7 +536,18 @@ namespace Mozart.Migrations.Postgres.Migrations
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
+                    b.Navigation("AcquiredMusicList");
+
+                    b.Navigation("AttributiveItems");
+
+                    b.Navigation("GiftItems");
+
+                    b.Navigation("GiftMusics");
+
                     b.Navigation("Loadout")
+                        .IsRequired();
+
+                    b.Navigation("UserRanking")
                         .IsRequired();
 
                     b.Navigation("Wallet")

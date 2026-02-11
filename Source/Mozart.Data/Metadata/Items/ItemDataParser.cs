@@ -34,7 +34,7 @@ public static class ItemDataParser
             short bitflag         = reader.ReadInt16();
             item.Gender           = (Gender)((bitflag >> 7) & 15);
             item.IsNew            = (bitflag >> 11) == 1;
-            item.Quantity         = reader.ReadByte(); // reader.ReadInt16();
+            item.Quantity         = reader.ReadInt16();
             item.GameModifier     = (GameModifier) reader.ReadByte();
             item.GameModifierType = (GameModifierType) reader.ReadByte();
             item.Price.Currency   = (Currency)reader.ReadByte();

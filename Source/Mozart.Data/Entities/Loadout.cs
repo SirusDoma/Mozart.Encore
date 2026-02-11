@@ -113,16 +113,20 @@ public class Loadout
         {
             ItemType.Instrument         => Equip1,
             ItemType.Hair               => Equip2,
-            ItemType.Earring            => Equip3,
+            ItemType.Accessories        => Equip3,
             ItemType.Gloves             => Equip4,
-            ItemType.Accessories        => Equip5,
+            ItemType.Necklace           => Equip5,
             ItemType.Top                => Equip6,
             ItemType.Pants              => Equip7,
             ItemType.Glasses            => Equip8,
-            ItemType.Necklace           => Equip9,
+            ItemType.Earring            => Equip9,
             ItemType.ClothesAccessories => Equip10,
             ItemType.Shoes              => Equip11,
             ItemType.Face               => Equip12,
+            ItemType.Wings              => Equip13,
+            ItemType.MusicalAccessories => Equip14,
+            ItemType.Pet                => Equip15,
+            ItemType.HairAccessories    => Equip16,
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }
@@ -133,26 +137,38 @@ public class Loadout
         {
             case ItemType.Instrument         : Equip1  = itemId; break;
             case ItemType.Hair               : Equip2  = itemId; break;
-            case ItemType.Earring            : Equip3  = itemId; break;
+            case ItemType.Accessories        : Equip3  = itemId; break;
             case ItemType.Gloves             : Equip4  = itemId; break;
-            case ItemType.Accessories        : Equip5  = itemId; break;
+            case ItemType.Necklace           : Equip5  = itemId; break;
             case ItemType.Top                : Equip6  = itemId; break;
             case ItemType.Pants              : Equip7  = itemId; break;
             case ItemType.Glasses            : Equip8  = itemId; break;
-            case ItemType.Necklace           : Equip9  = itemId; break;
+            case ItemType.Earring            : Equip9  = itemId; break;
             case ItemType.ClothesAccessories : Equip10 = itemId; break;
             case ItemType.Shoes              : Equip11 = itemId; break;
             case ItemType.Face               : Equip12 = itemId; break;
+            case ItemType.Wings              : Equip13 = itemId; break;
+            case ItemType.MusicalAccessories : Equip14 = itemId; break;
+            case ItemType.Pet                : Equip15 = itemId; break;
+            case ItemType.HairAccessories    : Equip16 = itemId; break;
             default: throw new ArgumentOutOfRangeException(nameof(type), "Index must be between 1 and 30");
         }
     }
 }
 
-public class Inventory(Loadout loadout) : IReadOnlyList<short>, IEnumerator
+public class Inventory(Loadout loadout, List<AttributiveItem> attributiveItems) : IReadOnlyList<Inventory.BagItem>, IEnumerator
 {
     private int _pointer = -1;
 
-    private class InventoryEnumerator : IEnumerator<short>
+    public class BagItem
+    {
+        public short Id { get; init; }
+        public int Count { get; init; }
+
+        public static readonly BagItem Empty = new() { Id = 0, Count = 0 };
+    }
+
+    private class InventoryEnumerator : IEnumerator<BagItem>
     {
         private readonly Inventory _inventory;
 
@@ -171,7 +187,7 @@ public class Inventory(Loadout loadout) : IReadOnlyList<short>, IEnumerator
             ((IEnumerator)_inventory).Reset();
         }
 
-        public short Current => _inventory[_inventory._pointer];
+        public BagItem Current => _inventory[_inventory._pointer];
 
         object? IEnumerator.Current => _inventory[_inventory._pointer];
 
@@ -180,13 +196,61 @@ public class Inventory(Loadout loadout) : IReadOnlyList<short>, IEnumerator
         }
     }
 
-    public short this[int index]
+    public BagItem this[int index]
     {
-        get => loadout.GetBagItemId(index + 1);
-        set => loadout.SetBagItemId(index + 1, value);
+        get
+        {
+            short id  = loadout.GetBagItemId(index + 1);
+            int count = 0;
+
+            if (id == 0)
+                return BagItem.Empty;
+
+            var attr = attributiveItems.SingleOrDefault(a => a.ItemId == id);
+            if (attr != null)
+                count = attr.Count;
+
+            return new BagItem
+            {
+                Id = id,
+                Count = count
+            };
+        }
+        set
+        {
+            short current = loadout.GetBagItemId(index + 1);
+            loadout.SetBagItemId(index + 1, value.Id);
+
+            if (value.Id == 0 || value.Count <= 0)
+            {
+                // Clear out attributive item properties if any
+                attributiveItems.RemoveAll(a => a.ItemId == current);
+            }
+            else
+            {
+                // Multiple items will be treated as attributive items
+                var attr = attributiveItems.SingleOrDefault(a => a.ItemId == value.Id);
+                if (attr != null)
+                {
+                    attr.PreviousCount = attr.Count;
+                    attr.Count = value.Count;
+                }
+                else
+                {
+                    attributiveItems.Add(new AttributiveItem
+                    {
+                        UserId = loadout.UserId,
+                        ItemId = value.Id,
+                        Count = value.Count,
+                        PreviousCount = 0,
+                        AcquiredAt = DateTime.UtcNow
+                    });
+                }
+            }
+        }
     }
 
-    public IEnumerator<short> GetEnumerator()
+    public IEnumerator<BagItem> GetEnumerator()
     {
         return new InventoryEnumerator(this);
     }

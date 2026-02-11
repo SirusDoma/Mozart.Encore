@@ -1,6 +1,6 @@
+using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
-using Mozart.Data.Entities;
 
 namespace Mozart.Sessions;
 
@@ -19,12 +19,16 @@ public class Actor
         Lose            = user.Lose;
         Draw            = user.Draw;
         Experience      = user.Experience;
+        Ranking         = user.Ranking;
         IsAdministrator = user.IsAdministrator;
         Equipments      = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory = user.Inventory.Select(e => (int)e).ToList();
+        Inventory        = user.Inventory.ToList();
+        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        GiftItems        = user.GiftBox.Items;
+        GiftMusics       = user.GiftBox.Musics;
     }
 
     public void Sync(User user)
@@ -36,14 +40,20 @@ public class Actor
         Lose            = user.Lose;
         Draw            = user.Draw;
         Experience      = user.Experience;
+        Ranking         = user.Ranking;
         Equipments      = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory = user.Inventory.Select(e => (int)e).ToList();
+        Inventory        = user.Inventory.ToList();
+        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        GiftItems        = user.GiftBox.Items;
+        GiftMusics       = user.GiftBox.Musics;
     }
 
     public required string Token { get; init; }
+
+    public required string ClientId { get; init; }
 
     public int UserId { get; init; }
 
@@ -67,15 +77,21 @@ public class Actor
 
     public int Experience { get; set; }
 
+    public int Ranking { get; set; }
+
     public bool IsAdministrator { get; init; }
 
     public Dictionary<ItemType, int> Equipments { get; set; }
 
-    public IList<int> Inventory { get; set; }
+    public IList<Inventory.BagItem> Inventory { get; set; }
 
-    public IList<int> AttributiveItemIds { get; set; } = [];
+    public IReadOnlyList<GiftItem> GiftItems { get; set; }
 
-    public IReadOnlyList<int> MusicIds { get; set; } = [];
+    public IReadOnlyList<GiftMusic> GiftMusics { get; set; }
+
+    public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
+
+    public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
 
     public override string ToString()
     {
