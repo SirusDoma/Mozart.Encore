@@ -6,6 +6,9 @@ This project is inspired by the _Mozart Project 0.028_.
 Supported client version: **v3.82\* (NX)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
+> [!IMPORTANT]
+> See other branches for different client version support.
+
 ## Features
 
 - Zero-Configuration for quick start.
