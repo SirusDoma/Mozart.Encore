@@ -25,6 +25,10 @@ public class User
 
     public int Experience { get; set; }
 
+    public int GemStar { get; set; }
+
+    public int Ticket { get; set; } = 10;
+
     public required bool IsAdministrator { get; init; }
 
     [NotMapped]
@@ -43,6 +47,22 @@ public class User
 
     public int Ranking => UserRanking.Ranking;
 
+    [NotMapped]
+    public int MembershipType
+    {
+        get => Credential.MembershipType;
+        set => Credential.MembershipType = value;
+    }
+
+    [NotMapped]
+    public DateTime MembershipDate
+    {
+        get => Credential.MembershipDate;
+        set => Credential.MembershipDate = value;
+    }
+
+    private Credential Credential { get; init; } = new() { Username = string.Empty, Password = [] };
+
     private Wallet Wallet { get; init; } = new();
 
     private Loadout Loadout { get; init; } = new();
@@ -56,6 +76,8 @@ public class User
     private List<GiftMusic> GiftMusics { get; init; } = [];
 
     public List<AcquiredMusic> AcquiredMusicList { get; init; } = [];
+
+    public List<CompletedMission> CompletedMissionList { get; init; } = [];
 
     [NotMapped]
     public Inventory Inventory => new(Loadout, AttributiveItems);

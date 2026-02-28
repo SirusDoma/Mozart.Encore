@@ -118,12 +118,51 @@ namespace Mozart.Migrations.MySql.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.CompletedMission", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("GatewayId")
+                        .HasColumnType("int")
+                        .HasColumnName("GatewayID");
+
+                    b.Property<int>("SetId")
+                        .HasColumnType("int")
+                        .HasColumnName("SetID");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int")
+                        .HasColumnName("Level");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("int")
+                        .HasColumnName("Rank");
+
+                    b.HasKey("UserId", "GatewayId", "SetId", "Level");
+
+                    b.ToTable("t_o2jam_user_mission", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    b.Property<DateTime>("MembershipDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("vipdate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("MembershipType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("vip");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
@@ -390,6 +429,9 @@ namespace Mozart.Migrations.MySql.Migrations
                     b.Property<int>("Experience")
                         .HasColumnType("int");
 
+                    b.Property<int>("GemStar")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Gender")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("Sex");
@@ -409,6 +451,9 @@ namespace Mozart.Migrations.MySql.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("USER_NICKNAME");
+
+                    b.Property<int>("Ticket")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -482,6 +527,24 @@ namespace Mozart.Migrations.MySql.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.CompletedMission", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("CompletedMissionList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Credential")
+                        .HasForeignKey("Mozart.Data.Entities.Credential", "Username")
+                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -524,6 +587,11 @@ namespace Mozart.Migrations.MySql.Migrations
                     b.Navigation("AcquiredMusicList");
 
                     b.Navigation("AttributiveItems");
+
+                    b.Navigation("CompletedMissionList");
+
+                    b.Navigation("Credential")
+                        .IsRequired();
 
                     b.Navigation("GiftItems");
 

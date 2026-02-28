@@ -175,21 +175,6 @@ public class ScoreTracker : IScoreTracker
                 Session  = member.Session
             });
 
-            if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
-            {
-                for (int j = 0; j < Entities.Room.MaxCapacity; j++)
-                {
-                    if (Room.Slots[j] is Entities.Room.VacantSlot or Entities.Room.LockedSlot)
-                    {
-                        UserTracked?.Invoke(this, new ScoreTrackEventArgs
-                        {
-                            MemberId = j,
-                            Session = null!
-                        });
-                    }
-                }
-            }
-
             return;
         }
 
@@ -215,9 +200,7 @@ public class ScoreTracker : IScoreTracker
         {
             // Client send exit room, but just to be safe - let's remove the member here
             // Probably need to revise in the future network version
-            if (Room.Metadata.Mode != GameMode.Single)
-                state.Session.Exit(Room);
-            else if (Completed)
+            if (Completed)
                 Room.CompleteGame();
         }
     }
@@ -250,73 +233,18 @@ public class ScoreTracker : IScoreTracker
 
         if (Completed)
         {
-            // By default, the game finished after a song is ended
-            bool finalized = true;
-
-            // However, album mode plays several songs in succession
-            // TODO: Create a separate score tracker class for album mode
             if (Room.Mode == GameMode.Jam)
             {
-                var album   = Room.Channel.GetAlbumList()[Room.MusicId];
-                var current = album.Entries[_scores.TryGetValue(state.MemberId, out var last) ? last.Count : 0];
-
-                // Trigger score completion for current song
+                // Album mode is not fully implemented in X2
+                // Only accessible by workaround, and it is bugged. Cannot support multiple music.
                 ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
                 {
                     Room       = Room,
-                    MusicId    = current.Id,
-                    Difficulty = current.Difficulty,
+                    MusicId    = Room.MusicId,
+                    Difficulty = Room.Difficulty,
                     States     = completedStates,
-                    Mode       = GameMode.Versus
+                    Mode       = GameMode.Jam
                 });
-
-                // In album mode, scores submitted each music transition.
-                // Therefore, capture the score and clear the tracker states once all scores are submitted.
-                foreach (var completedState in completedStates)
-                {
-                    int memberId = completedState.MemberId;
-                    if (!_scores.ContainsKey(memberId))
-                        _scores[memberId] = [];
-
-                    _scores[memberId].Add(completedState);
-                }
-
-                // Determine whether the game is completed (all songs are completed)
-                finalized = _states.All(s => s.Life == 0) || _scores.Max(c => c.Value.Count) >= album.Entries.Count;
-
-                // Re-build the states, either for finalized states or states for the next song
-                // The client will issue `ConfirmMusicLoaded` request during the song transition
-                _states.Clear();
-
-                if (finalized)
-                {
-                    foreach ((int memberId, var finalState) in _scores)
-                    {
-                        _states.Add(new UserScore
-                        {
-                            Session     = finalState.Last().Session,
-                            MemberId    = memberId,
-                            Cool        = finalState.Sum(s => s.Cool),
-                            Good        = finalState.Sum(s => s.Good),
-                            Bad         = finalState.Sum(s => s.Bad),
-                            Miss        = finalState.Sum(s => s.Miss),
-                            MaxCombo    = finalState.Max(s => s.MaxCombo),
-                            MaxJamCombo = finalState.Max(s => s.MaxJamCombo),
-                            Score       = (uint)finalState.Sum(s => s.Score),
-                            Life        = finalState.Last().Life,
-                            Clear       = finalState.Last().Life > 0,
-                            Completed   = true,
-                        });
-                    }
-
-                    // Trigger album completion event
-                    ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
-                    {
-                        Room    = Room,
-                        States  = completedStates,
-                        Mode    = GameMode.Jam
-                    });
-                }
             }
             else
             {
@@ -334,13 +262,10 @@ public class ScoreTracker : IScoreTracker
 
             // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
             // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
-            if (finalized)
-            {
-                foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
-                    member.IsReady = member.IsMaster;
+            foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
+                member.IsReady = member.IsMaster;
 
-                Room.CompleteGame();
-            }
+            Room.CompleteGame();
         }
     }
 
