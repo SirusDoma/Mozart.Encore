@@ -8,50 +8,62 @@ public class Actor
 {
     public Actor(User user)
     {
-        UserId          = user.Id;
-        Username        = user.Username;
-        Nickname        = user.Nickname;
-        Gender          = user.Gender;
-        Gem             = user.Gem;
-        Point           = user.Point;
-        Level           = user.Level;
-        Win             = user.Win;
-        Lose            = user.Lose;
-        Draw            = user.Draw;
-        Experience      = user.Experience;
-        Ranking         = user.Ranking;
-        IsAdministrator = user.IsAdministrator;
-        Equipments      = user.Equipments.ToDictionary(
+        UserId               = user.Id;
+        Username             = user.Username;
+        Nickname             = user.Nickname;
+        Gender               = user.Gender;
+        Gem                  = user.Gem;
+        Point                = user.Point;
+        Level                = user.Level;
+        Win                  = user.Win;
+        Lose                 = user.Lose;
+        Draw                 = user.Draw;
+        Experience           = user.Experience;
+        Ranking              = user.Ranking;
+        GemStar              = user.GemStar;
+        Ticket               = user.Ticket;
+        MembershipType       = user.MembershipType;
+        MembershipDate       = user.MembershipDate;
+        IsAdministrator      = user.IsAdministrator;
+        Equipments           = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory        = user.Inventory.ToList();
-        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
-        GiftItems        = user.GiftBox.Items;
-        GiftMusics       = user.GiftBox.Musics;
+        Inventory            = user.Inventory.ToList();
+        AcquiredMusicIds     = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        CompletedMissionList = user.CompletedMissionList;
+        GiftItems            = user.GiftBox.Items;
+        GiftMusics           = user.GiftBox.Musics;
     }
 
     public void Sync(User user)
     {
-        Gem             = user.Gem;
-        Point           = user.Point;
-        Level           = user.Level;
-        Win             = user.Win;
-        Lose            = user.Lose;
-        Draw            = user.Draw;
-        Experience      = user.Experience;
-        Ranking         = user.Ranking;
-        Equipments      = user.Equipments.ToDictionary(
+        Gem                   = user.Gem;
+        Point                 = user.Point;
+        Level                 = user.Level;
+        Win                   = user.Win;
+        Lose                  = user.Lose;
+        Draw                  = user.Draw;
+        Experience            = user.Experience;
+        Ranking               = user.Ranking;
+        GemStar               = user.GemStar;
+        Ticket                = user.Ticket;
+        MembershipType        = user.MembershipType;
+        MembershipDate        = user.MembershipDate;
+        Equipments            = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory        = user.Inventory.ToList();
-        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
-        GiftItems        = user.GiftBox.Items;
-        GiftMusics       = user.GiftBox.Musics;
+        Inventory             = user.Inventory.ToList();
+        AcquiredMusicIds      = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        CompletedMissionList  = user.CompletedMissionList;
+        GiftItems             = user.GiftBox.Items;
+        GiftMusics            = user.GiftBox.Musics;
     }
 
     public required string Token { get; init; }
+
+    public int ServerId { get; set; }
 
     public required string ClientId { get; init; }
 
@@ -67,6 +79,8 @@ public class Actor
 
     public int Point { get; set; }
 
+    public int Ticket { get; set; }
+
     public int Level { get; set; }
 
     public int Win { get; set; }
@@ -79,6 +93,12 @@ public class Actor
 
     public int Ranking { get; set; }
 
+    public int GemStar { get; set; }
+
+    public int MembershipType { get; set; }
+
+    public DateTime MembershipDate { get; set; }
+
     public bool IsAdministrator { get; init; }
 
     public Dictionary<ItemType, int> Equipments { get; set; }
@@ -90,6 +110,8 @@ public class Actor
     public IReadOnlyList<GiftMusic> GiftMusics { get; set; }
 
     public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
+
+    public List<CompletedMission> CompletedMissionList { get; set; }
 
     public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
 

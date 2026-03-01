@@ -123,6 +123,33 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.CompletedMission", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("GatewayId")
+                        .HasColumnType("integer")
+                        .HasColumnName("GatewayID");
+
+                    b.Property<int>("SetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("SetID");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("Level");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("Rank");
+
+                    b.HasKey("UserId", "GatewayId", "SetId", "Level");
+
+                    b.ToTable("t_o2jam_user_mission", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
                 {
                     b.Property<long>("Id")
@@ -131,6 +158,18 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MembershipDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vipdate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("MembershipType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("vip");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
@@ -403,6 +442,9 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.Property<int>("Experience")
                         .HasColumnType("integer");
 
+                    b.Property<int>("GemStar")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("Gender")
                         .HasColumnType("boolean")
                         .HasColumnName("Sex");
@@ -423,6 +465,9 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("USER_NICKNAME");
 
+                    b.Property<int>("Ticket")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -430,14 +475,14 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
-                    
-                    b.HasIndex("Username")
-                        .IsUnique();
-                    
+
                     b.HasIndex("Nickname")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("t_o2jam_charinfo", (string)null);
@@ -497,6 +542,24 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.CompletedMission", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("CompletedMissionList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Credential")
+                        .HasForeignKey("Mozart.Data.Entities.Credential", "Username")
+                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -539,6 +602,11 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.Navigation("AcquiredMusicList");
 
                     b.Navigation("AttributiveItems");
+
+                    b.Navigation("CompletedMissionList");
+
+                    b.Navigation("Credential")
+                        .IsRequired();
 
                     b.Navigation("GiftItems");
 

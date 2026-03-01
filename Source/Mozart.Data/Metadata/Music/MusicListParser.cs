@@ -47,10 +47,10 @@ public static class MusicListParser
             // P1: Unknown, observed to be always 0
             int p1 = reader.ReadInt32();
 
-            // P2: Unknown, sometimes 1, but otherwise 0
+            // P2: Unknown, observed to be always 0
             int p2 = reader.ReadInt32();
 
-            // P3: Unknown, sometimes 0, but otherwise 1
+            // P3: Unknown, observed to be always 0
             int p3 = reader.ReadInt32();
 
             // Regardless of parameters, it is marked as new (even if all parameters are 0)
@@ -58,31 +58,28 @@ public static class MusicListParser
                 header.IsNew = true;
         }
 
-        // -- Premium section
-        // Mainly used to mark music as paid music and need to be acquired in music shop
+        // -- Mission section
+        // Mainly used for mission mapping
 
         songCount = reader.ReadInt32();
         for (int i = 0; i < songCount; i++)
         {
             int id = reader.ReadInt32();
 
-            // The exact payload is unknown, however it is confirmed they are 3 integers, presumably prices
-
-            // P1: Unknown, observed to be either 10 or 20 most of the time, but there are other values as well
-            //     Presumably to be price with primary premium currency (e.g, e-Point, MCash, etc)
-            int p1 = reader.ReadInt32();
+            // Difficulty: which difficulty to play for this song mission
+            var difficulty = (Difficulty)reader.ReadInt32();
 
             // P2: Unknown, no occurrence other than 0
-            //     Presumably to be price with secondary premium currency (e.g, O2Cash, MusicCash)
             int p2 = reader.ReadInt32();
 
-            // P3: Unknown, no occurrence other than 0
-            //     Presumably to be price with in-game currency (Gem)
-            int p3 = reader.ReadInt32();
+            // Level separated from the song level
+            int level = reader.ReadInt32();
 
-            // Regardless of parameters, it is marked as new (even if all parameters are 0)
             if (headers.TryGetValue(id, out var header))
-                header.IsPurchasable = true;
+            {
+                header.MissionDifficulty = difficulty;
+                header.MissionLevel = level;
+            }
         }
 
         // -- Extra metadata section
@@ -102,16 +99,19 @@ public static class MusicListParser
             //     But there's a chance that it is actually a null terminated string
             string p1 = Encoding.UTF8.GetString(reader.ReadBytes(11)).Trim('\0');
 
-            // P2: Unknown,no occurrence other than 0
-            int p2 = reader.ReadInt32();
+            // P2: Unknown, no occurrence other than 0
+            byte p2 = reader.ReadByte();
 
-            // P3: Unknown, observed always to be `1243692` (`0x12FA2C`)
+            // P3: Unknown, no occurrence other than 0
             //     It might be possible that it is not int32
             int p3 = reader.ReadInt32();
 
-            // P4: Unknown, observed always to be `4540192` (`0x454720`)
-            //     It might be possible that it is not int32
+            // P4: Unknown
             int p4 = reader.ReadInt32();
+
+            // P5: Unknown
+            //     It might be possible that it is not int32
+            int p5 = reader.ReadInt32();
 
             if (headers.TryGetValue(id, out var header))
                 header.ReleaseDate = DateOnly.ParseExact(p1, "yyyy-MM-dd");

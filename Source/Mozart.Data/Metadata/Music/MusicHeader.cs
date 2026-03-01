@@ -60,7 +60,8 @@ public class MusicHeader
 
     public bool IsNew { get; set; }
 
-    public bool IsPurchasable { get; set; }
+    public Difficulty MissionDifficulty { get; set; }
+    public int MissionLevel { get; set; }
 
     public DateOnly ReleaseDate { get; set; }
 }

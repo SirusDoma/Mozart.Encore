@@ -72,10 +72,6 @@ public class Room : Broadcastable, IRoom
 
     public RoomState State => _metadata.State;
 
-    public GameMode Mode => _metadata.Mode;
-
-    public string Password => _metadata.Password;
-
     public int MinLevelLimit => _metadata.MinLevelLimit;
 
     public int MaxLevelLimit => _metadata.MaxLevelLimit;
@@ -92,10 +88,29 @@ public class Room : Broadcastable, IRoom
         set => _metadata.Title = value;
     }
 
+    public string Password
+    {
+        get => _metadata.Password;
+        set => _metadata.Password = value;
+    }
+
     public int MusicId
     {
         get => _metadata.MusicId;
         set => _metadata.MusicId = value;
+    }
+
+
+    public int MissionLevel
+    {
+        get => _metadata.MissionLevel;
+        set => _metadata.MissionLevel = value;
+    }
+
+    public GameMode Mode
+    {
+        get => _metadata.Mode;
+        set => _metadata.Mode = value;
     }
 
     public Difficulty Difficulty
@@ -134,6 +149,12 @@ public class Room : Broadcastable, IRoom
         set => _metadata.SkillsSeed = value;
     }
 
+    public bool TeamEnabled
+    {
+        get => _metadata.TeamEnabled;
+        set => _metadata.TeamEnabled = value;
+    }
+
     public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
     public IReadOnlyList<ISlot> Slots => _slots;
@@ -146,13 +167,14 @@ public class Room : Broadcastable, IRoom
     public event EventHandler<RoomUserTeamChangedEventArgs>? UserTeamChanged;
     public event EventHandler<RoomUserReadyStateChangedEventArgs>? UserReadyStateChanged;
 
-    public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
     public event EventHandler<RoomMusicChangedEventArgs>? MusicChanged;
     public event EventHandler<RoomAlbumChangedEventArgs>? AlbumChanged;
     public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
     public event EventHandler<RoomStateChangedEventArgs>? StateChanged;
     public event EventHandler<RoomSlotChangedEventArgs>? SlotChanged;
     public event EventHandler<RoomSkillChangedEventArgs>? SkillChanged;
+    public event EventHandler<RoomModeChangedEventArgs>? ModeChanged;
+    public event EventHandler<RoomTeamToggleChangedEventArgs>? TeamToggleChanged;
 
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
@@ -257,15 +279,8 @@ public class Room : Broadcastable, IRoom
 
     public void SaveMetadataChanges()
     {
-        if (_previous.Title != _metadata.Title)
-        {
-            TitleChanged?.Invoke(this, new RoomTitleChangedEventArgs
-            {
-                Title = _metadata.Title
-            });
-        }
-
         if (_previous.MusicId != _metadata.MusicId ||
+            _previous.MissionLevel != _metadata.MissionLevel ||
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
@@ -282,6 +297,7 @@ public class Room : Broadcastable, IRoom
                 MusicChanged?.Invoke(this, new RoomMusicChangedEventArgs
                 {
                     MusicId = _metadata.MusicId,
+                    MissionLevel = _metadata.MissionLevel,
                     Difficulty = _metadata.Difficulty,
                     Speed = _metadata.Speed,
                 });
@@ -312,6 +328,27 @@ public class Room : Broadcastable, IRoom
             SkillChanged?.Invoke(this, new RoomSkillChangedEventArgs
             {
                 Skills = _metadata.Skills
+            });
+        }
+
+        if (_previous.Mode != _metadata.Mode ||
+            _previous.Title != _metadata.Title ||
+            _previous.Password != _metadata.Password)
+        {
+            ModeChanged?.Invoke(this, new RoomModeChangedEventArgs
+            {
+                Title       = _metadata.Title,
+                Mode        = _metadata.Mode,
+                Password    = _metadata.Password,
+                TeamEnabled = _metadata.TeamEnabled
+            });
+        }
+
+        if (_previous.TeamEnabled != _metadata.TeamEnabled)
+        {
+            TeamToggleChanged?.Invoke(this, new RoomTeamToggleChangedEventArgs
+            {
+                Enabled = _metadata.TeamEnabled
             });
         }
 
