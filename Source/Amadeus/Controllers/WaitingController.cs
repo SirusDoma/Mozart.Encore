@@ -1,6 +1,6 @@
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages.Events;
-using Amadeus.Messages.Events.Waiting;
+using Amadeus.Messages.Events;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
 using Encore.Server;
@@ -128,10 +128,10 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public async Task SetRoomSkill(SetRoomSkillRequest request, CancellationToken cancellationToken)
+    public WaitingSkillChangedEventData SetRoomSkill(SetRoomSkillRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.SetRoomMusic,
+            (int)RequestCommand.SetRoomSkill,
             "Update room [{RoomId:000}] skill settings: {Status}",
             Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
         );
@@ -140,10 +140,10 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
         Room.SkillsSeed = Random.Shared.Next(0, int.MaxValue); // TODO: Crack how seed actually used in client
         Room.SaveMetadataChanges();
 
-        await Session.WriteMessage(new WaitingSkillChangedEventData
+        return new WaitingSkillChangedEventData
         {
             Skills = request.Skills
-        }, cancellationToken);
+        };
     }
 
     [CommandHandler]
