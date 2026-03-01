@@ -82,7 +82,7 @@ public static class StreamExtensions
             if (count < (ulong)maxCount)
                 count++;
             else if (maxCount > 0)
-                bytes = encoding.GetBytes($"{value[..(maxCount-1)]}");
+                bytes = bytes.Take(maxCount - 1).ToArray();
         }
 
         if (prefix != TypeCode.Empty)

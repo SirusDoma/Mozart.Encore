@@ -283,21 +283,7 @@ public class Room : Broadcastable, IRoom
         }
 
         // Capture state
-        _previous = new RoomMetadata
-        {
-            Id              = _metadata.Id,
-            Title           = _metadata.Title,
-            Mode            = _metadata.Mode,
-            MusicId         = _metadata.MusicId,
-            Difficulty      = _metadata.Difficulty,
-            Speed           = _metadata.Speed,
-            MinLevelLimit   = _metadata.MinLevelLimit,
-            MaxLevelLimit   = _metadata.MaxLevelLimit,
-            Arena           = _metadata.Arena,
-            ArenaRandomSeed = _metadata.ArenaRandomSeed,
-            Password        = _metadata.Password,
-            State           = _metadata.State
-        };
+        _previous = (RoomMetadata)_metadata.Clone();
     }
 
     public void UpdateReadyState(Session session)
