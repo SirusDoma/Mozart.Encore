@@ -59,7 +59,7 @@
       <None Update="Itemdata.dat">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="OJNList.dat">
+      <None Update="X2OJNList.dat">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
