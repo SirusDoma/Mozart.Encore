@@ -44,10 +44,10 @@ Supported client version: **v2.33 (X2)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10                    |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (X2)               |
+| Build                                | Supported client version |
+|--------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)   | v3.10                    |
+| [Amadeus.Encore](../../tree/amadeus) | v3.82 (NX)               |
 
 ## Features
 
