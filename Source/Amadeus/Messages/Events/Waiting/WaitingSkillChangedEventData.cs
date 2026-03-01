@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Amadeus.Messages.Events.Waiting;
+namespace Amadeus.Messages.Events;
 
 public class WaitingSkillChangedEventData : IMessage
 {

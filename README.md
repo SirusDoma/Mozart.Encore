@@ -182,9 +182,9 @@ Use the following command to create a new migration:
                              --startup-project Source\Amadeus\Amadeus.csproj \
                              --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
-                             -- --Auth:Mode=<auth mode> \
-                             --Db:Driver=<driver> \
-                             --Db:Url="<connection string>"
+                             -- Auth:Mode=<auth mode> \
+                             Db:Driver=<driver> \
+                             Db:Url="<connection string>"
 ```
 
 >[!IMPORTANT]
@@ -211,9 +211,9 @@ Run the following command to execute the migration:
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
                            --startup-project Source\Amadeus\Amadeus.csproj \
                            --context Mozart.Data.Contexts.MainDbContext \
-                           -- --Auth:Mode=<auth mode> \
-                           --Db:Driver=<driver> \
-                           --Db:Url="<connection string>"
+                           -- Auth:Mode=<auth mode> \
+                           Db:Driver=<driver> \
+                           Db:Url="<connection string>"
 ```
 
 # Web Server
