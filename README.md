@@ -6,8 +6,12 @@ This project is inspired by the _Mozart Project 0.028_.
 Supported client version: **v3.82\* (NX)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
-> [!IMPORTANT]
-> See other branches for different client version support.
+### Other Builds
+
+| Build                                     | Supported client version |
+|-------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)        | v3.10                    |
+| [CrossTime.Encore](../../tree/cross-time) | v2.33 (X2)               |
 
 ## Features
 
