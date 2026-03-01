@@ -31,6 +31,7 @@ public sealed class MainDbContext(
         ConfigureLoadout(modelBuilder);
         ConfigureRanking(modelBuilder);
         ConfigureAcquiredMusicList(modelBuilder);
+        ConfigureCompletedMission(modelBuilder);
         ConfigureAttributiveItem(modelBuilder);
         ConfigureGiftItem(modelBuilder);
         ConfigureGiftMusic(modelBuilder);
@@ -77,6 +78,12 @@ public sealed class MainDbContext(
                     flag    => flag != 0
                 );
 
+            entity.HasOne<Credential>("Credential")
+                .WithOne()
+                .HasPrincipalKey<User>(u => u.Username)
+                .HasForeignKey<Credential>(c => c.Username)
+                .IsRequired();
+
             entity.HasOne<Wallet>("Wallet")
                 .WithOne()
                 .HasForeignKey<Wallet>(c => c.UserId)
@@ -98,6 +105,12 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasMany<CompletedMission>(u => u.CompletedMissionList)
+                .WithOne()
+                .HasForeignKey(m => m.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasMany<AttributiveItem>("AttributiveItems")
                 .WithOne()
                 .HasForeignKey(a => a.UserId)
@@ -116,6 +129,9 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.Navigation("Credential")
+                .AutoInclude();
+
             entity.Navigation("Wallet")
                 .AutoInclude();
 
@@ -126,6 +142,9 @@ public sealed class MainDbContext(
                 .AutoInclude();
 
             entity.Navigation(e => e.AcquiredMusicList)
+                .AutoInclude();
+
+            entity.Navigation(e => e.CompletedMissionList)
                 .AutoInclude();
 
             entity.Navigation("AttributiveItems")
@@ -181,6 +200,14 @@ public sealed class MainDbContext(
                         str => Encoding.UTF8.GetBytes(str)
                     );
             }
+
+            entity.Property(e => e.MembershipType)
+                .HasColumnName("vip")
+                .HasDefaultValue(0);
+
+            entity.Property(e => e.MembershipDate)
+                .HasColumnName("vipdate")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             entity.Property<DateTime>("registdate")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
@@ -323,6 +350,33 @@ public sealed class MainDbContext(
 
             entity.Property(e => e.MusicId)
                 .HasColumnName("MUSIC_ID");
+        });
+    }
+
+    private void ConfigureCompletedMission(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CompletedMission>(entity =>
+        {
+            entity.ToTable("t_o2jam_user_mission");
+
+            entity.HasKey(e => new { e.UserId, e.GatewayId, e.SetId, e.Level });
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("USER_INDEX_ID")
+                .ValueGeneratedNever();
+
+            entity.Property(e => e.GatewayId)
+                .HasColumnName("GatewayID");
+
+            entity.Property(e => e.SetId)
+                .HasColumnName("SetID");
+
+            entity.Property(e => e.Level)
+                .HasColumnName("Level");
+
+            entity.Property(e => e.Rank)
+                .HasColumnName("Rank")
+                .HasConversion<int>();
         });
     }
 

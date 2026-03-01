@@ -68,9 +68,6 @@ public class RoomService : Broadcastable, IRoomService
             throw new InvalidOperationException("Channel is full");
 
         int musicId = session.GetAuthorizedToken<Actor>().InstalledMusicIds.FirstOrDefault((ushort)0);
-        if (mode == GameMode.Jam)
-            musicId = channel.GetAlbumList().FirstOrDefault().Value.AlbumId;
-
         for (int i = 0; i < channel.Capacity; i++)
         {
             var room = new Room(this, session, new RoomMetadata
@@ -79,6 +76,7 @@ public class RoomService : Broadcastable, IRoomService
                 Title           = title,
                 Mode            = mode,
                 MusicId         = musicId,
+                MissionLevel    = 0,
                 Difficulty      = Difficulty.EX,
                 Speed           = GameSpeed.X10,
                 MinLevelLimit   = minLevelLimit,

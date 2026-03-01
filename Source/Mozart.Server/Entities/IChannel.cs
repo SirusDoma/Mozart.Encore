@@ -12,10 +12,7 @@ public interface IChannel : IBroadcastable
     int UserCount   { get; }
     float GemRates  { get; }
     float ExpRates  { get; }
-    bool? FreeMusic { get; }
-
     string MusicListFileName { get; }
-    string AlbumListFileName { get; }
     string ItemDataFileName  { get; }
 
     void Register(Session session);
@@ -23,6 +20,5 @@ public interface IChannel : IBroadcastable
     void Remove(Session session);
 
     IReadOnlyDictionary<int, MusicHeader> GetMusicList();
-    IReadOnlyDictionary<int, AlbumHeader> GetAlbumList();
     IReadOnlyDictionary<int, ItemData> GetItemData();
 }

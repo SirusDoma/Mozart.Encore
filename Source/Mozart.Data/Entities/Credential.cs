@@ -7,4 +7,8 @@ public class Credential
     public required string Username { get; init; }
 
     public required byte[] Password { get; init; }
+
+    public int MembershipType { get; set; }
+
+    public DateTime MembershipDate { get; set; }
 }
