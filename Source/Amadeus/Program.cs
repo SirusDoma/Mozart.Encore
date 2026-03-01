@@ -30,34 +30,36 @@ namespace Amadeus;
 
 public class Program
 {
-    public static Version Version        => new(2, 0, 0);
+    public static Version Version        => new(2, 0, 1);
     public static Version NetworkVersion => new(3, 82);
-    public static string RepositoryUrl   => "https://github.com/SirusDoma/Amadeus.Encore";
+    public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
     {
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Server:Mode"]                 = "Full",
-                ["Server:Address"]              = "127.0.0.1",
-                ["Server:Port"]                 = "15010",
-                ["Server:MaxConnections"]       = ((int)SocketOptionName.MaxConnections).ToString(),
-                ["Server:PacketBufferSize"]     = "4096",
-                ["Http:Enabled"]                = "true",
-                ["Http:Address"]                = "127.0.0.1",
-                ["Http:Port"]                   = "15000",
-                ["Db:Driver"]                   = "Sqlite",
-                ["Db:Name"]                     = "O2JAM",
-                ["Db:Url"]                      = "Data Source=O2JAM.db",
-                ["Game:AllowSoloInVersus"]      = "true",
+                ["Server:Mode"]                     = "Full",
+                ["Server:Address"]                  = "127.0.0.1",
+                ["Server:Port"]                     = "15010",
+                ["Server:MaxConnections"]           = ((int)SocketOptionName.MaxConnections).ToString(),
+                ["Server:PacketBufferSize"]         = "4096",
+                ["Http:Enabled"]                    = "true",
+                ["Http:Address"]                    = "127.0.0.1",
+                ["Http:Port"]                       = "15000",
+                ["Db:Driver"]                       = "Sqlite",
+                ["Db:Name"]                         = "O2JAM",
+                ["Db:Url"]                          = "Data Source=O2JAM.db",
+                ["Game:AllowSoloInVersus"]          = "true",
                 ["Game:SingleModeRewardLevelLimit"] = "10",
-                ["Metadata:ItemData"]           = "Itemdata.dat",
-                ["Gateway:Channels:0:Id"]       = "0",
-                ["Auth:Mode"]                   = "Default",
-                ["Auth:RevokeOnStartp"]         = "true",
-                ["Score:Gem"]                   = "1.0",
-                ["Score:Exp"]                   = "1.0"
+                ["Metadata:MusicList"]              = "OJNList.dat",
+                ["Metadata:AlbumList"]              = "AlbumList.ojs",
+                ["Metadata:ItemData"]               = "Itemdata.dat",
+                ["Gateway:Channels:0:Id"]           = "0",
+                ["Auth:Mode"]                       = "Default",
+                ["Auth:RevokeOnStartp"]             = "true",
+                ["Score:Gem"]                       = "1.0",
+                ["Score:Exp"]                       = "1.0"
             })
             .AddIniFile("config.ini", true, true)
             // TODO: Use EnvironmentVariable instead
