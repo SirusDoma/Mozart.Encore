@@ -123,7 +123,7 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
     public WaitingSkillChangedEventData SetRoomSkill(SetRoomSkillRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.SetRoomMusic,
+            (int)RequestCommand.SetRoomSkill,
             "Update room [{RoomId:000}] skill settings: {Status}",
             Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
         );
