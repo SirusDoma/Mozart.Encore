@@ -126,7 +126,7 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -353,7 +353,7 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
                     

@@ -302,6 +302,9 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
             else
                 value = DecodeValue(reader, memberType, attribute);
 
+            if (!memberType.IsInstanceOfType(value))
+                value = Convert.ChangeType(value, memberType);
+
             member.SetValue(message, value);
         }
 

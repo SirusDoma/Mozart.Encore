@@ -10,6 +10,8 @@ public interface IUserRepository : IRepository<User>
 
     Task<User?> FindByUsername(string username, CancellationToken cancellationToken = default);
 
+    Task<User?> FindByNickname(string nickname, CancellationToken cancellationToken = default);
+
     Task Update(User user, CancellationToken cancellation = default);
 }
 
@@ -24,6 +26,12 @@ public class UserRepository(IDbContextFactory<MainDbContext> factory)
     public Task<User?> FindByUsername(string username, CancellationToken cancellationToken)
     {
         return DbSet.SingleOrDefaultAsync(c => c.Username == username, cancellationToken);
+    }
+
+    public Task<User?> FindByNickname(string nickname, CancellationToken cancellationToken)
+    {
+        return DbSet.SingleOrDefaultAsync(c =>
+            EF.Functions.Like(c.Nickname, nickname), cancellationToken);
     }
 
     public Task Update(User user, CancellationToken cancellation = default)
