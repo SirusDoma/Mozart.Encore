@@ -75,9 +75,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("BLOB")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)

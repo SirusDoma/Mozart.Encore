@@ -82,9 +82,6 @@ namespace Mozart.Migrations.SqlServer.Migrations
                         .HasColumnType("varbinary(max)")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
