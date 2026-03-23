@@ -77,10 +77,9 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
             Gem             = 0,
             Point           = 0
         };
+        user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
         await context.AddAsync(user, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
-
-        user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
 
         var rawPassword = Encoding.UTF8.GetBytes(password);
         var credential = new Credential
