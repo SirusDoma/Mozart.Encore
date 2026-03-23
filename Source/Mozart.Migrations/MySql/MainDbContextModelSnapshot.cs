@@ -77,9 +77,6 @@ namespace Mozart.Migrations.MySql.Migrations
                         .HasColumnType("longblob")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)

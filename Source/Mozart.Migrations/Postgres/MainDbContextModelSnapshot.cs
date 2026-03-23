@@ -82,9 +82,6 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("passwd");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
