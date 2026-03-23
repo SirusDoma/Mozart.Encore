@@ -24,7 +24,7 @@ using Mozart.Events;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
-using Mozart.Web;
+using Amadeus.Web;
 
 namespace Amadeus;
 

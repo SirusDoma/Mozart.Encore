@@ -5,7 +5,7 @@ using Mozart.Data.Entities;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Mozart.Web;
+namespace Amadeus.Web;
 
 public static class AuthenticateEndpoint
 {
