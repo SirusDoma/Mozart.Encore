@@ -45,38 +45,43 @@ public static class RegisterEndpoint
                 });
             }
 
-            logger.LogInformation("Registering user '{User}'...", request.Username);
-
-            var user = new User
+            string token;
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
             {
-                Id              = 0,
-                Username        = request.Username,
-                Nickname        = request.Username,
-                Gender          = request.Gender,
-                IsAdministrator = false
-            };
-            await context.AddAsync(user, cancellationToken);
+                logger.LogInformation("Registering user '{User}'...", request.Username);
 
-            user.Equipments[ItemType.Face] = (short)(request.Gender == Gender.Female ? 36 : 35);
+                var user = new User
+                {
+                    Id              = 0,
+                    Username        = request.Username,
+                    Nickname        = request.Username,
+                    Gender          = request.Gender,
+                    IsAdministrator = false
+                };
+                await context.AddAsync(user, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
 
-            var rawPassword = Encoding.UTF8.GetBytes(request.Password);
-            var credential = new Credential
-            {
-                UserId = user.Id,
-                Username = request.Username,
-                Password = auth.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
-            };
+                var rawPassword = Encoding.UTF8.GetBytes(request.Password);
+                var credential = new Credential
+                {
+                    Username = request.Username,
+                    Password = auth.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
+                };
 
-            await context.AddAsync(credential, cancellationToken);
-            await context.SaveChangesAsync(cancellationToken);
+                user.Equipments[ItemType.Face] = (short)(request.Gender == Gender.Female ? 36 : 35);
+                await context.AddAsync(credential, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
 
-            string token = await identityService.Authenticate(new UsernamePasswordCredentialRequest()
-            {
-                Address  = http.Connection.RemoteIpAddress ?? IPAddress.Any,
-                Username = request.Username,
-                Password = Encoding.UTF8.GetBytes(request.Password)
-            }, cancellationToken);
-            
+                token = await identityService.Authenticate(new UsernamePasswordCredentialRequest()
+                {
+                    Address  = http.Connection.RemoteIpAddress ?? IPAddress.Any,
+                    Username = request.Username,
+                    Password = Encoding.UTF8.GetBytes(request.Password)
+                }, cancellationToken);
+
+            }
+            await transaction.CommitAsync(cancellationToken);
+
             logger.LogInformation("User '{User}' registered successfully.", request.Username);
             return Results.Text(token);
         }
