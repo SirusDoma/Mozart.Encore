@@ -1,5 +1,4 @@
 using Amadeus.Messages.Events;
-using Amadeus.Messages.Events;
 using Amadeus.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Mozart.Entities;

@@ -1,6 +1,5 @@
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages.Events;
-using Amadeus.Messages.Events;
 using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
 using Encore.Server;

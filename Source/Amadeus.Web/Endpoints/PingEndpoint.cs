@@ -1,4 +1,4 @@
-namespace Mozart.Web;
+namespace Amadeus.Web;
 
 public static class PingEndpoint
 {
