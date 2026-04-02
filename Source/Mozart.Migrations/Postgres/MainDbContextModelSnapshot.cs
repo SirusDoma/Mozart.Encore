@@ -430,7 +430,7 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
                     
