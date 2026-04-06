@@ -59,9 +59,15 @@ public class MusicHeader
     public bool Encrypted { get; set; }
 
     public bool IsNew { get; set; }
+    public bool IsPremiumNew { get; set; }
 
-    public Difficulty MissionDifficulty { get; set; }
-    public int MissionLevel { get; set; }
+    public bool IsRegularPlanet { get; set; }
+    public bool IsSuperEasyPlanet { get; set; }
+    public bool IsEasyPlanet { get; set; }
+
+    public bool IsPurchasable { get; set; }
+    public int PriceO2Cash { get; set; }
+    public int PriceGem { get; set; }
 
     public DateOnly ReleaseDate { get; set; }
 }

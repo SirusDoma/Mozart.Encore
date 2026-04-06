@@ -119,7 +119,7 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
