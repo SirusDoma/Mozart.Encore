@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Requests;
+namespace CrossTime.Messages.Requests;
 
 public class ReadGiftMessageRequest : IMessage
 {

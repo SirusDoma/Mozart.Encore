@@ -8,7 +8,7 @@ using Mozart.Metadata.Items;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.CLI;
+namespace CrossTime.CLI;
 
 public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
 {
@@ -76,6 +76,8 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
             Point           = 0
         };
         await context.AddAsync(user, cancellationToken);
+        user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
+
         user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
 
         var rawPassword = Encoding.UTF8.GetBytes(password);

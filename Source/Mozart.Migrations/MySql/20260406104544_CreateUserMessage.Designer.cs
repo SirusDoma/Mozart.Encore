@@ -121,6 +121,40 @@ namespace Mozart.Migrations.MySql.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
+<<<<<<<< HEAD:Source/Mozart.Migrations/MySql/20260406104544_CreateUserMessage.Designer.cs
+========
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("longblob")
+                        .HasColumnName("passwd");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("userid");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("member", (string)null);
+                });
+
+>>>>>>>> a0ee822 (Backport improvements: Identity.Encore):Source/Mozart.Migrations/MySql/20260222102233_AddUserGemStar.Designer.cs
             modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
                     b.Property<int>("Id")

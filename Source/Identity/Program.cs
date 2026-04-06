@@ -1,11 +1,11 @@
 ﻿using System.Net.Sockets;
-using Identity.CLI;
-using Identity.Controllers;
-using Identity.Controllers.Filters;
-using Identity.Controllers.Internal;
-using Identity.Events;
-using Identity.Workers.Channels;
-using Identity.Workers.Gateway;
+using CrossTime.CLI;
+using CrossTime.Controllers;
+using CrossTime.Controllers.Filters;
+using CrossTime.Controllers.Internal;
+using CrossTime.Events;
+using CrossTime.Workers.Channels;
+using CrossTime.Workers.Gateway;
 using Encore.Hosting.Extensions;
 using Encore.Hosting.Logging;
 using Encore.Messaging;
@@ -24,14 +24,14 @@ using Mozart.Events;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
-using Identity.Web;
+using CrossTime.Web;
 
-namespace Identity;
+namespace CrossTime;
 
 public class Program
 {
-    public static Version Version        => new(4, 0, 0);
-    public static Version NetworkVersion => new(5, 89);
+    public static Version Version        => new(3, 0, 0);
+    public static Version NetworkVersion => new(2, 33);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
@@ -51,10 +51,8 @@ public class Program
                 ["Db:Name"]                         = "O2JAM",
                 ["Db:Url"]                          = "Data Source=O2JAM.db",
                 ["Game:AllowSoloInVersus"]          = "true",
-                ["Game:SingleModeRewardLevelLimit"] = "10",
-                ["Metadata:MusicList"]              = "OJNList.dat",
-                ["Metadata:AlbumList"]              = "AlbumList.ojs",
                 ["Metadata:ItemData"]               = "Itemdata.dat",
+                ["Metadata:MusicList"]              = "X2OJNList.dat",
                 ["Gateway:Channels:0:Id"]           = "0",
                 ["Auth:Mode"]                       = "Default",
                 ["Auth:RevokeOnStartp"]             = "true",
@@ -62,8 +60,6 @@ public class Program
                 ["Score:Exp"]                       = "1.0"
             })
             .AddIniFile("config.ini", true, true)
-            // TODO: Use EnvironmentVariable instead
-            // .AddIniFile($"config.{context.HostingEnvironment}.ini", true, true)
             .AddIniFile("mozart.ini", true, true)
             .AddCommandLine(args)
             .Build();
@@ -110,9 +106,9 @@ public class Program
                 var routes = provider.UseCodec<DefaultMessageCodec>()
                     .Map<AuthController>()
                     .Map<PlanetController>()
-                    .Map<ChargeController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
+                    .Map<MissionController>()
                     .Map<MyRoomController>()
                     .Map<ItemShopController>()
                     .Map<MusicShopController>()
@@ -320,6 +316,7 @@ public class Program
                 services.AddSingleton<IMetadataResolver, MetadataResolver>()
                     .AddSingleton<IChannelService, ChannelService>()
                     .AddSingleton<IRoomService, RoomService>()
+                    .AddSingleton<IMissionTracker, MissionTracker>()
                     .AddScoped<IAuthService, AuthService>();
             });
     }

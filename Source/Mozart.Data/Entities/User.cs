@@ -9,7 +9,7 @@ public class User
 
     public required string Username { get; init; }
 
-    public required string Nickname { get; set; }
+    public required string Nickname { get; init; }
 
     public required Gender Gender { get; init; }
 
@@ -25,9 +25,11 @@ public class User
 
     public int Experience { get; set; }
 
-    public required bool IsAdministrator { get; init; }
+    public int GemStar { get; set; }
 
-    public int Ranking => UserRanking.Ranking;
+    public int Ticket { get; set; } = 10;
+
+    public required bool IsAdministrator { get; init; }
 
     [NotMapped]
     public int Gem
@@ -39,96 +41,45 @@ public class User
     [NotMapped]
     public int Point
     {
-        get => Wallet.Point;
-        set => Wallet.Point = value;
-    }
-
-    [NotMapped]
-    public int O2Cash
-    {
         get => Wallet.O2Cash;
         set => Wallet.O2Cash = value;
     }
 
+    public int Ranking => UserRanking.Ranking;
+
     [NotMapped]
-    public int MusicCash
+    public int MembershipType
     {
-        get => Wallet.MusicCash;
-        set => Wallet.MusicCash = value;
+        get => Member.MembershipType;
+        set => Member.MembershipType = value;
     }
 
     [NotMapped]
-    public int ItemCash
+    public DateTime MembershipDate
     {
-        get => Wallet.ItemCash;
-        set => Wallet.ItemCash = value;
+        get => Member.MembershipDate;
+        set => Member.MembershipDate = value;
     }
 
-    [NotMapped]
-    public int CashPoint
-    {
-        get => Wallet.CashPoint;
-        set => Wallet.CashPoint = value;
-    }
+    private Member Member { get; init; } = new() { Username = string.Empty, Password = [] };
 
-    [NotMapped]
-    public int PenaltyLevel
-    {
-        get => Penalty.Level;
-        set => Penalty.Level = value;
-    }
+    private Wallet Wallet { get; init; } = new();
 
-    [NotMapped]
-    public int PenaltyCount
-    {
-        get => Penalty.Count;
-        set => Penalty.Count = value;
-    }
+    private Loadout Loadout { get; init; } = new();
 
-    private const int StarterPassFlag = 0x1000; // 4096 — bit 12, above max FreePassType (1056)
+    private List<AttributiveItem> AttributiveItems { get; init; } = [];
 
-    [NotMapped]
-    public FreePass FreePass
-    {
-        get
-        {
-            var type = (FreePassType)(Member.Vip & ~StarterPassFlag);
-            return type != FreePassType.None && Member.VipDate > DateTime.UtcNow
-                ? new FreePass(type, Member.VipDate)
-                : new FreePass(FreePassType.None, DateTime.UtcNow);
-        }
-        set
-        {
-            Member.Vip = (short)((Member.Vip & StarterPassFlag) | (int)(uint)value.Type);
-            Member.VipDate = value.ExpiryDate;
-        }
-    }
+    private UserRanking UserRanking { get; init; } = new();
 
-    [NotMapped]
-    public DateTime? StarterPassExpiryDate
-    {
-        get
-        {
-            return (Member.Vip & StarterPassFlag) != 0 && Member.VipDate > DateTime.UtcNow
-                ? Member.VipDate
-                : null;
-        }
-        set
-        {
-            if (value.HasValue)
-            {
-                Member.Vip = (short)(Member.Vip | StarterPassFlag);
-                Member.VipDate = value.Value;
-            }
-            else
-            {
-                Member.Vip = (short)(Member.Vip & ~StarterPassFlag);
-            }
-        }
-    }
+    private List<GiftItem> GiftItems { get; init; } = [];
 
-    [NotMapped]
-    public bool StarterPass => StarterPassExpiryDate != null;
+    private List<GiftMusic> GiftMusics { get; init; } = [];
+
+    private List<UserMessage> UserMessages { get; init; } = [];
+
+    public List<AcquiredMusic> AcquiredMusicList { get; init; } = [];
+
+    public List<CompletedMission> CompletedMissionList { get; init; } = [];
 
     [NotMapped]
     public Inventory Inventory => new(Loadout, AttributiveItems);
@@ -142,24 +93,4 @@ public class User
 
     [NotMapped]
     public EquipmentItems Equipments => new(Loadout);
-
-    private List<UserMessage> UserMessages { get; init; } = [];
-
-    public List<AcquiredMusic> AcquiredMusicList { get; init; } = [];
-
-    private Member Member { get; init; } = null!;
-
-    private Wallet Wallet { get; init; } = new();
-
-    private Penalty Penalty { get; init; } = new();
-
-    private Loadout Loadout { get; init; } = new();
-
-    private List<AttributiveItem> AttributiveItems { get; init; } = [];
-
-    private UserRanking UserRanking { get; init; } = new();
-
-    private List<GiftItem> GiftItems { get; init; } = [];
-
-    private List<GiftMusic> GiftMusics { get; init; } = [];
 }
