@@ -75,7 +75,7 @@ public class GatewayWorker(IServiceProvider provider, IClientServer clientServer
         // Scope in background service
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services#consuming-a-scoped-service-in-a-background-task
         using var scope = provider.CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+        var identityService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
         clientManager.Stopped += (sender, args) =>
         {

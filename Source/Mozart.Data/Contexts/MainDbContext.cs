@@ -15,7 +15,7 @@ public sealed class MainDbContext(
 {
     public DbSet<User> Users { get; init; }
 
-    public DbSet<Credential> Credentials { get; init; }
+    public DbSet<Member> Members { get; init; }
 
     public DbSet<AuthSession> Sessions { get; init; }
 
@@ -24,7 +24,7 @@ public sealed class MainDbContext(
         base.OnModelCreating(modelBuilder);
 
         ConfigureUser(modelBuilder);
-        ConfigureAuth(modelBuilder);
+        ConfigureMember(modelBuilder);
         ConfigureWallet(modelBuilder);
         ConfigureLoadout(modelBuilder);
     }
@@ -94,10 +94,10 @@ public sealed class MainDbContext(
         });
     }
 
-    private void ConfigureAuth(ModelBuilder modelBuilder)
+    private void ConfigureMember(ModelBuilder modelBuilder)
     {
 
-        modelBuilder.Entity<Credential>(entity =>
+        modelBuilder.Entity<Member>(entity =>
         {
             entity.ToTable("member");
 

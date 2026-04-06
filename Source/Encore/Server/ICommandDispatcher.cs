@@ -55,4 +55,3 @@ public interface ICommandDispatcher
 
     Task Dispatch(Session session, byte[] payload, CancellationToken cancellationToken);
 }
- 

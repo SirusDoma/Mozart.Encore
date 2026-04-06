@@ -18,8 +18,12 @@ using Mozart.Sessions;
 namespace Mozart.Controllers;
 
 [RoomAuthorize]
-public class WaitingController(Session session, IEventPublisher<ScoreTracker> publisher,
-    IOptions<GameOptions> options, ILogger<WaitingController> logger) : CommandController<Session>(session)
+public class WaitingController(
+    Session session,
+    IEventPublisher<ScoreTracker> publisher,
+    IOptions<GameOptions> options,
+    ILogger<WaitingController> logger
+) : CommandController<Session>(session)
 {
     private IRoom Room => Session.Room!;
 

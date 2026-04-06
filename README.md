@@ -3,14 +3,15 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.10 (Pre-NX)**
+Supported client version: **v3.10 (O2Jam Original)**
 
 ### Other Builds
 
 | Build                                     | Supported client version |
 |-------------------------------------------|--------------------------|
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (NX)               |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (X2)               |
+| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
 
 ## Features
 
@@ -82,7 +83,7 @@ Use `--Auth:<Option>` to configure these settings via command-line arguments.
 
 | Option            | Description                                                                                                                                                                                                                                                                                                                                |
 |-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Mode`            | Determine the SQL table used for authentication<br/><ul><li>`Default`: `t_o2jam_credentials`</li><li>`Foreign`: `member`</li></ul>`9you` and `GAMANIA` are aliases for `Foreign`.                                                                                                                                                          |
+| `Mode`            | Determine the authentication scheme. Both `Default` and `Foreign` read from `member` table.<br/><ul><li>`Default`: Store one way hashed `passwd`</li><li>`Foreign`: Store plaintext `passwd` (Compatible with existing v1.8 database schema)</li></ul>`9you` and `GAMANIA` are aliases for `Foreign`.                                      |
 | `SessionExpiry`   | Determine the number of minutes before the session gets deleted from `t_o2jam_login` after the connection terminated.<br/><br/>Set `0` to never expired which is recommended for single player or online server with custom session implementation. Otherwise, It is recommended to set between 2-5 minutes.<br/><br/>Default: `5` minutes |
 | `RevokeOnStartup` | Clear login tables on start-up. Recommended to disable for local server. Default: `true`                                                                                                                                                                                                                                                   |
 

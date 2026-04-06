@@ -7,7 +7,7 @@ using Mozart.Services;
 namespace Mozart.CLI;
 
 
-public class AuthorizeUserCommandTask(IIdentityService identityService) : ICommandLineTask
+public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTask
 {
     public static string Name => "user:authorize";
     public static string Description => "Authorize the user for a game session";
@@ -44,7 +44,7 @@ public class AuthorizeUserCommandTask(IIdentityService identityService) : IComma
 
         try
         {
-            string token = await identityService.Authenticate(new UsernamePasswordCredentialRequest
+            string token = await authService.Authenticate(new UsernamePasswordCredentialRequest
             {
                 Username = username,
                 Password = Encoding.UTF8.GetBytes(password),

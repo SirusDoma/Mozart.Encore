@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Encore.Messaging;
 using Encore.Server;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Encore.Hosting.Extensions;
 

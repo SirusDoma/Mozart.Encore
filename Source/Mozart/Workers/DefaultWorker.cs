@@ -23,7 +23,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
         using (var scope = provider.CreateScope())
         using (logger.BeginScope("System"))
         {
-            var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+            var identityService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
             try
             {

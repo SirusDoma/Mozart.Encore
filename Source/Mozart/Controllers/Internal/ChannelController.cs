@@ -16,7 +16,7 @@ public class ChannelController(
     UserSession session,
     IUserRepository repository,
     IGatewayClient client,
-    IIdentityService identityService,
+    IAuthService authService,
     IChannelService channelService,
     ILogger<GatewayController> logger
     ) : CommandController<UserSession>(session)
@@ -49,7 +49,7 @@ public class ChannelController(
         try
         {
             channel           = channelService.GetChannels().Single();
-            var authSession   = await identityService.Authorize(request.SessionId, cancellationToken);
+            var authSession   = await authService.Authorize(request.SessionId, cancellationToken);
             var characterInfo = await repository.Find(authSession.UserId, cancellationToken);
 
             if (characterInfo == null)

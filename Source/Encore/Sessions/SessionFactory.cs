@@ -1,7 +1,7 @@
 using System.Net.Sockets;
-using Microsoft.Extensions.Options;
 using Encore.Messaging;
 using Encore.Server;
+using Microsoft.Extensions.Options;
 
 namespace Encore.Sessions;
 

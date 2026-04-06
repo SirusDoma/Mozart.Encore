@@ -12,7 +12,7 @@ using Mozart.Contexts;
 
 namespace Mozart.Services;
 
-public interface IIdentityService
+public interface IAuthService
 {
     AuthOptions Options { get; }
 
@@ -33,9 +33,9 @@ public interface IIdentityService
     Task ClearSessions(int serverId, int channelId, CancellationToken cancellationToken);
 }
 
-public sealed class IdentityService(IAuthContext ctx, IOptions<ServerOptions> server, IOptions<TcpOptions> tcp,
+public sealed class AuthService(IAuthContext ctx, IOptions<ServerOptions> server, IOptions<TcpOptions> tcp,
     IOptions<GatewayOptions> gateway, IOptions<AuthOptions> options)
-    : IIdentityService
+    : IAuthService
 {
     public AuthOptions Options => options.Value;
 
@@ -55,7 +55,7 @@ public sealed class IdentityService(IAuthContext ctx, IOptions<ServerOptions> se
     public async Task<string> Authenticate(UsernamePasswordCredentialRequest request,
         CancellationToken cancellationToken)
     {
-        var record    = await ctx.FindCredential(request.Username, cancellationToken);
+        var record    = await ctx.FindMember(request.Username, cancellationToken);
         bool verified = Options.Mode switch
         {
             AuthMode.Default => VerifyHashedPassword(record, request),
@@ -127,12 +127,12 @@ public sealed class IdentityService(IAuthContext ctx, IOptions<ServerOptions> se
         return ctx.Sessions.Clear(serverId, channelId, cancellationToken);
     }
 
-    private static bool VerifyHashedPassword(Credential record, UsernamePasswordCredentialRequest credentialRequest)
+    private static bool VerifyHashedPassword(Member record, UsernamePasswordCredentialRequest credentialRequest)
     {
         return PasswordHasher.Verify(record.Password, credentialRequest.Password);
     }
 
-    private static bool VerifyPlainPassword(Credential record, UsernamePasswordCredentialRequest credentialRequest)
+    private static bool VerifyPlainPassword(Member record, UsernamePasswordCredentialRequest credentialRequest)
     {
         return Encoding.UTF8.GetString(record.Password).Trim().Equals(
             Encoding.UTF8.GetString(credentialRequest.Password).Trim());
