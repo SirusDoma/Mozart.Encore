@@ -4,7 +4,7 @@ using System.Text;
 using Mozart.Data.Entities;
 using Mozart.Services;
 
-namespace Identity.CLI;
+namespace CrossTime.CLI;
 
 
 public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTask
@@ -44,7 +44,7 @@ public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTa
 
         try
         {
-            string token = await authService.Authenticate(new UsernamePasswordCredentialRequest()
+            string token = await authService.Authenticate(new UsernamePasswordCredentialRequest
             {
                 Username = username,
                 Password = Encoding.UTF8.GetBytes(password),
@@ -53,6 +53,7 @@ public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTa
 
             Console.WriteLine();
             Console.WriteLine($"  Token: {token}");
+            Console.WriteLine($"  Launch Token: {Convert.ToBase64String(Encoding.BigEndianUnicode.GetBytes(token))}");
             return 0;
         }
         catch (ArgumentException ex)

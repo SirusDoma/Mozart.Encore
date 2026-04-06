@@ -1,7 +1,7 @@
-using Identity.Controllers.Filters;
-using Identity.Messages.Events;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
+using CrossTime.Controllers.Filters;
+using CrossTime.Messages.Events;
+using CrossTime.Messages.Requests;
+using CrossTime.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +14,7 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace CrossTime.Controllers;
 
 [RoomAuthorize]
 public class WaitingController(
@@ -33,20 +33,18 @@ public class WaitingController(
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomMusic,
-            "Update room [{RoomId:000}] music settings: [{Difficulty} / {Speed} / o2ma{MusicId}]",
-            Room.Id, request.Difficulty, request.Speed, request.MusicId
+            "Update room [{RoomId:000}] music settings: [o2ma{MusicId} / Lv.{Level}]",
+            Room.Id, request.MusicId, request.MissionLevel
         );
 
         Room.MusicId = request.MusicId;
-        Room.Difficulty = request.Difficulty;
-        Room.Speed = request.Speed;
+        Room.MissionLevel = request.MissionLevel;
         Room.SaveMetadataChanges();
 
         return new WaitingMusicChangedEventData
         {
-            MusicId    = request.MusicId,
-            Difficulty = request.Difficulty,
-            Speed      = request.Speed
+            MusicId = request.MusicId,
+            MissionLevel = request.MissionLevel
         };
     }
 
@@ -54,20 +52,15 @@ public class WaitingController(
     [CommandHandler]
     public WaitingAlbumChangedEventData SetRoomAlbum(SetRoomAlbumRequest request)
     {
-        logger.LogInformation(
-            (int)RequestCommand.SetRoomMusic,
-            "Update room [{RoomId:000}] album settings: [{Speed} / {AlbumId}]",
-            Room.Id, request.Speed, request.AlbumId
-        );
+        logger.LogInformation((int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] album settings", Room.Id);
 
-        Room.MusicId = request.AlbumId;
-        Room.Speed = request.Speed;
-        Room.SaveMetadataChanges();
+        // Not supported: request does not include selected music ids
 
         return new WaitingAlbumChangedEventData
         {
-            AlbumId = request.AlbumId,
-            Speed = request.Speed
+            AlbumId = Room.MusicId,
+            Speed   = Room.Speed
         };
     }
 
@@ -82,17 +75,16 @@ public class WaitingController(
             Room.Id, request.MemberId
         );
 
-        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
         await Room.Broadcast(Session, new UserAlbumEligibilityChangedEventData
         {
-            MemberId   = request.MemberId,
-            AlbumState = member.AlbumState
+            MemberId = request.MemberId,
+            Ineligible = false
         }, cancellationToken);
 
         return new UserAlbumEligibilityChangedEventData
         {
             MemberId   = request.MemberId,
-            AlbumState = member.AlbumState
+            Ineligible = false
         };
     }
 
@@ -108,7 +100,7 @@ public class WaitingController(
 
         return new WaitingRoomTitleEventData
         {
-            Title = request.Title[..Math.Min(21, request.Title.Length)]
+            Title = request.Title
         };
     }
 
@@ -139,8 +131,8 @@ public class WaitingController(
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomSkill,
-            "Update room [{RoomId:000}] skill settings: {Status} ({count}: {skillId})",
-            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active", request.Skills.Count, request.Skills.FirstOrDefault()
+            "Update room [{RoomId:000}] skill settings: {Status}",
+            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
         );
 
         Room.Skills = request.Skills.Where(s => s > 0).ToList();
@@ -154,6 +146,42 @@ public class WaitingController(
         {
             Skills = request.Skills
         };
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public WaitingModeChangedEventData SetRoomMode(SetRoomModeRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] mode settings: {P1}",
+            Room.Id, request.Mode
+        );
+
+        Room.Title = request.Title;
+        Room.Mode = request.Mode;
+        Room.Password = request.HasPassword == 1 ? request.Password : string.Empty;
+        Room.SaveMetadataChanges();
+
+        return new WaitingModeChangedEventData
+        {
+            Number       = request.Number,
+            Title        = request.Title,
+            Mode         = request.Mode,
+            HasPassword  = request.HasPassword == 1,
+            Password     = request.Password,
+            TeamDisabled = !Room.TeamEnabled
+        };
+    }
+
+    [CommandHandler(RequestCommand.ToggleTeamMode)]
+    public void ToggleTeamMode()
+    {
+        logger.LogInformation((int)RequestCommand.SetRoomTeam,
+            "Toggle team mode room [{RoomId:000}]", Room.Id);
+
+        Room.TeamEnabled = !Room.TeamEnabled;
+        Room.SaveMetadataChanges();
     }
 
     [CommandHandler]
@@ -202,9 +230,9 @@ public class WaitingController(
             };
         }
 
-        var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
         if (Room.UserCount > 1)
         {
+            var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
             var counts = slots.Select(s => s.Team)
                 .GroupBy(t => t)
                 .ToDictionary(g => g.Key, g => g.Count());
@@ -259,19 +287,16 @@ public class WaitingController(
             if (skills.Count > 0)
             {
                 // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
-                return new StartGameEventData
-                {
-                    Result = StartGameEventData.StartResult.GenericError,
-                };
+                Room.SkillsSeed = 0;
             }
-
-            await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
+            else
+            {
+                await repository.Update(user, cancellationToken);
+                await repository.Commit(cancellationToken);
+            }
         }
 
-        Session.Actor.Sync(user);
         Room.StartGame();
-
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
 
         return new StartGameEventData
@@ -290,38 +315,14 @@ public class WaitingController(
         Room.UpdateReadyState(Session);
     }
 
-    [CommandHandler]
-    public async Task<ExitWaitingResponse> ExitRoom(ExitWaitingRequest request, CancellationToken cancellationToken)
+    [CommandHandler(RequestCommand.ExitWaiting)]
+    public ExitWaitingResponse ExitRoom()
     {
-        var actor = Session.Actor;
         logger.LogInformation(
             (int)RequestCommand.ExitWaiting,
-            "Exit room: [{RoomId:000}]: {Reason:000}",
-            Room.Id,
-            request.Reason
+            "Exit room: [{RoomId:000}]",
+            Room.Id
         );
-
-        // Since reason payload can be forged easily, we need to add additional guard
-        // TODO: Implement this handling in disconnection?
-        if (request.Reason == 1 || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
-        {
-            var user = (await repository.Find(actor.UserId, cancellationToken))!;
-            user.PenaltyCount += 1;
-            user.PenaltyLevel = user.PenaltyCount switch
-            {
-                <= 3  => 0,
-                <= 6  => 1,
-                <= 9  => 2,
-                <= 12 => 3,
-                <= 15 => 4,
-                <= 18 => 5,
-                <= 21 => 6,
-                >= 22 => 7
-            };
-
-            await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
-        }
 
         var room = Room;
         Session.Exit(room);

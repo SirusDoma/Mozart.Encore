@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Responses;
+namespace CrossTime.Messages.Responses;
 
 public class GetGiftMessageListResponse : IMessage
 {

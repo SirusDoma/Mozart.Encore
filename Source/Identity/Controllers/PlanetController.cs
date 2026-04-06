@@ -1,5 +1,5 @@
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
+using CrossTime.Messages.Requests;
+using CrossTime.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -7,41 +7,58 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace CrossTime.Controllers;
 
 [Authorize]
 public class PlanetController(
     Session session, ISessionManager manager,
     IAuthService authService,
     IChannelService channelService,
+    IOptions<ServerOptions> serverOptions,
     IOptions<GatewayOptions> options,
     ILogger<PlanetController> logger
 ) : CommandController<Session>(session)
 {
+    // There could be 6 server at max and every server has different part of segment in the channel payload
+    // Each could have 20 channels at max
+    private static readonly Dictionary<int, int> ChannelStartIndices = new()
+    {
+        { 1, 20 },
+        { 2, 40 },
+        { 3, 60 },
+        { 4, 80 },
+        { 5, 100 },
+        { 6, 120 },
+    };
+
+    private const int MaxChannels = 200;
+
     [CommandHandler(RequestCommand.GetChannelList)]
     public ChannelListResponse GetChannelList()
-    {
+    { ;
         var gateway = options.Value;
         logger.LogInformation(
             (int)RequestCommand.GetChannelList,
             "Get channel list: [{GatewayId}]",
-            gateway.Id
+            Session.Actor.ServerId
         );
 
-        var states     = new List<ChannelListResponse.ChannelState>();
-        var channels   = channelService.GetChannels();
+        var states   = new List<ChannelListResponse.ChannelState>();
+        var channels = channelService.GetChannels();
+
+        if (!ChannelStartIndices.TryGetValue(Session.Actor.ServerId, out int startIndex))
+            startIndex = 1;
 
         if (channels.Count > 0)
         {
-            int maxChannel = channels.Max(c => c.Id) + 1;
-            for (ushort i = 0; i < maxChannel; i++)
+            for (ushort i = 0; i < MaxChannels; i++)
             {
-                var channel = channels.SingleOrDefault(s => s.Id == i);
+                var channel = channels.SingleOrDefault(s => s.Id + startIndex == i);
                 states.Add(new ChannelListResponse.ChannelState
                 {
-                    ServerId   = (ushort)gateway.Id,
-                    ChannelId  = i,
-                    Capacity   = channel?.Capacity ?? 0,
+                    ServerId   = (ushort)Session.Actor.ServerId,
+                    ChannelId  = (ushort)(i - startIndex),
+                    Capacity   = channel?.Capacity ?? 100,
                     Population = channel?.UserCount ?? 0,
                     Active     = channel != null
                 });
@@ -61,8 +78,8 @@ public class PlanetController(
             request.ChannelId
         );
 
-        if (request.ServerId != options.Value.Id)
-            throw new ArgumentOutOfRangeException(nameof(request), "Invalid server id");
+        if (serverOptions.Value.Mode != DeploymentMode.Full && request.ServerId != options.Value.Id)
+            throw new ArgumentOutOfRangeException(nameof(request), "Invalid gateway server id");
 
         const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
         var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(Session.Actor.Token, comparison));
@@ -80,8 +97,7 @@ public class PlanetController(
             {
                 await Session.WriteMessage(new AuthResponse
                 {
-                    Result = AuthResult.AlreadyConnected,
-                    FreePass = null
+                    Result = AuthSessionResult.DuplicateSessions
                 }, cancellationToken);
 
                 return null!;
@@ -93,17 +109,21 @@ public class PlanetController(
             var channel = channelService.GetChannel(request.ChannelId);
             Session.Register(channel);
 
-            await authService.UpdateChannel(Session.Actor.Token, options.Value.Id, request.ChannelId, cancellationToken);
+            await authService.UpdateChannel(Session.Actor.Token, request.ServerId, request.ChannelId, cancellationToken);
             return new ChannelLoginResponse
             {
-                Result = ChannelLoginResult.Success
+                Failed    = false,
+                ErrorCode = LoginErrorCode.Undefined,
+                Ranking   = Session.Actor.Ranking
             };
         }
         catch (InvalidOperationException)
         {
             return new ChannelLoginResponse
             {
-                Result = ChannelLoginResult.ChannelUnavailable
+                Failed    = true,
+                ErrorCode = LoginErrorCode.Undefined,
+                Ranking   = 0
             };
         }
     }
