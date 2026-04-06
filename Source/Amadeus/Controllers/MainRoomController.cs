@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Amadeus.Controllers.Filters;
 using Amadeus.Messages;
 using Amadeus.Messages.Requests;
@@ -6,6 +7,7 @@ using Amadeus.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
@@ -18,6 +20,7 @@ namespace Amadeus.Controllers;
 [ChannelAuthorize]
 public class MainRoomController(
     Session session,
+    IUserRepository repository,
     IOptions<GameOptions> gameOptions,
     IRoomService roomService,
     IEventPublisher<Room> publisher,
@@ -27,13 +30,13 @@ public class MainRoomController(
     private IChannel Channel => Session.Channel!;
 
     [CommandHandler(RequestCommand.GetCharacterInfo)]
-    public Task<CharacterInfoResponse> GetCharacterInfo(CancellationToken cancellationToken)
+    public CharacterInfoResponse GetCharacterInfo()
     {
         var actor = Session.GetAuthorizedToken<Actor>();
         logger.LogInformation((int)RequestCommand.GetCharacterInfo, "Get character info: [{User}]",
             actor.Nickname);
 
-        return Task.FromResult(new CharacterInfoResponse
+        return new CharacterInfoResponse
         {
             Nickname           = actor.Nickname,
             Gender             = actor.Gender,
@@ -76,7 +79,7 @@ public class MainRoomController(
                     ItemCount         = i.Count
                 }
             ).ToList(),
-        });
+        };
     }
 
     [CommandHandler]
@@ -132,7 +135,7 @@ public class MainRoomController(
                 NoteCountEx = (ushort)music.NoteCountEx,
                 NoteCountNx = (ushort)music.NoteCountNx,
                 NoteCountHx = (ushort)music.NoteCountHx,
-                Unknown     = 0 // Some sort of music flags. 0 most of the time, but it could be anything
+                Price       = music.PricePoint
             });
         }
 
@@ -142,7 +145,6 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetChannelInfo)]
     [CommandHandler(RequestCommand.GetUserList)]
     public UserListResponse GetUserList()
     {
@@ -168,11 +170,11 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetChannelInfo)]
+    [CommandHandler(RequestCommand.GetRoomList)]
     public RoomListResponse GetRoomList()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetChannelInfo,
+            (int)RequestCommand.GetRoomList,
             "Get room list: [0/{channelId:00}]",
             Channel.Id
         );
@@ -197,7 +199,7 @@ public class MainRoomController(
                 UserCount        = (byte)(room?.UserCount ?? 0),
                 MinLevelLimit    = (byte)(room?.MinLevelLimit ?? 0),
                 MaxLevelLimit    = (byte)(room?.MaxLevelLimit ?? 0),
-                AcquiredMusicIds = [] // Unused despite playing premium music
+                Skills           = room?.Skills.ToList() ?? []
             });
         }
 
@@ -249,7 +251,7 @@ public class MainRoomController(
                 Team       = member.Team,
                 RoomTitle  = room.Title,
                 MusicId    = (ushort)room.MusicId,
-                ArenaInfo  = new RoomArenaMessage(room.Arena, (byte)room.ArenaRandomSeed),
+                ArenaInfo  = new RoomArenaMessage(room.Arena, room.ArenaRandomSeed),
                 Mode       = room.Mode,
                 Difficulty = room.Difficulty,
                 Speed      = room.Speed,
@@ -342,6 +344,50 @@ public class MainRoomController(
                 Number = 0
             };
         }
+    }
+
+    [CommandHandler(RequestCommand.GetGiftMessageList, ResponseCommand.GetGiftMessageList)]
+    public async Task<GetGiftMessageListResponse> GetGiftMessages(CancellationToken cancellationToken)
+    {
+        var actor = Session.Actor;
+        logger.LogInformation((int)RequestCommand.GetGiftMessageList,
+            "Get user gift messages: [{User}]", actor.Nickname);
+
+        var user = (await repository.Find(actor.UserId, cancellationToken))!;
+        actor.Sync(user);
+
+        return new GetGiftMessageListResponse
+        {
+            Messages = actor.GiftMessages
+                .Select(m => new GetGiftMessageListResponse.GiftEntry
+                {
+                    MessageId = m.Id,
+                    GiftType  = GiftType.Music,
+                    WriteDate = m.WriteDate.ToShortDateString(),
+                    Sender    = m.SenderNickname,
+                    Title     = m.Title,
+                    Content   = m.Content
+                }).ToList()
+        };
+    }
+
+    [CommandHandler]
+    public async Task ReadGiftMessage(ReadGiftMessageRequest request, CancellationToken cancellationToken)
+    {
+        var actor = Session.Actor;
+        logger.LogInformation((int)RequestCommand.GetGiftMessageList,
+            "Read gift message: [{User}] ({giftId})", actor.Nickname, request.GiftMessageId);
+
+        var user    = (await repository.Find(actor.UserId, cancellationToken))!;
+        var message = user.GiftMessages.FirstOrDefault(m => m.Id == request.GiftMessageId);
+        if (message != null)
+        {
+            message.MarkAsRead();
+            await repository.Update(user, cancellationToken);
+            await repository.Commit(cancellationToken);
+        }
+
+        actor.Sync(user);
     }
 
     [CommandHandler(RequestCommand.ChannelLogout)]

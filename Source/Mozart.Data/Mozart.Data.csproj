@@ -37,4 +37,8 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Repositories\CredentialRepository.cs" />
+    </ItemGroup>
+
 </Project>

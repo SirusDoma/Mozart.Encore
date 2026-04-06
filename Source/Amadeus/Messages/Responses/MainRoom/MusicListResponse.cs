@@ -21,7 +21,7 @@ public class MusicListResponse : IMessage
         public ushort NoteCountHx { get; init; }
 
         [MessageField(order: 4)]
-        public int Unknown { get; init; } = 0;
+        public int Price { get; init; } = 0;
     }
 
     [CollectionMessageField(order: 0, prefixSizeType: TypeCode.Int16)]

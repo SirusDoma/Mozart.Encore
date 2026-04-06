@@ -28,7 +28,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         try
         {
             var tracker = (ScoreTracker)sender!;
-            await tracker.Room.Broadcast(new MusicLoadedEventData
+            var master  = e.IsRebroadcast ? tracker.Room.Master : null!;
+            await tracker.Room.Broadcast(master, new MusicLoadedEventData
             {
                 MemberId = (byte)e.MemberId
             }, CancellationToken.None);
@@ -125,6 +126,12 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         {
             e.Room.Channel.GetMusicList().TryGetValue(e.MusicId, out var music);
 
+            var skills = e.Room.Channel.GetItemData()
+                .Where(s => e.Room.Skills.Contains(s.Key) &&
+                            s.Value.GameModifier != GameModifier.None)
+                .Select(s => s.Value)
+                .ToList();
+
             int level = e.Difficulty switch
             {
                 Difficulty.EX => music?.LevelEx,
@@ -159,6 +166,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 if (state == null)
                     continue;
 
+                var mission = ScoreCompletedEventData.MissionResult.None;
                 bool win  = scores.Max(s => s.Score) == state.Score;
                 bool draw = scores.Count(s => s.Score == state.Score) > 1;
 
@@ -194,7 +202,14 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
                     user.Gem        += reward;
                     user.Experience += (int)(xpGain * channel.ExpRates);
+
                     if (user.Experience > xpNext)
+                        mission = MissionEvaluator.Evaluate(music, e.Difficulty, skills, state);
+
+                    if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                        mission = ScoreCompletedEventData.MissionResult.Failed;
+
+                    if (xpNext != 0 && user.Experience > xpNext && (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed))
                         user.Level++;
                 }
 
@@ -223,7 +238,10 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     Reward     = (ushort)Math.Max(0, reward),
                     Level      = state.Session.Actor.Level,
                     Experience = state.Session.Actor.Experience,
-                    Win        = win,
+                    Result     = draw ? ScoreCompletedEventData.MatchResult.Draw :
+                                 win  ? ScoreCompletedEventData.MatchResult.Win  :
+                                 ScoreCompletedEventData.MatchResult.Lose,
+                    Mission    = mission
                 });
             }
 

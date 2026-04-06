@@ -29,6 +29,7 @@ public class Actor
         AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
         GiftItems        = user.GiftBox.Items;
         GiftMusics       = user.GiftBox.Musics;
+        GiftMessages     = user.GiftMessages;
     }
 
     public void Sync(User user)
@@ -49,6 +50,7 @@ public class Actor
         AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
         GiftItems        = user.GiftBox.Items;
         GiftMusics       = user.GiftBox.Musics;
+        GiftMessages     = user.GiftMessages;
     }
 
     public required string Token { get; init; }
@@ -88,6 +90,8 @@ public class Actor
     public IReadOnlyList<GiftItem> GiftItems { get; set; }
 
     public IReadOnlyList<GiftMusic> GiftMusics { get; set; }
+
+    public IReadOnlyList<GiftMessage> GiftMessages { get; set; }
 
     public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
 

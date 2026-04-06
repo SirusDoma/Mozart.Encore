@@ -75,7 +75,7 @@ public class GatewayWorker(IServiceProvider provider, IClientServer clientServer
         // Scope in background service
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services#consuming-a-scoped-service-in-a-background-task
         using var scope = provider.CreateScope();
-        var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+        var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
         clientManager.Stopped += (sender, args) =>
         {
@@ -94,7 +94,7 @@ public class GatewayWorker(IServiceProvider provider, IClientServer clientServer
                     // Expiring session after 5 minutes of disconnection
                     logger.LogInformation("Deleted login session [{Token}]", s.Actor.Token);
                     if (s.Authorized)
-                        identityService.Revoke(s.Actor.Token, CancellationToken.None);
+                        authService.Revoke(s.Actor.Token, CancellationToken.None);
                 });
             }
         };

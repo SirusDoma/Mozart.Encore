@@ -1,6 +1,6 @@
 namespace Mozart.Data.Entities;
 
-public class Credential
+public class Member
 {
     public long Id { get; init; }
 

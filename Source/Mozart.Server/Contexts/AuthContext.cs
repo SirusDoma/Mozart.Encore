@@ -8,11 +8,11 @@ namespace Mozart.Contexts;
 
 public interface IAuthContext : IContext
 {
-    ICredentialRepository Credentials { get; }
-    IUserRepository       Users       { get; }
-    ISessionRepository    Sessions    { get; }
+    IMemberRepository  Members  { get; }
+    IUserRepository    Users    { get; }
+    ISessionRepository Sessions { get; }
 
-    Task<Credential> FindCredential(string username, CancellationToken cancellationToken = default);
+    Task<Member> FindMember(string username, CancellationToken cancellationToken = default);
 
     Task<AuthSession> CreateSession(string gatewayId, string username,  IPAddress clientAddress,
         CancellationToken cancellationToken = default);
@@ -26,19 +26,19 @@ public class AuthContext : IAuthContext
     {
         var sharedContextFactory = new SharedDbContextFactory<MainDbContext>(factory);
 
-        _context     = sharedContextFactory.CreateDbContext();
-        Credentials  = new CredentialRepository(sharedContextFactory);
-        Users        = new UserRepository(sharedContextFactory);
-        Sessions     = new SessionRepository(sharedContextFactory);
+        _context = sharedContextFactory.CreateDbContext();
+        Members  = new MemberRepository(sharedContextFactory);
+        Users    = new UserRepository(sharedContextFactory);
+        Sessions = new SessionRepository(sharedContextFactory);
     }
 
-    public ICredentialRepository Credentials { get; }
-    public IUserRepository       Users       { get; }
-    public ISessionRepository    Sessions    { get; }
+    public IMemberRepository  Members  { get; }
+    public IUserRepository    Users    { get; }
+    public ISessionRepository Sessions { get; }
 
-    public async Task<Credential> FindCredential(string username, CancellationToken cancellationToken)
+    public async Task<Member> FindMember(string username, CancellationToken cancellationToken)
     {
-        var record = await Credentials.FindByUsername(username, cancellationToken);
+        var record = await Members.FindByUsername(username, cancellationToken);
         if (record == null)
             throw new ArgumentException("Invalid username or password", nameof(username));
 

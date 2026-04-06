@@ -13,7 +13,7 @@ public enum RequestCommand : ushort
     ChannelLogin        = 0x03EC, // 1004
     SessionKeys         = 0x03EF, // 1007
     GetCharacterInfo    = 0x07D0, // 2000
-    GetChannelInfo      = 0x07D2, // 2002
+    GetRoomList         = 0x07D2, // 2002
     CreateRoom          = 0x07D4, // 2004
     GetUserList         = 0x07DA, // 2010
     SendMainRoomMessage = 0x07DC, // 2012
@@ -49,7 +49,8 @@ public enum RequestCommand : ushort
     SyncMusicPurchase   = 0x1392, // 5010
     SyncPoint           = 0x1395, // 5013
     StartPayment        = 0x1397, // 5015
-    PurchasableMusic    = 0x1399, // 5017
+    GetGiftMessageList  = 0x1399, // 5017
+    ReadGiftMessage     = 0x139B, // 5019
     Terminate           = 0xFFF0  // -16
 }
 
@@ -82,7 +83,7 @@ public enum ResponseCommand : ushort
     SyncMusicPurchase    = 0x1393, // 5011
     SyncPoint            = 0x1396, // 5014
     StartPayment         = 0x1398, // 5016
-    PurchasableMusic     = 0x139A, // 5018
+    GetGiftMessageList   = 0x139A, // 5018
     ClaimGift            = 0x13A0, // 5024
 }
 

@@ -17,7 +17,7 @@ public sealed class MainDbContext(
 
     public DbSet<UserRanking> UserRankings { get; init; }
 
-    public DbSet<Credential> Credentials { get; init; }
+    public DbSet<Member> Members { get; init; }
 
     public DbSet<AuthSession> Sessions { get; init; }
 
@@ -26,7 +26,7 @@ public sealed class MainDbContext(
         base.OnModelCreating(modelBuilder);
 
         ConfigureUser(modelBuilder);
-        ConfigureAuth(modelBuilder);
+        ConfigureMember(modelBuilder);
         ConfigureWallet(modelBuilder);
         ConfigureLoadout(modelBuilder);
         ConfigureRanking(modelBuilder);
@@ -34,6 +34,7 @@ public sealed class MainDbContext(
         ConfigureAttributiveItem(modelBuilder);
         ConfigureGiftItem(modelBuilder);
         ConfigureGiftMusic(modelBuilder);
+        ConfigureUserMessage(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -116,6 +117,12 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasMany<UserMessage>("UserMessages")
+                .WithOne()
+                .HasForeignKey(m => m.ReceiverId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Navigation("Wallet")
                 .AutoInclude();
 
@@ -137,6 +144,9 @@ public sealed class MainDbContext(
             entity.Navigation("GiftMusics")
                 .AutoInclude();
 
+            entity.Navigation("UserMessages")
+                .AutoInclude();
+
             entity.HasIndex(e => e.Username)
                 .IsUnique();
 
@@ -145,10 +155,10 @@ public sealed class MainDbContext(
         });
     }
 
-    private void ConfigureAuth(ModelBuilder modelBuilder)
+    private void ConfigureMember(ModelBuilder modelBuilder)
     {
 
-        modelBuilder.Entity<Credential>(entity =>
+        modelBuilder.Entity<Member>(entity =>
         {
             entity.ToTable("member");
 
@@ -389,6 +399,70 @@ public sealed class MainDbContext(
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
 
             entity.HasIndex(e => e.UserId);
+        });
+    }
+
+    private void ConfigureUserMessage(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserMessage>(entity =>
+        {
+            entity.ToTable("t_o2jam_message");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("Seq")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.SenderUsername)
+                .HasColumnName("SenderID")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.SenderId)
+                .HasColumnName("SenderIndexID");
+
+            entity.Property(e => e.SenderNickname)
+                .HasColumnName("SenderNickName")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.ReceiverUsername)
+                .HasColumnName("ReceiverID")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.ReceiverId)
+                .HasColumnName("ReceiverIndexID");
+
+            entity.Property(e => e.ReceiverNickname)
+                .HasColumnName("ReceiverNickName")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(40);
+
+            entity.Property(e => e.Content)
+                .HasMaxLength(400);
+
+            entity.Property(e => e.WriteDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
+
+            entity.Property(e => e.IsRead)
+                .HasColumnName("ReadFlag")
+                .HasColumnType("char(1)")
+                .HasConversion(
+                    v => v ? '1' : '0',
+                    v => v == '1'
+                )
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.GiftType)
+                .HasColumnName("TypeFlag")
+                .HasColumnType("char(1)")
+                .HasConversion(
+                    v => (char)('0' + (byte)v),
+                    v => (GiftType)(byte)(v - '0')
+                );
+
+            entity.HasIndex(e => e.ReceiverId);
         });
     }
 }

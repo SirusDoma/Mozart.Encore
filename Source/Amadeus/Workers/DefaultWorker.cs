@@ -22,7 +22,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
         using (var scope = provider.CreateScope())
         using (logger.BeginScope("System"))
         {
-            var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
             try
             {
@@ -43,8 +43,8 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
                 }
 
                 // Clear left-over login session or open connection to database.
-                if (identityService.Options.RevokeOnStartup)
-                    await identityService.ClearSessions(cancellationToken);
+                if (authService.Options.RevokeOnStartup)
+                    await authService.ClearSessions(cancellationToken);
 
                 // Start the TCP Server
                 server.Start(server.Options.MaxConnections);
@@ -75,7 +75,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
                             s.Exit(s.Channel);
 
                         logger.LogInformation("Deleted login session [{Token}]", s.Actor.Token);
-                        identityService.Revoke(s.Actor.Token, CancellationToken.None);
+                        authService.Revoke(s.Actor.Token, CancellationToken.None);
                     });
                 }
                 else

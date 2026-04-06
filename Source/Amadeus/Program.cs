@@ -302,7 +302,7 @@ public class Program
 
                 // Repositories
                 services.AddScoped<IUserRepository, UserRepository>()
-                    .AddScoped<ICredentialRepository, CredentialRepository>()
+                    .AddScoped<IMemberRepository, MemberRepository>()
                     .AddScoped<ISessionRepository, SessionRepository>();
 
                 // Application contexts
@@ -319,7 +319,7 @@ public class Program
                 services.AddSingleton<IMetadataResolver, MetadataResolver>()
                     .AddSingleton<IChannelService, ChannelService>()
                     .AddSingleton<IRoomService, RoomService>()
-                    .AddScoped<IIdentityService, IdentityService>();
+                    .AddScoped<IAuthService, AuthService>();
             });
     }
 }

@@ -11,8 +11,11 @@ using Mozart.Sessions;
 namespace Amadeus.Controllers;
 
 [Authorize]
-public class MyRoomController(Session session, IUserRepository repository, ILogger<MyRoomController> logger)
-    : CommandController<Session>(session)
+public class MyRoomController(
+    Session session,
+    IUserRepository repository,
+    ILogger<MyRoomController> logger
+) : CommandController<Session>(session)
 {
     [CommandHandler(RequestCommand.EnterShop)]
     [CommandHandler(RequestCommand.ExitShop)]

@@ -10,8 +10,14 @@ using Mozart.Sessions;
 namespace Amadeus.Controllers;
 
 [Authorize]
-public class PlanetController(Session session, ISessionManager manager, IIdentityService identityService, IChannelService channelService,
-    IOptions<GatewayOptions> options, ILogger<PlanetController> logger) : CommandController<Session>(session)
+public class PlanetController(
+    Session session,
+    ISessionManager manager,
+    IAuthService authService,
+    IChannelService channelService,
+    IOptions<GatewayOptions> options,
+    ILogger<PlanetController> logger
+) : CommandController<Session>(session)
 {
     [CommandHandler(RequestCommand.GetChannelList)]
     public ChannelListResponse GetChannelList()
@@ -88,7 +94,7 @@ public class PlanetController(Session session, ISessionManager manager, IIdentit
             var channel = channelService.GetChannel(request.ChannelId);
             Session.Register(channel);
 
-            await identityService.UpdateChannel(Session.Actor.Token, options.Value.Id, request.ChannelId, cancellationToken);
+            await authService.UpdateChannel(Session.Actor.Token, options.Value.Id, request.ChannelId, cancellationToken);
             return new ChannelLoginResponse
             {
                 Failed    = false,

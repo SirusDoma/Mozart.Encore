@@ -123,39 +123,6 @@ namespace Mozart.Migrations.SqlServer.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Credential", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<byte[]>("Password")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("passwd");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("userid");
-
-                    b.Property<DateTime>("registdate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("member", (string)null);
-                });
-
             modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
                     b.Property<int>("Id")
@@ -385,6 +352,39 @@ namespace Mozart.Migrations.SqlServer.Migrations
                     b.ToTable("t_o2jam_item", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("passwd");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("userid");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("member", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -434,13 +434,91 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username")
-                        .IsUnique();
-                    
                     b.HasIndex("Nickname")
                         .IsUnique();
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("t_o2jam_charinfo", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Seq");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("GiftType")
+                        .IsRequired()
+                        .HasColumnType("char(1)")
+                        .HasColumnName("TypeFlag");
+
+                    b.Property<string>("IsRead")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(1)")
+                        .HasDefaultValue("0")
+                        .HasColumnName("ReadFlag");
+
+                    b.Property<DateTime?>("ReadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int")
+                        .HasColumnName("ReceiverIndexID");
+
+                    b.Property<string>("ReceiverNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ReceiverNickName");
+
+                    b.Property<string>("ReceiverUsername")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ReceiverID");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int")
+                        .HasColumnName("SenderIndexID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("SenderNickName");
+
+                    b.Property<string>("SenderUsername")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("SenderID");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<DateTime>("WriteDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("t_o2jam_message", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
@@ -520,6 +598,14 @@ namespace Mozart.Migrations.SqlServer.Migrations
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("UserMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -546,6 +632,8 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
                     b.Navigation("Loadout")
                         .IsRequired();
+
+                    b.Navigation("UserMessages");
 
                     b.Navigation("UserRanking")
                         .IsRequired();
