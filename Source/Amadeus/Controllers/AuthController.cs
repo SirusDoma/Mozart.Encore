@@ -10,8 +10,14 @@ using Session = Mozart.Sessions.Session;
 
 namespace Amadeus.Controllers;
 
-public class AuthController(Session session, ISessionManager manager, IIdentityService identityService,
-    IChannelService channelService, IUserRepository userRepository, ILogger<AuthController> logger) : CommandController<Session>(session)
+public class AuthController(
+    Session session,
+    ISessionManager manager,
+    IAuthService authService,
+    IChannelService channelService,
+    IUserRepository userRepository,
+    ILogger<AuthController> logger
+) : CommandController<Session>(session)
 {
     [CommandHandler]
     public async Task<AuthResponse> Authorize(AuthRequest request, CancellationToken cancellationToken)
@@ -43,7 +49,7 @@ public class AuthController(Session session, ISessionManager manager, IIdentityS
                 }
             }
 
-            var authSession = await identityService.Authorize(request.Token, cancellationToken);
+            var authSession = await authService.Authorize(request.Token, cancellationToken);
             var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
 
             if (characterInfo == null)

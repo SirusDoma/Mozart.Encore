@@ -5,6 +5,8 @@ using Amadeus.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mozart.Data.Entities;
+using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
@@ -15,8 +17,13 @@ using Mozart.Sessions;
 namespace Amadeus.Controllers;
 
 [RoomAuthorize]
-public class WaitingController(Session session, IEventPublisher<ScoreTracker> publisher,
-    IOptions<GameOptions> options, ILogger<WaitingController> logger) : CommandController<Session>(session)
+public class WaitingController(
+    Session session,
+    IUserRepository repository,
+    IEventPublisher<ScoreTracker> publisher,
+    IOptions<GameOptions> options,
+    ILogger<WaitingController> logger
+) : CommandController<Session>(session)
 {
     private IRoom Room => Session.Room!;
 
@@ -135,8 +142,11 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
             Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
         );
 
-        Room.Skills     = request.Skills;
-        Room.SkillsSeed = Random.Shared.Next(0, int.MaxValue); // TODO: Crack how seed actually used in client
+        Room.Skills = request.Skills.Where(s => s > 0).ToList();
+        Room.SkillsSeed = Room.Skills.Count > 0
+            ? Random.Shared.Next(0, int.MaxValue) // TODO: Crack how seed actually used in client
+            : 0;
+
         Room.SaveMetadataChanges();
 
         return new WaitingSkillChangedEventData
@@ -178,7 +188,7 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
 
     [CommandHandler(RequestCommand.StartGame)]
     [RoomMasterAuthorize]
-    public StartGameEventData StartGame()
+    public async Task<StartGameEventData> StartGame(CancellationToken cancellationToken)
     {
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
@@ -191,9 +201,9 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
             };
         }
 
+        var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
         if (Room.UserCount > 1)
         {
-            var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
             var counts = slots.Select(s => s.Team)
                 .GroupBy(t => t)
                 .ToDictionary(g => g.Key, g => g.Count());
@@ -215,7 +225,53 @@ public class WaitingController(Session session, IEventPublisher<ScoreTracker> pu
             }
         }
 
+        var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
+        {
+            var skills = new List<int>();
+            skills.AddRange(Room.Skills.Where(s => s != 0));
+
+            if (skills.Count > 0)
+            {
+                for (int i = 0; i < user.Inventory.Capacity; i++)
+                {
+                    var item = user.Inventory[i];
+                    if (skills.Any(s => item.Id == s))
+                    {
+                        int rc = skills.RemoveAll(s => s == item.Id);
+                        if (item.Count > 0)
+                        {
+                            user.Inventory[i] = new Inventory.BagItem
+                            {
+                                Id = item.Id,
+                                Count = item.Count - 1
+                            };
+                        }
+                        else
+                        {
+                            if (item.Count == 0)
+                                skills.AddRange(Enumerable.Repeat((int)item.Id, rc)); // Something strange happened
+
+                            user.Inventory[i] = Inventory.BagItem.Empty;
+                        }
+                    }
+                }
+
+                if (skills.Count > 0)
+                {
+                    // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
+                    Room.SkillsSeed = 0;
+                }
+                else
+                {
+                    await repository.Update(user, cancellationToken);
+                    await repository.Commit(cancellationToken);
+                }
+            }
+        }
+
+        Session.Actor.Sync(user);
         Room.StartGame();
+
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
 
         return new StartGameEventData

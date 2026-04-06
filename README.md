@@ -3,15 +3,16 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.82\* (NX)**  
+Supported client version: **v3.82\* (O2Jam NX)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
 ### Other Builds
 
 | Build                                     | Supported client version |
 |-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10                    |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (X2)               |
+| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
+| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
 
 ## Features
 

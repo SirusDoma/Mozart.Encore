@@ -16,7 +16,7 @@ public static class AuthenticateEndpoint
 
     public static async Task<IResult> Post(
         HttpContext context,
-        IIdentityService identityService,
+        IAuthService authService,
         IOptions<AuthOptions> auth,
         AuthenticationRequest request,
         ILogger<WebServer> logger,
@@ -39,7 +39,7 @@ public static class AuthenticateEndpoint
 
             try
             {
-                string authToken = await identityService.Authenticate(new UsernamePasswordCredentialRequest()
+                string authToken = await authService.Authenticate(new UsernamePasswordCredentialRequest()
                 {
                     Address  = context.Connection.RemoteIpAddress ?? IPAddress.Any,
                     Username = request.Username,

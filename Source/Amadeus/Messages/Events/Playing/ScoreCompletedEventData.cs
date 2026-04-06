@@ -6,6 +6,20 @@ public class ScoreCompletedEventData : IMessage
 {
     public static Enum Command => EventCommand.ScoreCompleted;
 
+    public enum MissionResult : byte
+    {
+        None      = 0,
+        Failed    = 1,
+        Completed = 2
+    }
+
+    public enum MatchResult : byte
+    {
+        Draw = 0,
+        Win  = 1,
+        Lose = 2
+    }
+
     public class ScoreEntry : SubMessage
     {
 
@@ -46,10 +60,10 @@ public class ScoreCompletedEventData : IMessage
         public int? Experience { get; init; }
 
         [MessageField(order: 12)]
-        public bool? Win { get; init; }
+        public MatchResult? Result { get; init; }
 
         [MessageField(order: 13)]
-        private byte? Unused => Active ? 0 : null;
+        public MissionResult? Mission { get; init; } =  MissionResult.None;
 
     }
 

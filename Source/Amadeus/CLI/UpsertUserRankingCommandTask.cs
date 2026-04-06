@@ -35,8 +35,7 @@ public class UpsertUserRankingCommandTask(MainDbContext context) : ICommandLineT
 
     public async Task<int> ExecuteAsync(int count, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
+        await using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken))
         {
             var topJammers = await context.Users
                 .OrderByDescending(u => u.Level)
@@ -63,15 +62,14 @@ public class UpsertUserRankingCommandTask(MainDbContext context) : ICommandLineT
                 {
                     record.UserId = player.Id;
                 }
-
-                await context.SaveChangesAsync(cancellationToken);
             }
 
+            await context.SaveChangesAsync(cancellationToken);
             await context.UserRankings.Where(r => r.Ranking > topJammers.Count)
                 .ExecuteDeleteAsync(cancellationToken);
-        }
 
-        await transaction.CommitAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
 
         Console.WriteLine("User ranking has been updated successfully");
         return 0;

@@ -16,8 +16,8 @@ public interface IScoreTracker
     void Track(Session session);
     void Untrack(Session session);
 
-    void SubmitScore(Session session, int cool, int good, int bad, int miss,
-        int maxCombo, int maxJamCombo, uint score, int life);
+    void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo, int maxJamCombo,
+        uint score, int life);
 }
 
 public class ScoreUpdateEventArgs : EventArgs
@@ -31,6 +31,7 @@ public class ScoreTrackEventArgs : EventArgs
 {
     public required int MemberId    { get; init; }
     public required Session Session { get; init; }
+    public bool IsRebroadcast       { get; init; }
 }
 
 public class ScoreSubmitEventArgs : EventArgs
@@ -54,6 +55,8 @@ public class ScoreTracker : IScoreTracker
         public required Session Session { get; init; }
         public required int MemberId    { get; init; }
 
+        public GameSpeed Speed { get; init; }
+
         public int Life        { get; set; } = 1000;
         public int JamCombo    { get; set; } = 0;
 
@@ -69,6 +72,8 @@ public class ScoreTracker : IScoreTracker
         public bool Clear      { get; set; } = false;
         public bool Completed  { get; set; } = false;
     }
+
+    private readonly Lock _mutex = new();
 
     private readonly List<UserScore> _states = [];
     private readonly Dictionary<int, List<UserScore>> _scores = [];
@@ -101,13 +106,10 @@ public class ScoreTracker : IScoreTracker
         if (state == null)
             return; // might be left-over after leaving during gameplay
 
-        state.Life = life;
-        if (state is { Completed: false, Life: 0 })
-        {
-            state.Clear     = false;
-            state.Completed = true;
-        }
+        if (state.Life == 0)
+            return;
 
+        state.Life = life;
         UserLifeUpdated?.Invoke(this, new ScoreUpdateEventArgs
         {
             MemberId = state.MemberId,
@@ -123,6 +125,9 @@ public class ScoreTracker : IScoreTracker
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
             return; // might be left-over after leaving during gameplay
+
+        if (state.Life == 0)
+            return;
 
         state.JamCombo = jamCombo;
         UserJamIncreased?.Invoke(this, new ScoreUpdateEventArgs
@@ -151,40 +156,45 @@ public class ScoreTracker : IScoreTracker
             if (session != member.Session)
                 continue;
 
-            member.Session.Disconnected += OnSessionDisconnected;
-            _states.Add(new UserScore
+            lock (_mutex)
             {
-                Session     = member.Session,
-                MemberId    = i,
-                Life        = 1000,
-                JamCombo    = 0,
-                Cool        = 0,
-                Good        = 0,
-                Bad         = 0,
-                Miss        = 0,
-                MaxCombo    = 0,
-                MaxJamCombo = 0,
-                Score       = 0,
-                Clear       = false,
-                Completed   = false
-            });
+                member.Session.Disconnected += OnSessionDisconnected;
+                _states.Add(new UserScore
+                {
+                    Session = member.Session,
+                    MemberId = i,
+                    Speed = Room.Speed,
+                    Life = 1000,
+                    JamCombo = 0,
+                    Cool = 0,
+                    Good = 0,
+                    Bad = 0,
+                    Miss = 0,
+                    MaxCombo = 0,
+                    MaxJamCombo = 0,
+                    Score = 0,
+                    Clear = false,
+                    Completed = false
+                });
+            }
 
             UserTracked?.Invoke(this, new ScoreTrackEventArgs
             {
                 MemberId = i,
-                Session  = member.Session
+                Session = member.Session
             });
 
             if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
             {
                 for (int j = 0; j < Entities.Room.MaxCapacity; j++)
                 {
-                    if (Room.Slots[j] is Entities.Room.VacantSlot or Entities.Room.LockedSlot)
+                    if (Room.Slots[j] is Room.MemberSlot m)
                     {
                         UserTracked?.Invoke(this, new ScoreTrackEventArgs
                         {
                             MemberId = j,
-                            Session = null!
+                            Session = m.Session,
+                            IsRebroadcast = true
                         });
                     }
                 }
@@ -202,8 +212,11 @@ public class ScoreTracker : IScoreTracker
         if (state == null)
             return;
 
-        state.Session.Disconnected -= OnSessionDisconnected;
-        _states.Remove(state);
+        lock (_mutex)
+        {
+            state.Session.Disconnected -= OnSessionDisconnected;
+            _states.Remove(state);
+        }
 
         UserUntracked?.Invoke(this, new ScoreTrackEventArgs
         {
@@ -229,16 +242,22 @@ public class ScoreTracker : IScoreTracker
         if (state == null)
             throw new ArgumentOutOfRangeException(nameof(session)); // request forged?
 
-        state.Cool        = cool;
-        state.Good        = good;
-        state.Bad         = bad;
-        state.Miss        = miss;
-        state.MaxCombo    = maxCombo;
-        state.MaxJamCombo = maxJamCombo;
-        state.Score       = score;
-        state.Life        = life;
-        state.Clear       = state.Life > 0;
-        state.Completed   = true;
+        lock (_mutex)
+        {
+            if (Completed)
+                return;
+
+            state.Cool = cool;
+            state.Good = good;
+            state.Bad = bad;
+            state.Miss = miss;
+            state.MaxCombo = maxCombo;
+            state.MaxJamCombo = maxJamCombo;
+            state.Score = score;
+            state.Life = life;
+            state.Clear = state.Life > 0;
+            state.Completed = true;
+        }
 
         state.Session.Disconnected -= OnSessionDisconnected;
         var completedStates = _states.Where(s => s.Completed).ToList();
@@ -296,6 +315,7 @@ public class ScoreTracker : IScoreTracker
                         {
                             Session     = finalState.Last().Session,
                             MemberId    = memberId,
+                            Speed       = finalState.Last().Speed,
                             Cool        = finalState.Sum(s => s.Cool),
                             Good        = finalState.Sum(s => s.Good),
                             Bad         = finalState.Sum(s => s.Bad),

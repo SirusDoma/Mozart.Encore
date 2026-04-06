@@ -24,7 +24,7 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
         using (var scope = provider.CreateScope())
         using (var _ = logger.BeginScope("System"))
         {
-            var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
             try
             {
@@ -53,9 +53,9 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
                 await gatewayClient.Connect(cancellationToken);
 
                 // Clear left-over login session or open connection to database.
-                if (identityService.Options.RevokeOnStartup)
+                if (authService.Options.RevokeOnStartup)
                 {
-                    await identityService.ClearSessions(
+                    await authService.ClearSessions(
                         gatewayOptions.Value.Id,
                         gatewayOptions.Value.Channels.First().Id,
                         cancellationToken

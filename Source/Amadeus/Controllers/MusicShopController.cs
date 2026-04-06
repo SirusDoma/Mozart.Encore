@@ -15,28 +15,6 @@ public class MusicShopController(
     ILogger<MusicShopController> logger
 ) : CommandController<Session>(session)
 {
-
-    [CommandHandler(RequestCommand.PurchasableMusic, ResponseCommand.PurchasableMusic)]
-    public PurchasableMusicListResponse GetPurchasableMusicList()
-    {
-        logger.LogInformation((int)RequestCommand.StartPayment,
-            "Get purchasable music");
-
-        return new PurchasableMusicListResponse
-        {
-            Items = Session.Channel!.GetMusicList().Values.Where(m => m.IsPurchasable).Select(m =>
-                new PurchasableMusicListResponse.MusicItem
-                {
-                    MusicId      = m.Id,
-                    Title        = Encoding.UTF8.GetString(m.Title),
-                    Artist       = Encoding.UTF8.GetString(m.Artist),
-                    NoteDesigner = Encoding.UTF8.GetString(m.NoteDesigner),
-                    OJM          = m.OJM
-                }
-            ).ToList()
-        };
-    }
-
     [CommandHandler(RequestCommand.SyncMusicPurchase)]
     public async Task<SyncMusicPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)
     {

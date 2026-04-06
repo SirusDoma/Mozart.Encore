@@ -68,9 +68,8 @@ public static class MusicListParser
 
             // The exact payload is unknown, however it is confirmed they are 3 integers, presumably prices
 
-            // P1: Unknown, observed to be either 10 or 20 most of the time, but there are other values as well
-            //     Presumably to be price with primary premium currency (e.g, e-Point, MCash, etc)
-            int p1 = reader.ReadInt32();
+            // Price in Ep
+            int point = reader.ReadInt32();
 
             // P2: Unknown, no occurrence other than 0
             //     Presumably to be price with secondary premium currency (e.g, O2Cash, MusicCash)
@@ -82,7 +81,10 @@ public static class MusicListParser
 
             // Regardless of parameters, it is marked as new (even if all parameters are 0)
             if (headers.TryGetValue(id, out var header))
+            {
                 header.IsPurchasable = true;
+                header.PricePoint =  point;
+            }
         }
 
         // -- Extra metadata section

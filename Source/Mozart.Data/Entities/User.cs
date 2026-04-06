@@ -55,6 +55,8 @@ public class User
 
     private List<GiftMusic> GiftMusics { get; init; } = [];
 
+    private List<UserMessage> UserMessages { get; init; } = [];
+
     public List<AcquiredMusic> AcquiredMusicList { get; init; } = [];
 
     [NotMapped]
@@ -62,6 +64,10 @@ public class User
 
     [NotMapped]
     public GiftBox GiftBox => new(this, GiftItems, GiftMusics);
+
+    [NotMapped]
+    public IReadOnlyList<GiftMessage> GiftMessages =>
+        UserMessages.Where(m => !m.IsRead).Select(m => new GiftMessage(m)).ToList();
 
     [NotMapped]
     public EquipmentItems Equipments => new(Loadout);
