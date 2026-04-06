@@ -9,8 +9,11 @@ using Mozart.Sessions;
 namespace Mozart.Controllers;
 
 [Authorize]
-public class MessagingController(Session session, IChannelService channelService, ILogger<MessagingController> logger)
-    : CommandController<Session>(session)
+public class MessagingController(
+    Session session,
+    IChannelService channelService,
+    ILogger<MessagingController> logger
+) : CommandController<Session>(session)
 {
     [CommandHandler]
     public async Task SendMainRoomUserMessage(SendMainRoomMessageRequest request, CancellationToken cancellationToken)

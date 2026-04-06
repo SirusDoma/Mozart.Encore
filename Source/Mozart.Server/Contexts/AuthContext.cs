@@ -8,11 +8,11 @@ namespace Mozart.Contexts;
 
 public interface IAuthContext : IContext
 {
-    ICredentialRepository Credentials { get; }
-    IUserRepository       Users       { get; }
-    ISessionRepository    Sessions    { get; }
+    IMemberRepository  Members  { get; }
+    IUserRepository    Users    { get; }
+    ISessionRepository Sessions { get; }
 
-    Task<Credential> FindCredential(string username, CancellationToken cancellationToken = default);
+    Task<Member> FindMember(string username, CancellationToken cancellationToken = default);
 
     Task<AuthSession> CreateSession(string gatewayId, string username,  IPAddress clientAddress,
         CancellationToken cancellationToken = default);
@@ -24,21 +24,21 @@ public class AuthContext : IAuthContext
 
     public AuthContext(IDbContextFactory<MainDbContext> factory)
     {
-        var staticFactory = new StaticDbContextFactory<MainDbContext>(factory);
+        var sharedContextFactory = new SharedDbContextFactory<MainDbContext>(factory);
 
-        _context     = staticFactory.CreateDbContext();
-        Credentials  = new CredentialRepository(staticFactory);
-        Users        = new UserRepository(staticFactory);
-        Sessions     = new SessionRepository(staticFactory);
+        _context = sharedContextFactory.CreateDbContext();
+        Members  = new MemberRepository(sharedContextFactory);
+        Users    = new UserRepository(sharedContextFactory);
+        Sessions = new SessionRepository(sharedContextFactory);
     }
 
-    public ICredentialRepository Credentials { get; }
-    public IUserRepository       Users       { get; }
-    public ISessionRepository    Sessions    { get; }
+    public IMemberRepository  Members  { get; }
+    public IUserRepository    Users    { get; }
+    public ISessionRepository Sessions { get; }
 
-    public async Task<Credential> FindCredential(string username, CancellationToken cancellationToken)
+    public async Task<Member> FindMember(string username, CancellationToken cancellationToken)
     {
-        var record = await Credentials.FindByUsername(username, cancellationToken);
+        var record = await Members.FindByUsername(username, cancellationToken);
         if (record == null)
             throw new ArgumentException("Invalid username or password", nameof(username));
 

@@ -24,7 +24,7 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
         using (var scope = provider.CreateScope())
         using (var _ = logger.BeginScope("System"))
         {
-            var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
+            var identityService = scope.ServiceProvider.GetRequiredService<IAuthService>();
 
             try
             {

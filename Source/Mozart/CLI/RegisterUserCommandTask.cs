@@ -60,8 +60,6 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
 
     private async Task<int> ExecuteAsync(string username, string password, Gender gender, bool admin, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
         var user = new User
         {
             Username        = username,
@@ -77,12 +75,11 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
             Gem             = 0,
             Point           = 0
         };
-        user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
         await context.AddAsync(user, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        user.Equipments[ItemType.Face] = (short)(gender == Gender.Female ? 36 : 35);
 
         var rawPassword = Encoding.UTF8.GetBytes(password);
-        var credential = new Credential
+        var credential = new Member
         {
             Username = username,
             Password = authOptions.Value.Mode == AuthMode.Default ? PasswordHasher.Hash(rawPassword) : rawPassword
@@ -91,9 +88,7 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
         await context.AddAsync(credential, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        await transaction.CommitAsync(cancellationToken);
         Console.WriteLine("User has been registered successfully");
-
         return 0;
     }
 }

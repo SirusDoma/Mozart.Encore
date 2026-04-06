@@ -16,8 +16,12 @@ using Mozart.Sessions;
 namespace Mozart.Controllers;
 
 [ChannelAuthorize]
-public class MainRoomController(Session session,IRoomService roomService, IEventPublisher<Room> publisher,
-    ILogger<MainRoomController> logger) : CommandController<Session>(session)
+public class MainRoomController(
+    Session session,
+    IRoomService roomService,
+    IEventPublisher<Room> publisher,
+    ILogger<MainRoomController> logger
+) : CommandController<Session>(session)
 {
     private IChannel Channel => Session.Channel!;
 
