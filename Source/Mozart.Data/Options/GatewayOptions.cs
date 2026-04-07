@@ -15,9 +15,5 @@ public class GatewayOptions
     public int Port       { get; init; }
     public int Timeout    { get; init; } = 30;
 
-    public bool? FreeMission { get; init; }
-    public bool MissionUseTicket { get; init; } = true;
-    public int MissionCost { get; init; } = 1;
-
     public IList<ChannelOptions> Channels { get; init; } = [];
 }
