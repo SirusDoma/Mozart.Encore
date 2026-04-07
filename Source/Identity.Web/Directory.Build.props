@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <BaseIntermediateOutputPath>..\..\Temp\Identity.Web\</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>

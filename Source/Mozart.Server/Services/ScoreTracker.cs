@@ -41,7 +41,10 @@ public class ScoreSubmitEventArgs : EventArgs
 public class ScoreTrackedEventArgs : EventArgs
 {
     public required IRoom Room { get; init; }
+    public int MusicId { get; init; }
+    public Difficulty Difficulty { get; init; }
     public required IReadOnlyList<ScoreTracker.UserScore> States { get; init; }
+    public required GameMode Mode { get; init; }
 }
 
 public class ScoreTracker : IScoreTracker
@@ -50,6 +53,8 @@ public class ScoreTracker : IScoreTracker
     {
         public required Session Session { get; init; }
         public required int MemberId    { get; init; }
+
+        public GameSpeed Speed { get; init; }
 
         public int Life        { get; set; } = 1000;
         public int JamCombo    { get; set; } = 0;
@@ -70,6 +75,7 @@ public class ScoreTracker : IScoreTracker
     private readonly Lock _mutex = new();
 
     private readonly List<UserScore> _states = [];
+    private readonly Dictionary<int, List<UserScore>> _scores = [];
 
     public EventHandler<ScoreTrackEventArgs>? UserTracked;
     public EventHandler<ScoreTrackEventArgs>? UserUntracked;
@@ -77,7 +83,7 @@ public class ScoreTracker : IScoreTracker
     public EventHandler<ScoreUpdateEventArgs>?  UserLifeUpdated;
     public EventHandler<ScoreUpdateEventArgs>?  UserJamIncreased;
     public EventHandler<ScoreSubmitEventArgs>?  UserScoreSubmitted;
-    public EventHandler<ScoreTrackedEventArgs>? GameCompleted;
+    public EventHandler<ScoreTrackedEventArgs>? ScoreCompleted;
 
     public IRoom Room { get; }
 
@@ -154,42 +160,28 @@ public class ScoreTracker : IScoreTracker
                 member.Session.Disconnected += OnSessionDisconnected;
                 _states.Add(new UserScore
                 {
-                    Session     = member.Session,
-                    MemberId    = i,
-                    Life        = 1000,
-                    JamCombo    = 0,
-                    Cool        = 0,
-                    Good        = 0,
-                    Bad         = 0,
-                    Miss        = 0,
-                    MaxCombo    = 0,
+                    Session = member.Session,
+                    MemberId = i,
+                    Speed = Room.Speed,
+                    Life = 1000,
+                    JamCombo = 0,
+                    Cool = 0,
+                    Good = 0,
+                    Bad = 0,
+                    Miss = 0,
+                    MaxCombo = 0,
                     MaxJamCombo = 0,
-                    Score       = 0,
-                    Clear       = false,
-                    Completed   = false
+                    Score = 0,
+                    Clear = false,
+                    Completed = false
                 });
             }
 
             UserTracked?.Invoke(this, new ScoreTrackEventArgs
             {
                 MemberId = i,
-                Session  = member.Session
+                Session = member.Session
             });
-
-            if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
-            {
-                for (int j = 0; j < Entities.Room.MaxCapacity; j++)
-                {
-                    if (Room.Slots[j] is Room.MemberSlot m)
-                    {
-                        UserTracked?.Invoke(this, new ScoreTrackEventArgs
-                        {
-                            MemberId = j,
-                            Session  = m.Session
-                        });
-                    }
-                }
-            }
 
             return;
         }
@@ -260,16 +252,98 @@ public class ScoreTracker : IScoreTracker
 
         if (Completed)
         {
-            foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
-                member.IsReady = member.IsMaster;
+            // By default, the game finished after a song is ended
+            bool finalized = true;
 
-            GameCompleted?.Invoke(this, new ScoreTrackedEventArgs
+            // However, album mode plays several songs in succession
+            // TODO: Create a separate score tracker class for album mode
+            if (Room.Mode == GameMode.Jam)
             {
-                Room    = Room,
-                States  = completedStates
-            });
+                var album   = Room.Channel.GetAlbumList()[Room.MusicId];
+                var current = album.Entries[_scores.TryGetValue(state.MemberId, out var last) ? last.Count : 0];
 
-            Room.CompleteGame();
+                // Trigger score completion for current song
+                ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
+                {
+                    Room       = Room,
+                    MusicId    = current.Id,
+                    Difficulty = current.Difficulty,
+                    States     = completedStates,
+                    Mode       = GameMode.Versus
+                });
+
+                // In album mode, scores submitted each music transition.
+                // Therefore, capture the score and clear the tracker states once all scores are submitted.
+                foreach (var completedState in completedStates)
+                {
+                    int memberId = completedState.MemberId;
+                    if (!_scores.ContainsKey(memberId))
+                        _scores[memberId] = [];
+
+                    _scores[memberId].Add(completedState);
+                }
+
+                // Determine whether the game is completed (all songs are completed)
+                finalized = _states.All(s => s.Life == 0) || _scores.Max(c => c.Value.Count) >= album.Entries.Count;
+
+                // Re-build the states, either for finalized states or states for the next song
+                // The client will issue `ConfirmMusicLoaded` request during the song transition
+                _states.Clear();
+
+                if (finalized)
+                {
+                    foreach ((int memberId, var finalState) in _scores)
+                    {
+                        _states.Add(new UserScore
+                        {
+                            Session     = finalState.Last().Session,
+                            MemberId    = memberId,
+                            Speed       = finalState.Last().Speed,
+                            Cool        = finalState.Sum(s => s.Cool),
+                            Good        = finalState.Sum(s => s.Good),
+                            Bad         = finalState.Sum(s => s.Bad),
+                            Miss        = finalState.Sum(s => s.Miss),
+                            MaxCombo    = finalState.Max(s => s.MaxCombo),
+                            MaxJamCombo = finalState.Max(s => s.MaxJamCombo),
+                            Score       = (uint)finalState.Sum(s => s.Score),
+                            Life        = finalState.Last().Life,
+                            Clear       = finalState.Last().Life > 0,
+                            Completed   = true,
+                        });
+                    }
+
+                    // Trigger album completion event
+                    ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
+                    {
+                        Room    = Room,
+                        States  = completedStates,
+                        Mode    = GameMode.Jam
+                    });
+                }
+            }
+            else
+            {
+                // Trigger normal score completion
+                ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
+                {
+                    Room       = Room,
+                    MusicId    = Room.MusicId,
+                    Difficulty = Room.Difficulty,
+                    States     = completedStates,
+                    Mode       = Room.Mode
+                });
+
+            }
+
+            // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
+            // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+            if (finalized)
+            {
+                foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
+                    member.IsReady = member.IsMaster;
+
+                Room.CompleteGame();
+            }
         }
     }
 

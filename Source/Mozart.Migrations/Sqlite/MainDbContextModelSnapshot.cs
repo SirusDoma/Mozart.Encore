@@ -17,6 +17,59 @@ namespace Mozart.Migrations.Sqlite.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("MUSIC_ID");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("t_o2jam_musiclist", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("INDEX_ID");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("REG_DATE")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("USED_COUNT");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ITEM_INDEX_ID");
+
+                    b.Property<int>("PreviousCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0)
+                        .HasColumnName("OLD_USED_COUNT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_char_attr_item", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.AuthSession", b =>
                 {
                     b.Property<int>("UserId")
@@ -63,35 +116,80 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("Seq");
 
-                    b.Property<byte[]>("Password")
-                        .IsRequired()
-                        .HasColumnType("BLOB")
-                        .HasColumnName("passwd");
+                    b.Property<int>("ItemId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ItemID");
 
-                    b.Property<string>("Username")
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("userid");
+                        .HasColumnName("SenderNickname");
 
-                    b.Property<DateTime>("registdate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("User_Index_ID");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("member", (string)null);
+                    b.ToTable("t_o2jam_gift_item", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Seq");
+
+                    b.Property<int>("MusicId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Music_ID");
+
+                    b.Property<DateTime>("SendDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SendDate")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Sender_Index_ID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SenderNickname");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("t_o2jam_gift_music", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
@@ -243,6 +341,66 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_item", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Password")
+                        .IsRequired()
+                        .HasColumnType("BLOB")
+                        .HasColumnName("passwd");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("userid");
+
+                    b.Property<short>("Vip")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("vip");
+
+                    b.Property<DateTime>("VipDate")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("vipdate");
+
+                    b.Property<DateTime>("registdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("member", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("COUNT");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("LEVEL");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("t_o2jam_penalty", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -299,16 +457,121 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_charinfo", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Seq");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("TEXT");
+
+                    b.Property<char>("GiftType")
+                        .HasColumnType("char(1)")
+                        .HasColumnName("TypeFlag");
+
+                    b.Property<char>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(1)")
+                        .HasDefaultValue('0')
+                        .HasColumnName("ReadFlag");
+
+                    b.Property<DateTime?>("ReadDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ReceiverIndexID");
+
+                    b.Property<string>("ReceiverNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ReceiverNickName");
+
+                    b.Property<string>("ReceiverUsername")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ReceiverID");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("SenderIndexID");
+
+                    b.Property<string>("SenderNickname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SenderNickName");
+
+                    b.Property<string>("SenderUsername")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SenderID");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("WriteDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("t_o2jam_message", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.Property<int>("Ranking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Ranking");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("User_Index_ID");
+
+                    b.HasKey("Ranking");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("t_o2jam_dumpranking", (string)null);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("USER_INDEX_ID");
 
+                    b.Property<int>("CashPoint")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Gem")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ItemCash")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MusicCash")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("O2Cash")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Point")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("UserId");
@@ -316,11 +579,75 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_charcash", (string)null);
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AcquiredMusicList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.AttributiveItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("AttributiveItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.GiftMusic", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("GiftMusics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
                         .WithOne("Loadout")
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Member")
+                        .HasForeignKey("Mozart.Data.Entities.Member", "Username")
+                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Penalty")
+                        .HasForeignKey("Mozart.Data.Entities.Penalty", "UserId");
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithMany("UserMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.UserRanking", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("UserRanking")
+                        .HasForeignKey("Mozart.Data.Entities.UserRanking", "UserId");
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
@@ -332,7 +659,26 @@ namespace Mozart.Migrations.Sqlite.Migrations
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
+                    b.Navigation("AcquiredMusicList");
+
+                    b.Navigation("AttributiveItems");
+
+                    b.Navigation("GiftItems");
+
+                    b.Navigation("GiftMusics");
+
                     b.Navigation("Loadout")
+                        .IsRequired();
+
+                    b.Navigation("Member")
+                        .IsRequired();
+
+                    b.Navigation("Penalty")
+                        .IsRequired();
+
+                    b.Navigation("UserMessages");
+
+                    b.Navigation("UserRanking")
                         .IsRequired();
 
                     b.Navigation("Wallet")
