@@ -359,16 +359,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("userid");
 
-                    b.Property<short>("Vip")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue((short)0)
-                        .HasColumnName("vip");
-
-                    b.Property<DateTime>("VipDate")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("vipdate");
-
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
@@ -380,25 +370,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .IsUnique();
 
                     b.ToTable("member", (string)null);
-                });
-
-            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("USER_INDEX_ID");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("COUNT");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("LEVEL");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("t_o2jam_penalty", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
@@ -556,22 +527,10 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("USER_INDEX_ID");
 
-                    b.Property<int>("CashPoint")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Gem")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemCash")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MusicCash")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("O2Cash")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Point")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("UserId");
@@ -618,23 +577,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
-            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
-                {
-                    b.HasOne("Mozart.Data.Entities.User", null)
-                        .WithOne("Member")
-                        .HasForeignKey("Mozart.Data.Entities.Member", "Username")
-                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
-                {
-                    b.HasOne("Mozart.Data.Entities.User", null)
-                        .WithOne("Penalty")
-                        .HasForeignKey("Mozart.Data.Entities.Penalty", "UserId");
-                });
-
             modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -668,12 +610,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.Navigation("GiftMusics");
 
                     b.Navigation("Loadout")
-                        .IsRequired();
-
-                    b.Navigation("Member")
-                        .IsRequired();
-
-                    b.Navigation("Penalty")
                         .IsRequired();
 
                     b.Navigation("UserMessages");
