@@ -372,6 +372,16 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("userid");
 
+                    b.Property<short>("Vip")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("vip");
+
+                    b.Property<DateTime>("VipDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vipdate");
+
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -383,6 +393,25 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .IsUnique();
 
                     b.ToTable("member", (string)null);
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("USER_INDEX_ID");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("COUNT");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("LEVEL");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("t_o2jam_penalty", (string)null);
                 });
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
@@ -546,10 +575,22 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("USER_INDEX_ID");
 
+                    b.Property<int>("CashPoint")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Gem")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ItemCash")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MusicCash")
+                        .HasColumnType("integer");
+
                     b.Property<int>("O2Cash")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Point")
                         .HasColumnType("integer");
 
                     b.HasKey("UserId");
@@ -596,6 +637,23 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasForeignKey("Mozart.Data.Entities.Loadout", "UserId");
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Member")
+                        .HasForeignKey("Mozart.Data.Entities.Member", "Username")
+                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Penalty")
+                        .HasForeignKey("Mozart.Data.Entities.Penalty", "UserId");
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.UserMessage", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -629,6 +687,12 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.Navigation("GiftMusics");
 
                     b.Navigation("Loadout")
+                        .IsRequired();
+
+                    b.Navigation("Member")
+                        .IsRequired();
+
+                    b.Navigation("Penalty")
                         .IsRequired();
 
                     b.Navigation("UserMessages");
