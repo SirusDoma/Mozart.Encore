@@ -1,18 +1,29 @@
-# Amadeus.Encore
+# Identity.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.82\* (O2Jam NX)**  
-<sub>* v3.73 and older might work but not fully tested.</sub>
+Supported client version: **v5.89\* (O2JamO2 Beta)**  
+
+> [!NOTE]
+> **Penalty is not enforced**  
+> 
+> The server tracks players who leave a game before it finishes. 
+> Abandoning the game increments the player's penalty count and accumulates their penalty level. 
+> 
+> However, the current implementation does not impose any restrictions based on penalty level. 
+> This is because penalty enforcement is handled server-side, and the original penalty logic has never been fully figured out. 
+>
+> Keep in mind that the penalties are still properly tracked and reflected in the user status page, 
+> and penalty reset items will still work correctly.
 
 ### Other Builds
 
 | Build                                     | Supported client version |
 |-------------------------------------------|--------------------------|
 | [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
 | [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
 
 ## Features
 
@@ -33,8 +44,8 @@ Supported client version: **v3.82\* (O2Jam NX)**
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Amadeus.Web](Source/Amadeus.Web/)             | Lightweight HTTP Web server                       |
-| [Amadeus](Source/Amadeus/)                     | Game server implementation for O2Jam client v3.82 |
+| [Identity.Web](Source/Identity.Web/)           | Lightweight HTTP Web server                       |
+| [Identity](Source/Identity/)                   | Game server implementation for O2Jam client v5.89 |
 
 # Configuration
 
@@ -123,7 +134,6 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
 | `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
 | `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
-| `FreeMusic` | Unlock all premium music based on the provided `MusicList` exclusive for this channel. Default: Default: (Empty) using global [Game settings](#Game-settings) |
 | `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)             |
 | `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)           |
 | `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)            |
@@ -154,6 +164,14 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 
 # Database Migration
 
+> [!Caution]
+> **CrossTime.Encore database schema not supported**
+>
+> The Identity.Encore application and its database schema are designed based on Amadeus.Encore.
+> As a result, migrating from a CrossTime.Encore database is not supported.
+>
+> However, migration from Amadeus.Encore database is supported.
+
 Use Entity Framework tools to run the database migration.
 See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
 
@@ -166,12 +184,6 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
->[!CAUTION]
-> A breaking change was introduced to the database schema and its migrations starting with Mozart v1.10.0.
-> Manual adjustments to existing database schemas may be required when upgrading from Mozart v1.8.0.
-> 
-> Foreign database schema remain supported with proper `Auth:Mode` configuration.
-
 ## Add Migration
 
 The migration files are divided by [projects based on provider](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/providers?tabs=dotnet-core-cli).
@@ -180,7 +192,7 @@ Use the following command to create a new migration:
 ```shell
  # Replace "MySql" with your preferred database driver
  dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Amadeus\Amadeus.csproj \
+                             --startup-project Source\Identity\Identity.csproj \
                              --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
                              -- Auth:Mode=<auth mode> \
@@ -210,7 +222,7 @@ Run the following command to execute the migration:
 
 ```shell
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Amadeus\Amadeus.csproj \
+                           --startup-project Source\Identity\Identity.csproj \
                            --context Mozart.Data.Contexts.MainDbContext \
                            -- Auth:Mode=<auth mode> \
                            Db:Driver=<driver> \
@@ -263,17 +275,26 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
 
 ```shell
-OTwo.exe <token> <ftp_server> O2Jam <gateway_count> \
+OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
   <gateway_address_1> <gateway_port_1> \
   <gateway_address_2> <gateway_port_2> \
   … \
   <gateway_address_n> <gateway_port_n>
 ```
 
+> [!NOTE]
+> There are 2 modes:
+>
+> **O2_INET**: Use value of `0`. Gender passed as `m` or `f` string.
+> **INET**: Use value of `1`. Gender passed as `1` or `2` string.
+> 
+> Use `0` for rank if the player is unranked.
+
+
 For example, if you have three Planets (three Gateways), you might use:
 
 ```shell 
-OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
+OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
 192.168.10.1 15010 \
 192.168.10.2 15010 \
 192.168.10.3 15010
@@ -284,7 +305,7 @@ OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
 > For example:
 > 
 > ```shell 
-> OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
+> OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
 > 192.168.10.1 15010 \
 > 192.168.10.1 15010 \
 > 192.168.10.1 15010

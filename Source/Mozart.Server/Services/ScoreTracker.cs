@@ -31,7 +31,6 @@ public class ScoreTrackEventArgs : EventArgs
 {
     public required int MemberId    { get; init; }
     public required Session Session { get; init; }
-    public bool IsRebroadcast       { get; init; }
 }
 
 public class ScoreSubmitEventArgs : EventArgs
@@ -183,22 +182,6 @@ public class ScoreTracker : IScoreTracker
                 MemberId = i,
                 Session = member.Session
             });
-
-            if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
-            {
-                for (int j = 0; j < Entities.Room.MaxCapacity; j++)
-                {
-                    if (Room.Slots[j] is Room.MemberSlot m)
-                    {
-                        UserTracked?.Invoke(this, new ScoreTrackEventArgs
-                        {
-                            MemberId = j,
-                            Session = m.Session,
-                            IsRebroadcast = true
-                        });
-                    }
-                }
-            }
 
             return;
         }
