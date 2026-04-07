@@ -14,10 +14,16 @@ Supported client version: **v2.33 (O2Jam X2)**
 | [Identity.Encore](../../tree/identity) | v5.89 (O2JamO2 Beta)     |
 
 > [!CAUTION]
-> The O2Jam X2 client never officially left beta and contains numerous game-breaking bugs.
+> **Cross.Time.Encore build is set to be diverged from the main build**
+> 
+> This mean database schema upgrade from this build to a newer build is **not** supported.
+> Moreover, any general improvements from the major release build is not guaranteed to be backported into this build.
+> 
+> This is because O2Jam X2 client never officially left beta and contains numerous game-breaking bugs.
 > X2 Client and this server build is **not recommended** as a primary uses for regular gameplay.
 >
 > Instead, it should be treated as a means of preserving and accessing a client version that has otherwise been lost.
+> In other words, treat this as an experimental server build for X2.
 >
 > **Known limitations:**
 > - The server IP addresses are hard-coded in the client executable. Binary patching is required to connect to a custom server.
