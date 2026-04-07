@@ -1,29 +1,47 @@
-# Identity.Encore
+# CrossTime.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Beta)**  
-
-> [!NOTE]
-> **Penalty is not enforced**  
-> 
-> The server tracks players who leave a game before it finishes. 
-> Abandoning the game increments the player's penalty count and accumulates their penalty level. 
-> 
-> However, the current implementation does not impose any restrictions based on penalty level. 
-> This is because penalty enforcement is handled server-side, and the original penalty logic has never been fully figured out. 
->
-> Keep in mind that the penalties are still properly tracked and reflected in the user status page, 
-> and penalty reset items will still work correctly.
+Supported client version: **v2.33 (O2Jam X2)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
+| Build                                  | Supported client version |
+|----------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)     | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)   | v3.82 (O2Jam NX)         |
+| [Identity.Encore](../../tree/identity) | v5.89 (O2JamO2 Beta)     |
+
+> [!CAUTION]
+> The O2Jam X2 client never officially left beta and contains numerous game-breaking bugs.
+> X2 Client and this server build is **not recommended** as a primary uses for regular gameplay.
+>
+> Instead, it should be treated as a means of preserving and accessing a client version that has otherwise been lost.
+>
+> **Known limitations:**
+> - The server IP addresses are hard-coded in the client executable. Binary patching is required to connect to a custom server.
+> - The item shop is non-functional. It requires the user account to be paired with a mgame account, but no such pairing mechanism exists in the network protocol. Even if the client is patched to bypass this checking, the game crashes on the payment page.
+> - Hall of Fame and Artist Room are not implemented.
+> - Album mode is not implemented. While a workaround exists to access it, gameplay becomes broken after the first song.
+> - User list is not working.
+> - Attributive (Ring modifier) is not working properly.
+> - Various other client bugs exist, such as inability to enter some servers, the client sending outdated or missing payload packet data, etc.
+
+> [!IMPORTANT]
+> **Gem Star** is not fully supported.
+> 
+> Gem Star is a rating system exclusive to O2Jam X2. 
+> Each server defines a Gem Star range and is only accessible to players whose Gem Star count falls within that range, except for the practice server, 
+> which is open to all players regardless of their Gem Star count.
+>
+> Gem Stars can be earned by completing missions, with rewards unique to each server, or by playing against other players in versus mode. 
+> However, versus matches can also result in Gem Star loss.
+>
+> The Gem Stars gain and loss are computed entirely on the server side, and the algorithm behind these calculations was never discovered. 
+> For this reason, the server does not implement Gem Star rewards or penalties.
+> 
+> However, Gem Star is defined in the schema and properly included in the network response.
 
 ## Features
 
@@ -44,8 +62,8 @@ Supported client version: **v5.89\* (O2JamO2 Beta)**
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Identity.Web](Source/Identity.Web/)           | Lightweight HTTP Web server                       |
-| [Identity](Source/Identity/)                   | Game server implementation for O2Jam client v5.89 |
+| [CrossTime.Web](Source/CrossTime.Web/)         | Lightweight HTTP Web server                       |
+| [CrossTime](Source/CrossTime/)                 | Game server implementation for O2Jam client v2.33 |
 
 # Configuration
 
@@ -113,11 +131,14 @@ These options can be configured under `Gateway` section.
 > [!TIP]
 > This configuration is ignored in the `Full` deployment mode.
 
-| Option    | Description                                                                                                                                                                                                                                                             |
-|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Address` | <ul><li>In `Gateway` mode:<br/>Inbound TCP address to listen incoming channel server connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In `Channel` mode:<br/>Outbound TCP address to connect to the Gateway server.</li></ul> Default: `127.0.0.1` |
-| `Port`    | <ul><li>In `Gateway` mode:<br/>Inbound TCP port to listen incoming channel server connection.</li><br/><li>In `Channel` mode:<br/>Outbound TCP port to connect to the Gateway server.</li></ul> Default: `15047`                                                        |
-| `Timeout` | The maximum wait time (in seconds) for establishing connection between the gateway and the channel. Default: `30` seconds                                                                                                                                               |
+| Option             | Description                                                                                                                                                                                                                                                             |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Address`          | <ul><li>In `Gateway` mode:<br/>Inbound TCP address to listen incoming channel server connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In `Channel` mode:<br/>Outbound TCP address to connect to the Gateway server.</li></ul> Default: `127.0.0.1` |
+| `Port`             | <ul><li>In `Gateway` mode:<br/>Inbound TCP port to listen incoming channel server connection.</li><br/><li>In `Channel` mode:<br/>Outbound TCP port to connect to the Gateway server.</li></ul> Default: `15047`                                                        |
+| `Timeout`          | The maximum wait time (in seconds) for establishing connection between the gateway and the channel. Default: `30` seconds                                                                                                                                               |
+| `FreeMission`      | Unlock all missions without requiring ticket or gem cost exclusive for this gateway. Default: (Empty) using global [Game settings](#Game-settings)                                                                                                                      |
+| `MissionUseTicket` | Determine whether missions consume tickets instead of gems. Default: `true`                                                                                                                                                                                             |
+| `MissionCost`      | The amount of tickets or gems consumed per mission. Default: `1`                                                                                                                                                                                                        |
 
 ### Channels
 These options can be configured under `Gateway:Channels:<N>` section as explained above. 
@@ -128,15 +149,14 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                                   |
-|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                     |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)             |
-| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)           |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)            |
+| Option      | Description                                                                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                           |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                            |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                     |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                     |
+| `MusicList` | Path of `X2OJNList.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database. 
@@ -146,9 +166,8 @@ Use `--Metadata:<Option>` to configure these settings via command-line arguments
 
 | Option      | Description                                                                               |
 |-------------|-------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.   |
-| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`3.82`. |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`.  |
+| `MusicList` | Relative or absolute path of `X2OJNList.dat`. Format must compatible with client v`2.33`. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`2.33`.  |
 
 ## Game settings
 Gameplay-specific settings.
@@ -158,19 +177,10 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 | Option                       | Description                                                                                                                                                                                                                                                                                                  |
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                         |
-| `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
-| `FreeMusic`                  | Unlock all premium music based on the provided `MusicList`. Default: `true`                                                                                                                                                                                                                                  |
+| `FreeMission`                | Unlock all missions without requiring ticket or gem cost. Default: `true`                                                                                                                                                                                                                                    |
 | `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
 
 # Database Migration
-
-> [!Caution]
-> **CrossTime.Encore database schema not supported**
->
-> The Identity.Encore application and its database schema are designed based on Amadeus.Encore.
-> As a result, migrating from a CrossTime.Encore database is not supported.
->
-> However, migration from Amadeus.Encore database is supported.
 
 Use Entity Framework tools to run the database migration.
 See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
@@ -192,7 +202,7 @@ Use the following command to create a new migration:
 ```shell
  # Replace "MySql" with your preferred database driver
  dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Identity\Identity.csproj \
+                             --startup-project Source\CrossTime\CrossTime.csproj \
                              --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
                              -- Auth:Mode=<auth mode> \
@@ -222,7 +232,7 @@ Run the following command to execute the migration:
 
 ```shell
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Identity\Identity.csproj \
+                           --startup-project Source\CrossTime\CrossTime.csproj \
                            --context Mozart.Data.Contexts.MainDbContext \
                            -- Auth:Mode=<auth mode> \
                            Db:Driver=<driver> \
@@ -272,44 +282,8 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 
 ### Gateway
 
-Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
-
-```shell
-OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
-  <gateway_address_1> <gateway_port_1> \
-  <gateway_address_2> <gateway_port_2> \
-  … \
-  <gateway_address_n> <gateway_port_n>
-```
-
-> [!NOTE]
-> There are 2 modes:
->
-> **O2_INET**: Use value of `0`. Gender passed as `m` or `f` string.
-> **INET**: Use value of `1`. Gender passed as `1` or `2` string.
-> 
-> Use `0` for rank if the player is unranked.
-
-
-For example, if you have three Planets (three Gateways), you might use:
-
-```shell 
-OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
-192.168.10.1 15010 \
-192.168.10.2 15010 \
-192.168.10.3 15010
-```
-
-> [!TIP]
-> You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
-> For example:
-> 
-> ```shell 
-> OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
-> 192.168.10.1 15010 \
-> 192.168.10.1 15010 \
-> 192.168.10.1 15010
-> ```
+The server IP addresses are hard-coded in the client executable. 
+Binary patching is required to connect to a custom server.
 
 ### Channel
 
