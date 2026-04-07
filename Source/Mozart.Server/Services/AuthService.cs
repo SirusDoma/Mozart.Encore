@@ -83,19 +83,19 @@ public sealed class AuthService(IAuthContext ctx, IOptions<ServerOptions> server
     {
         if (!Guid.TryParse(token, out _))
         {
-            if (Options.Mode == AuthMode.Default)
-                throw new ArgumentException("Invalid token", nameof(token));
-
-            string[] creds = token.Split(':');
-            if (creds.Length != 2)
-                throw new ArgumentException("Invalid token", nameof(token));
-
-            token = await Authenticate(new UsernamePasswordCredentialRequest()
+            if (Options.Mode != AuthMode.Default)
             {
-                Username = creds[0],
-                Password = Encoding.UTF8.GetBytes(creds[1]),
-                Address  = IPAddress.Any
-            }, cancellationToken);
+                string[] creds = token.Split(':');
+                if (creds.Length != 2)
+                    throw new ArgumentException("Invalid token", nameof(token));
+
+                token = await Authenticate(new UsernamePasswordCredentialRequest()
+                {
+                    Username = creds[0],
+                    Password = Encoding.UTF8.GetBytes(creds[1]),
+                    Address = IPAddress.Any
+                }, cancellationToken);
+            }
         }
 
         var session = await ctx.Sessions.Find(token, cancellationToken);

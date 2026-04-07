@@ -4,13 +4,13 @@ namespace Mozart.Metadata.Items;
 
 public enum ItemDataFormat
 {
-    Old,
-    New
+    Nx,
+    Classic
 }
 
 public static class ItemDataParser
 {
-    public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data, ItemDataFormat format = ItemDataFormat.Old)
+    public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data, ItemDataFormat format = ItemDataFormat.Nx)
     {
         var items = new Dictionary<int, ItemData>();
 
@@ -61,7 +61,7 @@ public static class ItemDataParser
 
             // O2KR Item Data
             // Special animated item, (similar to O2MO Costume)
-            if (format == ItemDataFormat.New)
+            if (format == ItemDataFormat.Classic)
             {
                 bool special = false;
                 var specialGender = Gender.Any;

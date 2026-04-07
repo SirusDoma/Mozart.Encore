@@ -10,9 +10,10 @@ public class AlbumHeader
 
     public int ServerId { get; set; }
     public int AlbumId { get; set; }
-    public short MasterId { get; set; }
+    public short Price { get; set; }
     public byte[] Name { get; set; } = [];
-    public int Level { get; set; }
+    public byte Level { get; set; }
+    public bool Ranked { get; set; }
     public List<MusicEntry> Entries { get; set; } = [];
 
 }
