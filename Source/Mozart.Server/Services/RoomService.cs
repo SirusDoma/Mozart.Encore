@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Encore.Sessions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Entities;
@@ -7,13 +8,14 @@ using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Options;
 using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
 
 namespace Mozart.Services;
 
 public interface IRoomService
 {
     Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit);
+        int minLevelLimit, int maxLevelLimit, bool premium);
 
     Room DeleteRoom(IChannel channel, int id);
 
@@ -50,7 +52,7 @@ public class RoomService : Broadcastable, IRoomService
         _rooms.Values.SelectMany(e => e.Values.SelectMany(r => r.Sessions)).ToList();
 
     public Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit)
+        int minLevelLimit, int maxLevelLimit, bool premium)
     {
         if (session.Room != null)
             throw new ArgumentOutOfRangeException(nameof(session));
@@ -65,6 +67,10 @@ public class RoomService : Broadcastable, IRoomService
         if (rooms.Count >= channel.Capacity)
             throw new InvalidOperationException("Channel is full");
 
+        int musicId = session.GetAuthorizedToken<Actor>().InstalledMusicIds.FirstOrDefault((ushort)0);
+        if (mode == GameMode.Jam)
+            musicId = channel.GetAlbumList().FirstOrDefault().Value.AlbumId;
+
         for (int i = 0; i < channel.Capacity; i++)
         {
             var room = new Room(this, session, new RoomMetadata
@@ -72,7 +78,7 @@ public class RoomService : Broadcastable, IRoomService
                 Id              = i,
                 Title           = title,
                 Mode            = mode,
-                MusicId         = session.GetAuthorizedToken<Actor>().MusicIds.FirstOrDefault(0),
+                MusicId         = musicId,
                 Difficulty      = Difficulty.EX,
                 Speed           = GameSpeed.X10,
                 MinLevelLimit   = minLevelLimit,
@@ -80,7 +86,8 @@ public class RoomService : Broadcastable, IRoomService
                 Arena           = Arena.Random,
                 ArenaRandomSeed = (byte)Random.Shared.Next(0, (int)Arena.AWhaleOfAqua),
                 Password        = password,
-                State           = RoomState.Waiting
+                State           = RoomState.Waiting,
+                Premium         = premium
             }, _options.Value.MusicLoadTimeout > 0 ? TimeSpan.FromSeconds(_options.Value.MusicLoadTimeout) : null);
 
             if (rooms.TryAdd(i, room))
@@ -148,7 +155,7 @@ public class RoomService : Broadcastable, IRoomService
         }
     }
 
-    private void OnRoomSessionDisconnected(object? sender, Encore.Sessions.SessionEventArgs e)
+    private void OnRoomSessionDisconnected(object? sender, SessionEventArgs e)
     {
         _logger.LogWarning("Session [{User}] removed from the room due to connection lost",
             e.Session.Socket.RemoteEndPoint);

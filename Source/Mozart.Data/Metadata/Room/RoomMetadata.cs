@@ -22,9 +22,15 @@ public class RoomMetadata : ICloneable
 
     public byte ArenaRandomSeed { get; set; }
 
+    public IList<int> Skills { get; set; } = [];
+
+    public int SkillsSeed { get; set; }
+
     public string Password { get; init; } = string.Empty;
 
     public RoomState State { get; set; } = RoomState.Waiting;
+
+    public bool Premium { get; set; }
 
     public object Clone()
     {
