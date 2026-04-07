@@ -19,14 +19,10 @@ public class RoomUserLeftEventArgs : EventArgs
     public required int RoomMasterMemberId { get; init; }
 }
 
-public class RoomTitleChangedEventArgs : EventArgs
-{
-    public required string Title { get; init; }
-}
-
 public class RoomMusicChangedEventArgs : EventArgs
 {
     public required int MusicId           { get; init; }
+    public required int MissionLevel      { get; init; }
     public required GameSpeed Speed       { get; init; }
     public required Difficulty Difficulty { get; init; }
 }
@@ -76,4 +72,17 @@ public class RoomSlotChangedEventArgs : EventArgs
 public class RoomSkillChangedEventArgs : EventArgs
 {
     public required IList<int> Skills { get; init; }
+}
+
+public class RoomModeChangedEventArgs : EventArgs
+{
+    public required string Title     { get; init; }
+    public required GameMode Mode    { get; init; }
+    public required string Password  { get; init; }
+    public required bool TeamEnabled { get; init; }
+}
+
+public class RoomTeamToggleChangedEventArgs : EventArgs
+{
+    public required bool Enabled { get; init; }
 }
