@@ -61,7 +61,7 @@ public class AuthContext : IAuthContext
             GatewayId = gatewayId,
             ServerId  = 0,
             ChannelId = 0,
-            Token     = Guid.NewGuid().ToString("N").ToUpper(),
+            Token     = Guid.NewGuid().ToString().ToUpper(),
             Address   = clientAddress,
             LoginTime = DateTime.UtcNow
         };

@@ -1,6 +1,5 @@
 using Encore.Sessions;
 using Mozart.Metadata.Items;
-using Mozart.Metadata.Music;
 using Mozart.Options;
 using Mozart.Services;
 using Session = Mozart.Sessions.Session;
@@ -21,10 +20,8 @@ public class Channel : Broadcastable, IChannel
         Capacity  = options.Capacity;
         GemRates  = options.Gem;
         ExpRates  = options.Exp;
-        FreeMusic = options.FreeMusic;
 
         MusicListFileName = options.MusicList;
-        AlbumListFileName = options.AlbumList;
         ItemDataFileName  = options.ItemData;
     }
 
@@ -36,10 +33,8 @@ public class Channel : Broadcastable, IChannel
     public int Capacity    { get; init; }
     public float GemRates  { get; init; }
     public float ExpRates  { get; init; }
-    public bool? FreeMusic { get; init; }
 
     public string MusicListFileName { get; init; } = string.Empty;
-    public string AlbumListFileName { get; init; } = string.Empty;
     public string ItemDataFileName  { get; init; } = string.Empty;
 
     public int UserCount => _sessions.Count;
@@ -72,16 +67,6 @@ public class Channel : Broadcastable, IChannel
 
         _sessions.Remove(session);
         session.Disconnected -= OnSessionDisconnected;
-    }
-
-    public IReadOnlyDictionary<int, MusicHeader> GetMusicList()
-    {
-        return _metadataResolver.GetMusicList(this);
-    }
-
-    public IReadOnlyDictionary<int, AlbumHeader> GetAlbumList()
-    {
-        return _metadataResolver.GetAlbumList(this);
     }
 
     public IReadOnlyDictionary<int, ItemData> GetItemData()
