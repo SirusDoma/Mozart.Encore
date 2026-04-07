@@ -119,40 +119,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.ToTable("t_o2jam_login", (string)null);
                 });
 
-<<<<<<<< HEAD:Source/Mozart.Migrations/Sqlite/20260406104544_CreateUserMessage.Designer.cs
-========
-            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id");
-
-                    b.Property<byte[]>("Password")
-                        .IsRequired()
-                        .HasColumnType("BLOB")
-                        .HasColumnName("passwd");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("userid");
-
-                    b.Property<DateTime>("registdate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("member", (string)null);
-                });
-
->>>>>>>> a0ee822 (Backport improvements: Identity.Encore):Source/Mozart.Migrations/Sqlite/20260222102233_AddUserGemStar.Designer.cs
             modelBuilder.Entity("Mozart.Data.Entities.GiftItem", b =>
                 {
                     b.Property<int>("Id")

@@ -10,6 +10,8 @@ public class RoomMetadata : ICloneable
 
     public required int MusicId { get; set; }
 
+    public required int MissionLevel { get; set; }
+
     public required Difficulty Difficulty { get; set; }
 
     public required GameSpeed Speed { get; set; }
@@ -26,11 +28,11 @@ public class RoomMetadata : ICloneable
 
     public int SkillsSeed { get; set; }
 
-    public string Password { get; init; } = string.Empty;
+    public bool TeamEnabled { get; set; }
+
+    public string Password { get; set; } = string.Empty;
 
     public RoomState State { get; set; } = RoomState.Waiting;
-
-    public bool Premium { get; set; }
 
     public object Clone()
     {
