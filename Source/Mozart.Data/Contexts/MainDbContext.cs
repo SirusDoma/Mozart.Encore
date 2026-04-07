@@ -35,7 +35,6 @@ public sealed class MainDbContext(
         ConfigureGiftItem(modelBuilder);
         ConfigureGiftMusic(modelBuilder);
         ConfigureUserMessage(modelBuilder);
-        ConfigurePenalty(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -78,12 +77,6 @@ public sealed class MainDbContext(
                     admin => admin ? 1 : 0,
                     flag    => flag != 0
                 );
-
-            entity.HasOne<Member>("Member")
-                .WithOne()
-                .HasForeignKey<Member>(m => m.Username)
-                .HasPrincipalKey<User>(u => u.Username)
-                .IsRequired();
 
             entity.HasOne<Wallet>("Wallet")
                 .WithOne()
@@ -130,14 +123,6 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne<Penalty>("Penalty")
-                .WithOne()
-                .HasForeignKey<Penalty>(p => p.UserId)
-                .IsRequired(false);
-
-            entity.Navigation("Member")
-                .AutoInclude();
-
             entity.Navigation("Wallet")
                 .AutoInclude();
 
@@ -160,9 +145,6 @@ public sealed class MainDbContext(
                 .AutoInclude();
 
             entity.Navigation("UserMessages")
-                .AutoInclude();
-
-            entity.Navigation("Penalty")
                 .AutoInclude();
 
             entity.HasIndex(e => e.Username)
@@ -209,13 +191,6 @@ public sealed class MainDbContext(
                         str => Encoding.UTF8.GetBytes(str)
                     );
             }
-
-            entity.Property(e => e.Vip)
-                .HasColumnName("vip")
-                .HasDefaultValue((short)0);
-
-            entity.Property(e => e.VipDate)
-                .HasColumnName("vipdate");
 
             entity.Property<DateTime>("registdate")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
@@ -488,28 +463,6 @@ public sealed class MainDbContext(
                 );
 
             entity.HasIndex(e => e.ReceiverId);
-
-            entity.HasQueryFilter(x => !x.IsRead);
-        });
-    }
-
-    private void ConfigurePenalty(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Penalty>(entity =>
-        {
-            entity.ToTable("t_o2jam_penalty");
-
-            entity.HasKey(e => e.UserId);
-
-            entity.Property(e => e.UserId)
-                .HasColumnName("USER_INDEX_ID")
-                .ValueGeneratedNever();
-
-            entity.Property(e => e.Level)
-                .HasColumnName("LEVEL");
-
-            entity.Property(e => e.Count)
-                .HasColumnName("COUNT");
         });
     }
 }
