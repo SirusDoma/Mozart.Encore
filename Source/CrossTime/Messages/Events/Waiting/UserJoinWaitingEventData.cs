@@ -1,9 +1,9 @@
-using CrossTime.Messages.Codecs;
+using Identity.Messages.Codecs;
 using Encore.Messaging;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace CrossTime.Messages.Events;
+namespace Identity.Messages.Events;
 
 public class UserJoinWaitingEventData : IMessage
 {
@@ -22,20 +22,23 @@ public class UserJoinWaitingEventData : IMessage
     public Gender Gender { get; init; }
 
     [MessageField(order: 4)]
-    public RoomTeam Team { get; init; }
+    public int Gem { get; init; }
 
     [MessageField(order: 5)]
-    public bool Ready { get; init; }
+    public RoomTeam Team { get; init; }
 
     [MessageField(order: 6)]
-    public bool AlbumEligible { get; init; }
+    public bool Ready { get; init; }
 
-    [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
+    [MessageField(order: 7)]
+    public WaitingState WaitingState { get; init; }
+
+    [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
     public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-    [CollectionMessageField(order: 8, prefixSizeType: TypeCode.Int32)]
+    [CollectionMessageField(order: 9, prefixSizeType: TypeCode.Int32)]
     public IReadOnlyList<ushort> MusicIds { get; init; } = [];
 
-    [MessageField(order: 9)]
-    public int GemStar { get; init; }
+    [MessageField(order: 10)]
+    public int CashPoint { get; init; }
 }
