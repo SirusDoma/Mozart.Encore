@@ -31,7 +31,6 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
 
             if (room.Mode == GameMode.Jam)
             {
-                room.Channel.GetAlbumList().TryGetValue(room.MusicId, out var album);
                 await e.Channel.Broadcast(room.Master, new RoomParameterChangedEventData
                 {
                     Number = room.Id,
@@ -40,12 +39,6 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                         AlbumId = (ushort)room.MusicId,
                         Speed = room.Speed
                     }
-                }, CancellationToken.None);
-
-                await e.Channel.Broadcast(room.Master, new RoomAlbumMusicListEventData
-                {
-                    Number = room.Id,
-                    MusicIds = album?.Entries.Select(m => m.Id).ToList() ?? []
                 }, CancellationToken.None);
             }
             else
@@ -61,6 +54,12 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                     }
                 }, CancellationToken.None);
             }
+
+            await e.Channel.Broadcast(room.Master, new RoomSkillChangedEventData
+            {
+                Number = room.Id,
+                Skills = room.Skills
+            }, CancellationToken.None);
         }
         catch (Exception ex)
         {
