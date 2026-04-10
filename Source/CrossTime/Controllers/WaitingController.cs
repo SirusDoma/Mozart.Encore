@@ -65,23 +65,23 @@ public class WaitingController(
     }
 
     [CommandHandler]
-    public async Task<UserAlbumEligibilityChangedEventData> CheckUserAlbumEligibility(
+    public async Task<WaitingStateChangedEventData> GetWaitingState(
         CheckUserAlbumEligibilityRequest request,
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomArena,
-            "Update room [{RoomId:000}] [{Member:00}] album eligibility status",
+            "Update room [{RoomId:000}] [{Member:00}] waiting state",
             Room.Id, request.MemberId
         );
 
-        await Room.Broadcast(Session, new UserAlbumEligibilityChangedEventData
+        await Room.Broadcast(Session, new WaitingStateChangedEventData
         {
             MemberId = request.MemberId,
             Ineligible = false
         }, cancellationToken);
 
-        return new UserAlbumEligibilityChangedEventData
+        return new WaitingStateChangedEventData
         {
             MemberId   = request.MemberId,
             Ineligible = false

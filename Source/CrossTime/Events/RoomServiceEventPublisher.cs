@@ -40,12 +40,6 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                         Speed = room.Speed
                     }
                 }, CancellationToken.None);
-
-                await e.Channel.Broadcast(room.Master, new RoomAlbumMusicListEventData
-                {
-                    Number = room.Id,
-                    MusicIds = [room.MusicId]
-                }, CancellationToken.None);
             }
             else
             {
@@ -60,6 +54,12 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                     }
                 }, CancellationToken.None);
             }
+
+            await e.Channel.Broadcast(room.Master, new RoomSkillChangedEventData
+            {
+                Number = room.Id,
+                Skills = room.Skills
+            }, CancellationToken.None);
         }
         catch (Exception ex)
         {
