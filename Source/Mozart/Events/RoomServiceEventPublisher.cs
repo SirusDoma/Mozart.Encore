@@ -1,10 +1,8 @@
-using Identity.Messages.Events;
 using Microsoft.Extensions.Logging;
-using Mozart.Events;
-using Mozart.Metadata;
+using Mozart.Messages.Events;
 using Mozart.Services;
 
-namespace Identity.Events;
+namespace Mozart.Events;
 
 public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger) : IEventPublisher<RoomService>
 {
@@ -23,43 +21,18 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
             {
                 Number        = room.Id,
                 Title         = room.Title,
-                Mode          = room.Mode,
+                Mode          = room.Metadata.Mode,
                 HasPassword   = !string.IsNullOrEmpty(room.Password),
                 MinLevelLimit = (byte)room.Metadata.MinLevelLimit,
-                MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit,
-                Premium       = room.Metadata.Premium
+                MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit
             }, CancellationToken.None);
 
-            if (room.Mode == GameMode.Jam)
+            await e.Channel.Broadcast(room.Master, new RoomMusicChangedEventData
             {
-                await e.Channel.Broadcast(room.Master, new RoomParameterChangedEventData
-                {
-                    Number = room.Id,
-                    Parameter = new RoomParameterChangedEventData.AlbumParameter
-                    {
-                        AlbumId = (ushort)room.MusicId,
-                        Speed = room.Speed
-                    }
-                }, CancellationToken.None);
-            }
-            else
-            {
-                await e.Channel.Broadcast(room.Master, new RoomParameterChangedEventData
-                {
-                    Number = room.Id,
-                    Parameter = new RoomParameterChangedEventData.MusicParameter
-                    {
-                        MusicId = (ushort)room.MusicId,
-                        Difficulty = room.Difficulty,
-                        Speed = room.Speed,
-                    }
-                }, CancellationToken.None);
-            }
-
-            await e.Channel.Broadcast(room.Master, new RoomSkillChangedEventData
-            {
-                Number = room.Id,
-                Skills = room.Skills
+                Number     = room.Id,
+                MusicId    = room.MusicId,
+                Difficulty = room.Difficulty,
+                Speed      = room.Speed,
             }, CancellationToken.None);
         }
         catch (Exception ex)
