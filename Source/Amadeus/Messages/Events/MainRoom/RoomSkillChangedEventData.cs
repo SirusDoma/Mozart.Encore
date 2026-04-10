@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Amadeus.Messages.Events;
+namespace Identity.Messages.Events;
 
 public class RoomSkillChangedEventData : IMessage
 {

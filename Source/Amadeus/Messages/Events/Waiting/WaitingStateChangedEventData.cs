@@ -1,6 +1,7 @@
 using Encore.Messaging;
+using Mozart.Metadata;
 
-namespace Amadeus.Messages.Responses;
+namespace Identity.Messages.Responses;
 
 public class WaitingStateChangedEventData : IMessage
 {
@@ -10,5 +11,5 @@ public class WaitingStateChangedEventData : IMessage
     public byte MemberId { get; init; }
 
     [MessageField(order: 1)]
-    public bool Ineligible { get; init; } = false;
+    public WaitingState WaitingState { get; init; }
 }

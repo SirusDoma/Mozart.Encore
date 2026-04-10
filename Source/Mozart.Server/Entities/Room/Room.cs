@@ -63,6 +63,8 @@ public class Room : Broadcastable, IRoom
 
         public bool IsReady { get; set; }
 
+        public WaitingState WaitingState { get; set; } = WaitingState.None;
+
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
 
@@ -133,6 +135,8 @@ public class Room : Broadcastable, IRoom
         get => _metadata.SkillsSeed;
         set => _metadata.SkillsSeed = value;
     }
+
+    public bool Premium => _metadata.Premium;
 
     public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
