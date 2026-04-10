@@ -136,6 +136,12 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
+            await room.Broadcast(sender: room.Master, new WaitingMusicChangedEventData
+            {
+                MusicId      = (ushort)room.MusicId,
+                MissionLevel = (byte)room.MissionLevel,
+            }, CancellationToken.None);
+
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
@@ -145,12 +151,6 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                     Difficulty = room.Difficulty,
                     Speed      = room.Speed,
                 }
-            }, CancellationToken.None);
-
-            await room.Broadcast(sender: room.Master, new WaitingMusicChangedEventData
-            {
-                MusicId      = (ushort)room.MusicId,
-                MissionLevel = (byte)room.MissionLevel,
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -165,6 +165,13 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
+
+            await room.Broadcast(sender: room.Master, new WaitingAlbumChangedEventData
+            {
+                AlbumId = e.AlbumId,
+                Speed = e.Speed
+            }, CancellationToken.None);
+
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
@@ -174,24 +181,11 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                     Speed = e.Speed
                 }
             }, CancellationToken.None);
-
-            await room.Broadcast(sender: room.Master, new WaitingAlbumChangedEventData
-            {
-                AlbumId = e.AlbumId,
-                Speed = e.Speed
-            }, CancellationToken.None);
-
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomAlbumMusicListEventData
-            {
-                Number = room.Id,
-                MusicIds = [room.MusicId]
-            }, CancellationToken.None);
-
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex,
-                "Failed to broadcast [Room::OnMusicChanged] event to one or more subscribers");
+                "Failed to broadcast [Room::OnAlbumChanged] event to one or more subscribers");
         }
     }
 
@@ -220,12 +214,6 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
-            {
-                Number = room.Id,
-                State  = room.State
-            }, CancellationToken.None);
-
             if (e.PreviousState == RoomState.Waiting)
             {
                 await room.Broadcast(sender: room.Master, new StartGameEventData
@@ -234,6 +222,12 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                     SkillsSeed = room.SkillsSeed
                 }, CancellationToken.None);
             }
+
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
+            {
+                Number = room.Id,
+                State  = room.State
+            }, CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -279,8 +273,15 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
+
             await room.Broadcast(sender: room.Master, new WaitingSkillChangedEventData
             {
+                Skills = e.Skills
+            }, CancellationToken.None);
+
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
+            {
+                Number = room.Id,
                 Skills = e.Skills
             }, CancellationToken.None);
         }
@@ -295,15 +296,6 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomModeChangedEventData
-            {
-                Number       = room.Id,
-                Title        = e.Title,
-                Mode         = e.Mode,
-                HasPassword  = !string.IsNullOrEmpty(e.Password),
-                TeamDisabled = !e.TeamEnabled
-            }, CancellationToken.None);
-
             await room.Broadcast(sender: room.Master, new WaitingModeChangedEventData
             {
                 Number       = room.Id,
@@ -311,6 +303,15 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Mode         = e.Mode,
                 HasPassword  = !string.IsNullOrEmpty(e.Password),
                 Password     = e.Password,
+                TeamDisabled = !e.TeamEnabled
+            }, CancellationToken.None);
+
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomModeChangedEventData
+            {
+                Number       = room.Id,
+                Title        = e.Title,
+                Mode         = e.Mode,
+                HasPassword  = !string.IsNullOrEmpty(e.Password),
                 TeamDisabled = !e.TeamEnabled
             }, CancellationToken.None);
         }

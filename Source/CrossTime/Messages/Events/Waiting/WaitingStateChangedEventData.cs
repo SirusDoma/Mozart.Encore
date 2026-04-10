@@ -2,9 +2,9 @@ using Encore.Messaging;
 
 namespace CrossTime.Messages.Responses;
 
-public class UserAlbumEligibilityChangedEventData : IMessage
+public class WaitingStateChangedEventData : IMessage
 {
-    public static Enum Command => EventCommand.UserAlbumEligibilityChanged;
+    public static Enum Command => EventCommand.WaitingStateChanged;
 
     [MessageField(order: 0)]
     public byte MemberId { get; init; }
