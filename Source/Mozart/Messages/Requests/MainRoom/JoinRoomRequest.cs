@@ -1,14 +1,18 @@
 using Encore.Messaging;
+using Mozart.Metadata;
 
-namespace Mozart.Messages.Requests;
+namespace Identity.Messages.Requests;
 
 public class JoinRoomRequest : IMessage
 {
     public static Enum Command => RequestCommand.JoinWaiting;
 
     [MessageField(order: 0)]
-    public int RoomNumber { get; init; }
+    public int Number { get; init; }
 
-    [StringMessageField(order: 1)]
+    [MessageField(order: 1)]
+    public WaitingState WaitingState { get; init; }
+
+    [StringMessageField(order: 2)]
     public string Password { get; init; } = "\0\0\0\0";
 }
