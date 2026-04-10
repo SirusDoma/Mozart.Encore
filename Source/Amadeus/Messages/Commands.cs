@@ -1,4 +1,4 @@
-namespace Identity;
+namespace Amadeus;
 
 public enum GenericCommand : ushort
 {
@@ -51,14 +51,6 @@ public enum RequestCommand : ushort
     GetGiftMessageList  = 0x1399, // 5017
     ReadGiftMessage     = 0x139B, // 5019
     ClaimGift           = 0x139F, // 5023
-    SyncFreePass        = 0x13A1, // 5025
-    SyncCashPoint       = 0x13A4, // 5028
-    ChangeName          = 0x13A6, // 5030
-    CheckName           = 0x13A8, // 5032
-    PenaltyReset        = 0x13AA, // 5034
-    PurchaseFreePass    = 0x13AC, // 5036
-    GiftFreePass        = 0x13AE, // 5038
-    CheckGiftFreePass   = 0x13B0, // 5040
     Terminate           = 0xFFF0  // -16
 }
 
@@ -93,14 +85,6 @@ public enum ResponseCommand : ushort
     StartPayment         = 0x1398, // 5016
     GetGiftMessageList   = 0x139A, // 5018
     ClaimGift            = 0x13A0, // 5024
-    SyncFreePass         = 0x13A2, // 5026
-    SyncCashPoint        = 0x13A5, // 5029
-    ChangeName           = 0x13A7, // 5031
-    CheckName            = 0x13A9, // 5033
-    PenaltyReset         = 0x13AB, // 5035
-    PurchaseFreePass     = 0x13AD, // 5037
-    GiftFreePass         = 0x13AF, // 5039
-    CheckGiftFreePass    = 0x13B1, // 5041
 }
 
 public enum EventCommand : ushort
@@ -113,7 +97,6 @@ public enum EventCommand : ushort
     RoomStateChanged      = 0x07E4, // 2020
     RoomParameterChanged  = 0x07E7, // 2023
     RoomSkillChanged      = 0x07E9, // 2025
-    MusicPremiumTimeList  = 0x07EA, // 2026
     WaitingTitleChanged   = 0x0BB9, // 3001
     UserJoinWaiting       = 0x0BBC, // 3004
     UserLeaveWaiting      = 0x0BBF, // 3007
