@@ -31,7 +31,7 @@ public class UserJoinWaitingEventData : IMessage
     public bool Ready { get; init; }
 
     [MessageField(order: 7)]
-    public AlbumState AlbumState { get; init; }
+    public WaitingState WaitingState { get; init; }
 
     [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
     public Dictionary<ItemType, int> Equipments { get; init; } = [];

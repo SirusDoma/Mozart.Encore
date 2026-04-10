@@ -63,7 +63,7 @@ public class Room : Broadcastable, IRoom
 
         public bool IsReady { get; set; }
 
-        public AlbumState AlbumState { get; set; } = AlbumState.None;
+        public WaitingState WaitingState { get; set; } = WaitingState.None;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
