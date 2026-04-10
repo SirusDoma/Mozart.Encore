@@ -39,8 +39,8 @@ public enum RequestCommand : ushort
     StartGame           = 0x0FAA, // 4010
     ConfirmMusicLoaded  = 0x0FAC, // 4012
     UpdateGameStats     = 0x0FAE, // 4014
-    ExitPlaying         = 0x0FB5, // 4021
     SubmitScore         = 0x0FB0, // 4016
+    ExitPlaying         = 0x0FB5, // 4021
     PurchaseItem        = 0x1388, // 5000
     SellItem            = 0x138A, // 5002
     EquipItem           = 0x138C, // 5004
@@ -71,9 +71,9 @@ public enum ResponseCommand : ushort
     ExitWaiting          = 0x0BBE, // 3006
     WaitingUserMessage   = 0x0BC4, // 3012
     WaitingAdminMessage  = 0x0BC5, // 3013
-    EquipItem            = 0x138D, // 5004
     PurchaseItem         = 0x1389, // 5001
     SellItem             = 0x138B, // 5003
+    EquipItem            = 0x138D, // 5005
     PurchaseMusic        = 0x1393, // 5011
 }
 
@@ -91,14 +91,14 @@ public enum EventCommand : ushort
     UserLeaveWaiting        = 0x0BBF, // 3007
     RoomSlotUpdate          = 0x0BC1, // 3009
     Kick                    = 0x0BC2, // 3010
-    RoomForceRemoved        = 0x0BC6, // 3013
+    RoomForceRemoved        = 0x0BC6, // 3014
     WaitingMusicChanged     = 0x0FA1, // 4001
     RoomArenaChanged        = 0x0FA3, // 4003
     UserTeamChanged         = 0x0FA5, // 4005
     UserInstrumentChanged   = 0x0FA7, // 4007
     UserReadyStateChanged   = 0x0FA9, // 4009
-    MusicLoaded             = 0x0FAD, // 4013
     StartGame               = 0x0FAB, // 4011
+    MusicLoaded             = 0x0FAD, // 4013
     GameStatsUpdate         = 0x0FAF, // 4015
     ScoreSubmission         = 0x0FB1, // 4017
     GameCompleted           = 0x0FB2, // 4018
