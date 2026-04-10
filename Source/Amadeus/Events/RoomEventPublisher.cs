@@ -1,12 +1,12 @@
-using Amadeus.Messages.Events;
-using Amadeus.Messages.Responses;
+using Identity.Messages.Events;
+using Identity.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 
-namespace Amadeus.Events;
+namespace Identity.Events;
 
 public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPublisher<Room>
 {
@@ -34,15 +34,17 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
             await room.Broadcast(sender: e.Member.Session, new UserJoinWaitingEventData
             {
-                MemberId        = (byte)e.MemberId,
-                Nickname        = e.Member.Actor.Nickname,
-                Level           = e.Member.Actor.Level,
-                Gender          = e.Member.Actor.Gender,
-                Team            = e.Member.Team,
-                Ready           = e.Member.IsReady,
-                IsAdministrator = e.Member.Actor.IsAdministrator,
-                Equipments      = e.Member.Actor.Equipments,
-                MusicIds        = e.Member.Actor.InstalledMusicIds
+                MemberId     = (byte)e.MemberId,
+                Nickname     = e.Member.Actor.Nickname,
+                Level        = e.Member.Actor.Level,
+                Gender       = e.Member.Actor.Gender,
+                Gem          = e.Member.Actor.Gem,
+                Team         = e.Member.Team,
+                Ready        = e.Member.IsReady,
+                WaitingState = e.Member.WaitingState,
+                Equipments   = e.Member.Actor.Equipments,
+                MusicIds     = e.Member.Actor.InstalledMusicIds,
+                CashPoint    = e.Member.Actor.CashPoint
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -61,6 +63,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             {
                 MemberId              = (byte)e.MemberId,
                 NewRoomMasterMemberId = (byte)e.RoomMasterMemberId,
+                Premium               = room.Premium
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -282,7 +285,8 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             {
                 Number    = room.Id,
                 Capacity  = (byte)e.Capacity,
-                UserCount = (byte)e.UserCount
+                UserCount = (byte)e.UserCount,
+                Premium   = room.Premium
             }, CancellationToken.None);
         }
         catch (Exception ex)

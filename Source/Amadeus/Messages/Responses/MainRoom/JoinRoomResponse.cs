@@ -1,9 +1,9 @@
-using Amadeus.Messages.Codecs;
+using Identity.Messages.Codecs;
 using Encore.Messaging;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace Amadeus.Messages.Responses;
+namespace Identity.Messages.Responses;
 
 public class JoinRoomResponse : IMessage
 {
@@ -12,11 +12,12 @@ public class JoinRoomResponse : IMessage
     public enum JoinResult : uint
     {
         Success         = 0x00000000, // 0
-        ConnectionError = 0xFFFFFFFF, // -1
+        GenericError    = 0xFFFFFFFF, // -1
         InvalidMode     = 0xFFFFFFFE, // -2
         InvalidPassword = 0xFFFFFFFD, // -3
         InProgress      = 0xFFFFFFFB, // -5
-        Full            = 0xFFFFFFFA  // -6 (or -4 / 0xFFFFFFFC)
+        Full            = 0xFFFFFFFA, // -6 (or -4 / 0xFFFFFFFC)
+        NoPass          = 0xFFFFFFF9  // -7
     }
 
     public enum RoomSlotState : int
@@ -38,22 +39,28 @@ public class JoinRoomResponse : IMessage
         public Gender Gender { get; init; }
 
         [MessageField(order: 3)]
-        public bool IsRoomMaster { get; init; }
+        public int Gem { get; init; }
 
         [MessageField(order: 4)]
-        public RoomTeam Team { get; init; }
+        public bool IsRoomMaster { get; init; }
 
         [MessageField(order: 5)]
-        public bool Ready { get; init; }
+        public RoomTeam Team { get; init; }
 
         [MessageField(order: 6)]
-        public bool IsAdministrator { get; init; }
+        public bool Ready { get; init; }
 
-        [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
+        [MessageField(order: 7)]
+        public WaitingState WaitingState { get; init; }
+
+        [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-        [CollectionMessageField(order: 8, prefixSizeType: TypeCode.Int32)]
+        [CollectionMessageField(order: 9, prefixSizeType: TypeCode.Int32)]
         public IReadOnlyList<ushort> MusicIds { get; init; } = [];
+
+        [MessageField(order: 10)]
+        public int CashPoint { get; init; }
     }
 
     public class RoomSlotInfo : SubMessage
@@ -98,9 +105,12 @@ public class JoinRoomResponse : IMessage
     [MessageField(order: 9)]
     public int UserCount { get; init; }
 
-    [CollectionMessageField(order: 10, minCount: 8, maxCount: 8)]
+    [CollectionMessageField(order: 10, minCount: 7, maxCount: 7)]
     public IReadOnlyList<RoomSlotInfo> Slots { get; init; } = [];
 
     [CollectionMessageField(order: 11, prefixSizeType: TypeCode.Int32)]
     public IReadOnlyList<int> Skills { get; init; } = [];
+
+    [MessageField<MessageFieldCodec<short>>(order: 12)]
+    public bool Premium { get; init; }
 }

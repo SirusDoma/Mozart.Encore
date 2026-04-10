@@ -1,7 +1,7 @@
-using Amadeus.Controllers.Filters;
-using Amadeus.Messages.Events;
-using Amadeus.Messages.Requests;
-using Amadeus.Messages.Responses;
+using Identity.Controllers.Filters;
+using Identity.Messages.Events;
+using Identity.Messages.Requests;
+using Identity.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +14,7 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Amadeus.Controllers;
+namespace Identity.Controllers;
 
 [RoomAuthorize]
 public class WaitingController(
@@ -82,16 +82,17 @@ public class WaitingController(
             Room.Id, request.MemberId
         );
 
+        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
         await Room.Broadcast(Session, new WaitingStateChangedEventData
         {
-            MemberId = request.MemberId,
-            Ineligible = false
+            MemberId     = request.MemberId,
+            WaitingState = member.WaitingState
         }, cancellationToken);
 
         return new WaitingStateChangedEventData
         {
-            MemberId   = request.MemberId,
-            Ineligible = false
+            MemberId     = request.MemberId,
+            WaitingState = member.WaitingState
         };
     }
 
@@ -138,8 +139,8 @@ public class WaitingController(
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomSkill,
-            "Update room [{RoomId:000}] skill settings: {Status}",
-            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
+            "Update room [{RoomId:000}] skill settings: {Status} ({count}: {skillId})",
+            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active", request.Skills.Count, request.Skills.FirstOrDefault()
         );
 
         Room.Skills = request.Skills.Where(s => s > 0).ToList();
@@ -226,47 +227,46 @@ public class WaitingController(
         }
 
         var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
+        var skills = new List<int>();
+        skills.AddRange(Room.Skills.Where(s => s != 0));
+
+        if (skills.Count > 0)
         {
-            var skills = new List<int>();
-            skills.AddRange(Room.Skills.Where(s => s != 0));
+            for (int i = 0; i < user.Inventory.Capacity; i++)
+            {
+                var item = user.Inventory[i];
+                if (skills.Any(s => item.Id == s))
+                {
+                    int rc = skills.RemoveAll(s => s == item.Id);
+                    if (item.Count > 0)
+                    {
+                        user.Inventory[i] = new Inventory.BagItem
+                        {
+                            Id = item.Id,
+                            Count = item.Count - 1
+                        };
+                    }
+                    else
+                    {
+                        if (item.Count == 0)
+                            skills.AddRange(Enumerable.Repeat((int)item.Id, rc)); // Something strange happened
+
+                        user.Inventory[i] = Inventory.BagItem.Empty;
+                    }
+                }
+            }
 
             if (skills.Count > 0)
             {
-                for (int i = 0; i < user.Inventory.Capacity; i++)
+                // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
+                return new StartGameEventData
                 {
-                    var item = user.Inventory[i];
-                    if (skills.Any(s => item.Id == s))
-                    {
-                        int rc = skills.RemoveAll(s => s == item.Id);
-                        if (item.Count > 0)
-                        {
-                            user.Inventory[i] = new Inventory.BagItem
-                            {
-                                Id = item.Id,
-                                Count = item.Count - 1
-                            };
-                        }
-                        else
-                        {
-                            if (item.Count == 0)
-                                skills.AddRange(Enumerable.Repeat((int)item.Id, rc)); // Something strange happened
-
-                            user.Inventory[i] = Inventory.BagItem.Empty;
-                        }
-                    }
-                }
-
-                if (skills.Count > 0)
-                {
-                    // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
-                    Room.SkillsSeed = 0;
-                }
-                else
-                {
-                    await repository.Update(user, cancellationToken);
-                    await repository.Commit(cancellationToken);
-                }
+                    Result = StartGameEventData.StartResult.GenericError,
+                };
             }
+
+            await repository.Update(user, cancellationToken);
+            await repository.Commit(cancellationToken);
         }
 
         Session.Actor.Sync(user);
@@ -290,14 +290,38 @@ public class WaitingController(
         Room.UpdateReadyState(Session);
     }
 
-    [CommandHandler(RequestCommand.ExitWaiting)]
-    public ExitWaitingResponse ExitRoom()
+    [CommandHandler]
+    public async Task<ExitWaitingResponse> ExitRoom(ExitWaitingRequest request, CancellationToken cancellationToken)
     {
+        var actor = Session.Actor;
         logger.LogInformation(
             (int)RequestCommand.ExitWaiting,
-            "Exit room: [{RoomId:000}]",
-            Room.Id
+            "Exit room: [{RoomId:000}]: {Reason:000}",
+            Room.Id,
+            request.Reason
         );
+
+        // Since reason payload can be forged easily, we need to add additional guard
+        // TODO: Implement this handling in disconnection?
+        if (request.Reason == 1 || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
+        {
+            var user = (await repository.Find(actor.UserId, cancellationToken))!;
+            user.PenaltyCount += 1;
+            user.PenaltyLevel = user.PenaltyCount switch
+            {
+                <= 3  => 0,
+                <= 6  => 1,
+                <= 9  => 2,
+                <= 12 => 3,
+                <= 15 => 4,
+                <= 18 => 5,
+                <= 21 => 6,
+                >= 22 => 7
+            };
+
+            await repository.Update(user, cancellationToken);
+            await repository.Commit(cancellationToken);
+        }
 
         var room = Room;
         Session.Exit(room);
