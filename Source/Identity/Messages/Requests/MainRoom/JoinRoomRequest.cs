@@ -11,7 +11,7 @@ public class JoinRoomRequest : IMessage
     public int Number { get; init; }
 
     [MessageField(order: 1)]
-    public AlbumState AlbumState { get; init; }
+    public WaitingState WaitingState { get; init; }
 
     [StringMessageField(order: 2)]
     public string Password { get; init; } = "\0\0\0\0";

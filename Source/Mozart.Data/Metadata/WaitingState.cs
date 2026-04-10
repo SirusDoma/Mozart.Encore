@@ -1,6 +1,6 @@
 namespace Mozart.Metadata;
 
-public enum AlbumState : byte
+public enum WaitingState : byte
 {
     None            = 0,
     InsufficientGem = 1,
