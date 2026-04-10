@@ -1,9 +1,9 @@
-using CrossTime.Messages.Codecs;
+using Identity.Messages.Codecs;
 using Encore.Messaging;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace CrossTime.Messages.Responses;
+namespace Identity.Messages.Responses;
 
 public class JoinRoomResponse : IMessage
 {
@@ -12,12 +12,12 @@ public class JoinRoomResponse : IMessage
     public enum JoinResult : uint
     {
         Success         = 0x00000000, // 0
-        InternalError   = 0xFFFFFFFF, // -1
+        GenericError    = 0xFFFFFFFF, // -1
         InvalidMode     = 0xFFFFFFFE, // -2
         InvalidPassword = 0xFFFFFFFD, // -3
-        Full            = 0xFFFFFFFC, // -4
         InProgress      = 0xFFFFFFFB, // -5
-        InvalidRoom     = 0xFFFFFFFA  // -6
+        Full            = 0xFFFFFFFA, // -6 (or -4 / 0xFFFFFFFC)
+        NoPass          = 0xFFFFFFF9  // -7
     }
 
     public enum RoomSlotState : int
@@ -39,25 +39,28 @@ public class JoinRoomResponse : IMessage
         public Gender Gender { get; init; }
 
         [MessageField(order: 3)]
-        public bool IsRoomMaster { get; init; }
+        public int Gem { get; init; }
 
         [MessageField(order: 4)]
-        public RoomTeam Team { get; init; }
+        public bool IsRoomMaster { get; init; }
 
         [MessageField(order: 5)]
-        public bool Ready { get; init; }
+        public RoomTeam Team { get; init; }
 
         [MessageField(order: 6)]
-        public bool AlbumEligible { get; init; }
+        public bool Ready { get; init; }
 
-        [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
+        [MessageField(order: 7)]
+        public WaitingState WaitingState { get; init; }
+
+        [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-        [CollectionMessageField(order: 8, prefixSizeType: TypeCode.Int32)]
+        [CollectionMessageField(order: 9, prefixSizeType: TypeCode.Int32)]
         public IReadOnlyList<ushort> MusicIds { get; init; } = [];
 
-        [MessageField(order: 9)]
-        public int GemStar { get; init; }
+        [MessageField(order: 10)]
+        public int CashPoint { get; init; }
     }
 
     public class RoomSlotInfo : SubMessage
@@ -70,15 +73,6 @@ public class JoinRoomResponse : IMessage
 
         [MessageField(order: 2)]
         public RoomMemberInfo? MemberInfo { get; init; } = null;
-    }
-
-    public class AlbumMusicInfo : SubMessage
-    {
-        [MessageField(order: 0)]
-        public ushort MusicId { get; init; }
-
-        [MessageField(order: 1)]
-        public int MissionLevel { get; init; }
     }
 
     [MessageField(order: 0)]
@@ -118,14 +112,5 @@ public class JoinRoomResponse : IMessage
     public IReadOnlyList<int> Skills { get; init; } = [];
 
     [MessageField<MessageFieldCodec<short>>(order: 12)]
-    public bool Restricted { get; init; } = false;
-
-    [MessageField(order: 13)]
-    public bool Unknown { get; init; }
-
-    [MessageField(order: 14)]
-    public bool TeamDisabled { get; init; }
-
-    [CollectionMessageField(order: 15, minCount: 12, maxCount: 12)]
-    public IReadOnlyList<AlbumMusicInfo>? AlbumMusic { get; init; } = null;
+    public bool Premium { get; init; }
 }

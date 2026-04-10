@@ -1,23 +1,29 @@
 using System.Diagnostics;
-using CrossTime.Controllers.Filters;
-using CrossTime.Messages;
-using CrossTime.Messages.Events;
-using CrossTime.Messages.Requests;
-using CrossTime.Messages.Responses;
-using Encore.Server;
+using System.Text;
 using Microsoft.Extensions.Logging;
+
+using Encore.Server;
 using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
 using Mozart.Services;
 using Mozart.Sessions;
+using Identity.Controllers.Filters;
+using Identity.Messages;
+using Identity.Messages.Events;
+using Identity.Messages.Requests;
+using Identity.Messages.Responses;
+using Microsoft.Extensions.Options;
+using Mozart.Data.Entities;
+using Mozart.Options;
 
-namespace CrossTime.Controllers;
+namespace Identity.Controllers;
 
 [ChannelAuthorize]
 public class MainRoomController(
     Session session,
+    IOptions<GameOptions> gameOptions,
     IUserRepository repository,
     IRoomService roomService,
     IEventPublisher<Room> publisher,
@@ -33,34 +39,87 @@ public class MainRoomController(
         logger.LogInformation((int)RequestCommand.GetCharacterInfo, "Get character info: [{User}]",
             actor.Nickname);
 
-        await Session.WriteMessage(new SyncMembershipEventData
-        {
-            Gem             = actor.Gem,
-            Point           = actor.Point,
-            O2Cash          = actor.Point,
-            ItemCash        = actor.Point,
-            MusicCash       = actor.Point,
-            MembershipType  = actor.MembershipType
-        }, cancellationToken);
-
         var giftBox = BuildGiftBoxResponse(actor);
         if (giftBox.Messages.Count > 0)
             await Session.WriteMessage(giftBox, cancellationToken);
 
         return new CharacterInfoResponse
         {
-            Nickname   = actor.Nickname,
-            Gender     = actor.Gender,
-            Gem        = actor.Gem,
-            Point      = actor.Point,
-            Level      = actor.Level,
-            Win        = actor.Win,
-            Lose       = 0,
-            Draw       = 0,
-            Equipments = actor.Equipments,
-            Inventory  = actor.Inventory.Select(i => (int)i.Id).ToList(),
-            GemStar    = actor.GemStar,
-            Ticket     = actor.Ticket
+            Nickname         = actor.Nickname,
+            Gender           = actor.Gender,
+            Gem              = actor.Gem,
+            Point            = actor.Point,
+            O2Cash           = actor.O2Cash,
+            Level            = actor.Level,
+            Win              = actor.Win,
+            Lose             = actor.Lose,
+            Draw             = actor.Draw,
+            Battles          = actor.Win + actor.Lose + actor.Draw,
+            Experience       = actor.Experience,
+            IsAdministrator  = actor.IsAdministrator,
+            Equipments       = actor.Equipments,
+            Inventory        = actor.Inventory.Select(i => (int)i.Id).ToList(),
+            CashPoint        = actor.CashPoint,
+            PenaltyCount     = (short)actor.PenaltyCount,
+            PenaltyLevel     = (short)actor.PenaltyLevel,
+            ItemGiftBox      = actor.GiftItems.Select(i =>
+                new CharacterInfoResponse.GiftItemInfo
+                {
+                    GiftId = i.Id,
+                    ItemId = i.ItemId,
+                    Sender = i.SenderNickname
+                }
+            ).ToList(),
+            MusicGiftBox     = actor.GiftMusics.Select(m =>
+                new CharacterInfoResponse.GiftMusicInfo
+                {
+                    GiftId  = m.Id,
+                    MusicId = m.MusicId,
+                    Sender  = m.SenderNickname
+                }
+            ).ToList(),
+            AttributiveItems = actor.Inventory.Where(i => i.Count > 0).Select(i =>
+                new CharacterInfoResponse.AttributiveItemInfo
+                {
+                    AttributiveItemId = i.Id,
+                    ItemCount         = i.Count
+                }
+            ).ToList(),
+        };
+    }
+
+    [CommandHandler(RequestCommand.GetCharacterInfo)]
+    public MusicPremiumTimeEventData GetMusicPremiumTimeList()
+    {
+        var actor  = Session.Actor;
+        var expiry = DateTime.MinValue;
+        bool free  = gameOptions.Value.FreeMusic || Session.Actor.FreePass.Type == FreePassType.AllMusic;
+
+        if (!free)
+        {
+            // TODO: Support time-limited promotion/event?
+            if (Session.Actor.FreePass.Type == FreePassType.None)
+                return new MusicPremiumTimeEventData();
+
+            // FreePass in the original server implementation may a lot more complex than this.
+            // But we have no way to know how it works now.
+            expiry = Session.Actor.FreePass.ExpiryDate;
+        }
+
+        var acquiredMusic = new HashSet<int>(actor.AcquiredMusicIds.Select(i => (int)i));
+        return new MusicPremiumTimeEventData
+        {
+            Entries = actor.Top100.Select(id =>
+                new MusicPremiumTimeEventData.MusicEntry
+                {
+                    MusicId = (ushort)id,
+                    Day     = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Day),
+                    Month   = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Month),
+                    Year    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Year % 1000),
+                    Hour    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Hour),
+                    Minute  = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Minute)
+                }
+            ).ToList()
         };
     }
 
@@ -108,21 +167,22 @@ public class MainRoomController(
         logger.LogInformation((int)RequestCommand.GetMusicList,
             "Get music list: [0/{channelId:00}] {Count} music", Channel.Id, musicList.Count);
 
-        var musicInfoList = new List<MusicListResponse.MusicInfo>();
-        foreach (var music in musicList.Values)
-        {
-            musicInfoList.Add(new MusicListResponse.MusicInfo
-            {
-                Id          = (ushort)music.Id,
-                NoteCountEx = (ushort)music.NoteCountEx,
-                NoteCountNx = (ushort)music.NoteCountNx,
-                NoteCountHx = (ushort)music.NoteCountHx
-            });
-        }
-
         return new MusicListResponse
         {
-            MusicList = musicInfoList
+            MusicList = musicList.Values.Select(music =>
+                new MusicListResponse.MusicInfo
+                {
+                    Id          = (ushort)music.Id,
+                    NoteCountEx = (ushort)music.NoteCountEx,
+                    NoteCountNx = (ushort)music.NoteCountNx,
+                    NoteCountHx = (ushort)music.NoteCountHx,
+                    Price       = new MusicListResponse.MusicPrice
+                    {
+                        O2Cash = music.PriceO2Cash,
+                        Gem    = music.PriceGem
+                    }
+                }
+            ).ToList()
         };
     }
 
@@ -143,7 +203,8 @@ public class MainRoomController(
                 return new UserListResponse.UserInfo
                 {
                     Level    = actor.Level,
-                    Username = actor.Username,
+                    Username = actor.Nickname, // Supposed to be username, but the server inject nickname anyway
+                    // This may affect user list webpage function (see `CTuser_id`)
                     Nickname = actor.Nickname
                 };
             }).ToList()
@@ -173,13 +234,14 @@ public class MainRoomController(
                 HasPassword      = !string.IsNullOrEmpty(room?.Password),
                 MusicId          = (ushort)(room?.MusicId ?? 0),
                 Difficulty       = room?.Difficulty ?? Difficulty.EX,
-                Mode             = room?.Mode ?? GameMode.Versus,
+                Mode             = room?.Mode ?? GameMode.Single,
                 Speed            = room?.Speed ?? GameSpeed.X10,
                 Capacity         = (byte)(room?.Capacity ?? 0),
                 UserCount        = (byte)(room?.UserCount ?? 0),
                 MinLevelLimit    = (byte)(room?.MinLevelLimit ?? 0),
                 MaxLevelLimit    = (byte)(room?.MaxLevelLimit ?? 0),
-                Skills           = room?.Skills.ToList() ?? []
+                Skills           = room?.Skills.ToList() ?? [],
+                Premium          = room?.Premium ?? false
             });
         }
 
@@ -195,10 +257,18 @@ public class MainRoomController(
         logger.LogInformation(
             (int)RequestCommand.JoinWaiting,
             "Join room: [{RoomId:000}]",
-            request.RoomNumber
+            request.Number
         );
 
-        var room = roomService.GetRoom(Channel, request.RoomNumber);
+        var room = roomService.GetRoom(Channel, request.Number);
+        if (room.Mode == GameMode.Single)
+        {
+            return new JoinRoomResponse
+            {
+                Result = JoinRoomResponse.JoinResult.InvalidMode
+            };
+        }
+
         if (room.State != RoomState.Waiting)
         {
             return new JoinRoomResponse
@@ -215,23 +285,23 @@ public class MainRoomController(
             Session.Register(room);
             int index  = room.Slots.ToList().FindIndex(r => r is Room.MemberSlot m && m.Session == Session);
             var member = (room.Slots[index] as Room.MemberSlot)!;
+            member.WaitingState = request.WaitingState;
 
             return new JoinRoomResponse
             {
-                Result       = JoinRoomResponse.JoinResult.Success,
-                Index        = (byte)index,
-                Team         = member.Team,
-                RoomTitle    = room.Title,
-                MusicId      = (ushort)room.MusicId,
-                ArenaInfo    = new RoomArenaMessage(room.Arena, room.ArenaRandomSeed),
-                Mode         = room.Mode,
-                Difficulty   = room.Difficulty,
-                Speed        = room.Speed,
-                UserCount    = room.UserCount,
-                Skills       = room.Skills.ToList(),
-                Unknown      = false,
-                TeamDisabled = !room.TeamEnabled,
-                Slots        = room.Slots.Where(slot => (slot as Room.MemberSlot)?.Session != Session).Select((slot, i) =>
+                Result     = JoinRoomResponse.JoinResult.Success,
+                Index      = (byte)index,
+                Team       = member.Team,
+                RoomTitle  = room.Title,
+                MusicId    = (ushort)room.MusicId,
+                ArenaInfo  = new RoomArenaMessage(room.Arena, room.ArenaRandomSeed),
+                Mode       = room.Mode,
+                Difficulty = room.Difficulty,
+                Speed      = room.Speed,
+                UserCount  = room.UserCount,
+                Premium    = room.Premium,
+                Skills     = room.Skills.ToList(),
+                Slots      = room.Slots.Select((slot, i) =>
                 {
                     return slot switch
                     {
@@ -245,27 +315,34 @@ public class MainRoomController(
                             Index = (byte)i,
                             State = JoinRoomResponse.RoomSlotState.Locked
                         },
+                        Room.MemberSlot when i == index => new JoinRoomResponse.RoomSlotInfo
+                        {
+                            Index = (byte)i,
+                            State = JoinRoomResponse.RoomSlotState.Occupied,
+                            MemberInfo = null
+                        },
                         Room.MemberSlot m => new JoinRoomResponse.RoomSlotInfo
                         {
                             Index = (byte)i,
                             State = JoinRoomResponse.RoomSlotState.Occupied,
                             MemberInfo = new JoinRoomResponse.RoomMemberInfo
                             {
-                                Nickname       = m.Actor.Nickname,
-                                Level          = m.Actor.Level,
-                                Gender         = m.Actor.Gender,
-                                IsRoomMaster   = m.IsMaster,
-                                Team           = m.Team,
-                                Ready          = m.IsReady,
-                                AlbumEligible  = false,
-                                Equipments     = m.Actor.Equipments,
-                                MusicIds       = m.Actor.InstalledMusicIds,
-                                GemStar        = m.Actor.GemStar
+                                Nickname     = m.Actor.Nickname,
+                                Level        = m.Actor.Level,
+                                Gender       = m.Actor.Gender,
+                                Gem          = m.Actor.Gem,
+                                IsRoomMaster = m.IsMaster,
+                                Team         = m.Team,
+                                Ready        = m.IsReady,
+                                WaitingState = m.WaitingState,
+                                Equipments   = m.Actor.Equipments,
+                                MusicIds     = m.Actor.InstalledMusicIds,
+                                CashPoint    = m.Actor.CashPoint
                             }
                         },
                         _ => throw new UnreachableException()
                     };
-                }).ToList()
+                }).Where(m => m.Index != index).ToList()
             };
         }
         catch (InvalidOperationException)
@@ -289,8 +366,8 @@ public class MainRoomController(
     {
         logger.LogInformation(
             (int)RequestCommand.CreateRoom,
-            "Create room: {Title} ({Mode})",
-            request.Title, request.Mode
+            "Create room: {title}",
+            request.Title
         );
 
         try
@@ -301,14 +378,16 @@ public class MainRoomController(
                 mode:          request.Mode,
                 password:      request.HasPassword ? request.Password : string.Empty,
                 minLevelLimit: request.MinLevelLimit,
-                maxLevelLimit: request.MaxLevelLimit
+                maxLevelLimit: request.MaxLevelLimit,
+                premium:       request.Premium
             );
             publisher.Monitor(room);
 
             return new CreateRoomResponse
             {
-                Result = CreateRoomResponse.CreateResult.Success,
-                Number = room.Id
+                Result  = CreateRoomResponse.CreateResult.Success,
+                Number  = room.Id,
+                Premium = room.Premium
             };
         }
         catch (InvalidOperationException)
@@ -319,20 +398,6 @@ public class MainRoomController(
                 Number = 0
             };
         }
-    }
-    [CommandHandler(RequestCommand.SyncWallet)]
-    public async Task<SyncWalletResponse> SyncWallet(CancellationToken cancellationToken)
-    {
-        var actor = Session.Actor;
-        var user  = (await repository.Find(actor.UserId, cancellationToken))!;
-
-        actor.Sync(user);
-        return new SyncWalletResponse
-        {
-            Gem     = actor.Gem,
-            GemStar = actor.GemStar,
-            Point   = actor.Point
-        };
     }
 
     [CommandHandler(RequestCommand.GetGiftMessageList, ResponseCommand.GetGiftMessageList)]
