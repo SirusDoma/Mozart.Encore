@@ -88,7 +88,7 @@ public class RoomService : Broadcastable, IRoomService
                 Password        = password,
                 State           = RoomState.Waiting,
                 Premium         = premium
-            }, _options.Value.MusicLoadTimeout > 0 ? TimeSpan.FromSeconds(_options.Value.MusicLoadTimeout) : null);
+            }, _options.Value);
 
             if (rooms.TryAdd(i, room))
             {
