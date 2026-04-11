@@ -45,24 +45,25 @@ public class MainRoomController(
 
         return new CharacterInfoResponse
         {
-            Nickname         = actor.Nickname,
-            Gender           = actor.Gender,
-            Gem              = actor.Gem,
-            Point            = actor.Point,
-            O2Cash           = actor.O2Cash,
-            Level            = actor.Level,
-            Win              = actor.Win,
-            Lose             = actor.Lose,
-            Draw             = actor.Draw,
-            Battles          = actor.Win + actor.Lose + actor.Draw,
-            Experience       = actor.Experience,
-            IsAdministrator  = actor.IsAdministrator,
-            Equipments       = actor.Equipments,
-            Inventory        = actor.Inventory.Select(i => (int)i.Id).ToList(),
-            CashPoint        = actor.CashPoint,
-            PenaltyCount     = (short)actor.PenaltyCount,
-            PenaltyLevel     = (short)actor.PenaltyLevel,
-            ItemGiftBox      = actor.GiftItems.Select(i =>
+            Nickname           = actor.Nickname,
+            Gender             = actor.Gender,
+            Gem                = actor.Gem,
+            Point              = actor.Point,
+            O2Cash             = actor.O2Cash,
+            Level              = actor.Level,
+            Win                = actor.Win,
+            Lose               = actor.Lose,
+            Draw               = actor.Draw,
+            Battles            = actor.Win + actor.Lose + actor.Draw,
+            Experience         = actor.Experience,
+            IsAdministrator    = actor.IsAdministrator,
+            Equipments         = actor.Equipments,
+            Inventory          = actor.Inventory.Select(i => (int)i.Id).ToList(),
+            CashPoint          = actor.CashPoint,
+            PenaltyCount       = (short)actor.PenaltyCount,
+            PenaltyLevel       = (short)actor.PenaltyLevel,
+            UnreadGiftMessages = actor.GiftMessages.Count,
+            ItemGiftBox        = actor.GiftItems.Select(i =>
                 new CharacterInfoResponse.GiftItemInfo
                 {
                     GiftId = i.Id,
@@ -70,7 +71,7 @@ public class MainRoomController(
                     Sender = i.SenderNickname
                 }
             ).ToList(),
-            MusicGiftBox     = actor.GiftMusics.Select(m =>
+            MusicGiftBox       = actor.GiftMusics.Select(m =>
                 new CharacterInfoResponse.GiftMusicInfo
                 {
                     GiftId  = m.Id,
@@ -78,7 +79,7 @@ public class MainRoomController(
                     Sender  = m.SenderNickname
                 }
             ).ToList(),
-            AttributiveItems = actor.Inventory.Where(i => i.Count > 0).Select(i =>
+            AttributiveItems   = actor.Inventory.Where(i => i.Count > 0).Select(i =>
                 new CharacterInfoResponse.AttributiveItemInfo
                 {
                     AttributiveItemId = i.Id,

@@ -88,7 +88,7 @@ public class CharacterInfoResponse : IMessage
     public IList<int> Inventory { get; init; } = [];
 
     [MessageField(order: 15)]
-    public int Unknown { get; set; } // Stored as: (value & 0xFF000000) >> 24
+    public int UnreadGiftMessages { get; set; }
 
     [CollectionMessageField(order: 16, prefixSizeType: TypeCode.Int16)]
     public IList<GiftItemInfo> ItemGiftBox { get; init; } = [];
