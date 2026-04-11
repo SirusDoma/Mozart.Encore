@@ -47,6 +47,7 @@ public class MainRoomController(
             Lose               = actor.Lose,
             Draw               = actor.Draw,
             Experience         = actor.Experience,
+            Battles            = actor.Win + actor.Lose + actor.Draw,
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
             Inventory          = actor.Inventory.Select(i => (int)i.Id).ToList(),
@@ -146,6 +147,7 @@ public class MainRoomController(
         };
     }
 
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     [CommandHandler(RequestCommand.GetUserList)]
     public UserListResponse GetUserList()
     {
@@ -171,11 +173,11 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetRoomList)]
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     public RoomListResponse GetRoomList()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetRoomList,
+            (int)RequestCommand.GetChannelInfo,
             "Get room list: [0/{channelId:00}]",
             Channel.Id
         );
