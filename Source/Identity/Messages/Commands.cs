@@ -13,7 +13,7 @@ public enum RequestCommand : ushort
     ChannelLogin        = 0x03EC, // 1004
     SessionKeys         = 0x03EF, // 1007
     GetCharacterInfo    = 0x07D0, // 2000
-    GetRoomList         = 0x07D2, // 2002
+    GetChannelInfo      = 0x07D2, // 2002
     CreateRoom          = 0x07D4, // 2004
     GetUserList         = 0x07DA, // 2010
     SendMainRoomMessage = 0x07DC, // 2012
