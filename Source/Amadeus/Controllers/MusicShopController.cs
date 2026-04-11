@@ -19,7 +19,7 @@ public class MusicShopController(
     public async Task<SyncMusicPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.SyncItemPurchase,
+        logger.LogInformation((int)RequestCommand.SyncMusicPurchase,
             "Sync music purchase");
 
         // The actual transaction happen within the web page, we only need to sync the latest user info
@@ -31,7 +31,7 @@ public class MusicShopController(
             Gem       = user.Gem,
             Point     = user.Point,
             O2Cash    = 0,
-            MusicIds  = [],
+            MusicIds  = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList(),
             ItemCash  = 0,
             MusicCash = 0
         };
