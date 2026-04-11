@@ -30,6 +30,7 @@ public interface IRoom : IBroadcastable
 
     void UpdateReadyState(Session session);
     void UpdateTeam(Session session, RoomTeam team);
+    void UpdateWaitingState(Session session, int memberId);
     void UpdateSlot(Session session, int slotId);
 
     void StartGame();
