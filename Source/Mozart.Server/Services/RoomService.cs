@@ -80,8 +80,9 @@ public class RoomService : Broadcastable, IRoomService
                 Arena           = Arena.Random,
                 ArenaRandomSeed = (byte)Random.Shared.Next(0, (int)Arena.AWhaleOfAqua),
                 Password        = password,
-                State           = RoomState.Waiting
-            }, _options.Value.MusicLoadTimeout > 0 ? TimeSpan.FromSeconds(_options.Value.MusicLoadTimeout) : null);
+                State           = RoomState.Waiting,
+                Premium         = premium
+            }, _options.Value);
 
             if (rooms.TryAdd(i, room))
             {
