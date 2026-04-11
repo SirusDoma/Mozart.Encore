@@ -98,7 +98,7 @@ public class PlanetController(
             return new ChannelLoginResponse
             {
                 Failed    = false,
-                ErrorCode = LoginErrorCode.Undefined,
+                Info      = new ChannelLoginResponse.SuccessInfo(),
                 Nickname  = Session.Actor.Nickname,
                 Username  = Session.Actor.Username,
                 Ranking   = Session.Actor.Ranking
@@ -109,7 +109,7 @@ public class PlanetController(
             return new ChannelLoginResponse
             {
                 Failed    = true,
-                ErrorCode = LoginErrorCode.Undefined,
+                Info      = new ChannelLoginResponse.FailureInfo(),
                 Nickname  = string.Empty,
                 Username  = string.Empty,
                 Ranking   = 0

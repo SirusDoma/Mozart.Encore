@@ -75,10 +75,8 @@ public class CharacterInfoResponse : IMessage
     [MessageField(order: 10)]
     public int Experience { get; set; }
 
-    // Client address: 0x5C69A4
-    // Value is reset to 0 after STATE_RESULT
     [MessageField(order: 11)]
-    public int Unknown { get; set; }
+    public int Battles { get; set; }
 
     [MessageField(order: 12)]
     public bool IsAdministrator { get; init; }
@@ -92,12 +90,8 @@ public class CharacterInfoResponse : IMessage
     [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
     public IReadOnlyList<ushort> AcquiredMusicIds { get; init; } = [];
 
-    // This doesn't work!
-    // Moreover, it uses troublesome semantic (only consider the highest byte order)
-    //
-    // Refer to the client address: 0x5C69A8 and 0x440B50 (wrong command code)
     [MessageField(order: 16)]
-    public int Whisperable { get; set; }
+    public int UnreadGiftMessages { get; set; }
 
     [CollectionMessageField(order: 17, prefixSizeType: TypeCode.Int16)]
     public IList<GiftItemInfo> ItemGiftBox { get; init; } = [];
