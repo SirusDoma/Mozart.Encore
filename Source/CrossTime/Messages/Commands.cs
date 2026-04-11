@@ -15,7 +15,7 @@ public enum RequestCommand : ushort
     Terminate           = 0x03F1, // 1009
     ConnectGateway      = 0x03F3, // 1011
     GetCharacterInfo    = 0x07D0, // 2000
-    GetRoomList         = 0x07D2, // 2002
+    GetChannelInfo      = 0x07D2, // 2002
     CreateRoom          = 0x07D4, // 2004
     GetUserList         = 0x07DA, // 2010
     SendMainRoomMessage = 0x07DC, // 2012
