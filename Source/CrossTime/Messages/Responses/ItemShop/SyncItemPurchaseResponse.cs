@@ -26,18 +26,4 @@ public class SyncItemPurchaseResponse : IMessage
 
     [CollectionMessageField(order: 3, minCount: 30, maxCount:30)]
     public IReadOnlyList<int> Inventory { get; init; } = [];
-
-    [MessageField(order: 5)]
-    public int ItemCash { get; init; }
-
-    [MessageField(order: 6)]
-    public int MusicCash { get; init; }
-
-    [CollectionMessageField(order: 7, prefixSizeType: TypeCode.Int32)]
-    public IList<AttributiveItemInfo> AttributiveItems { get; init; } = [];
-
-    public TimeSpan FreePassExtensionPeriod { get; init; }
-
-    [MessageField(order: 8)]
-    private int FreePassExtensionDays => Math.Max((int)Math.Ceiling(FreePassExtensionPeriod.TotalDays), 0);
 }
