@@ -1,6 +1,7 @@
 using Encore.Sessions;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
+using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 using Session = Mozart.Sessions.Session;
@@ -16,15 +17,16 @@ public class Room : Broadcastable, IRoom
 
     private readonly IRoomService _service;
     private readonly RoomMetadata _metadata;
+    private readonly GameOptions _options;
 
     private readonly List<ISlot> _slots;
-    private readonly TimeSpan? _musicLoadTimeout;
 
-    public Room(IRoomService service, Session master, RoomMetadata metadata, TimeSpan? musicLoadTimeout = null)
+    public Room(IRoomService service, Session master, RoomMetadata metadata, GameOptions options)
     {
         _service  = service;
         _previous = (RoomMetadata)metadata.Clone();
         _metadata = metadata;
+        _options  = options;
         _slots = [
             new MemberSlot
             {
@@ -41,7 +43,6 @@ public class Room : Broadcastable, IRoom
             new VacantSlot(),
             new VacantSlot(),
         ];
-        _musicLoadTimeout = musicLoadTimeout;
 
         Channel = master.Channel!;
         ScoreTracker = new ScoreTracker(this);
@@ -62,6 +63,8 @@ public class Room : Broadcastable, IRoom
         public bool IsMaster { get; set; }
 
         public bool IsReady { get; set; }
+
+        public WaitingState WaitingState { get; set; } = WaitingState.None;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
@@ -144,6 +147,7 @@ public class Room : Broadcastable, IRoom
     public event EventHandler<RoomUserLeftEventArgs>? UserLeft;
     public event EventHandler<RoomUserLeftEventArgs>? UserDisconnected;
     public event EventHandler<RoomUserTeamChangedEventArgs>? UserTeamChanged;
+    public event EventHandler<RoomUserWaitingStateChangedEventArgs>? UserWaitingStateChanged;
     public event EventHandler<RoomUserReadyStateChangedEventArgs>? UserReadyStateChanged;
 
     public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
@@ -353,6 +357,48 @@ public class Room : Broadcastable, IRoom
         });
     }
 
+    public void UpdateWaitingState(Session session, int memberId)
+    {
+        if (memberId is < 0 or >= MaxCapacity)
+            throw new ArgumentOutOfRangeException(nameof(memberId));
+
+        if (_slots[memberId] is not MemberSlot member)
+            throw new ArgumentOutOfRangeException(nameof(memberId));
+
+        var state = WaitingState.None;
+        bool freeMusic = Channel.FreeMusic ?? _options.FreeMusic;
+
+        if (!freeMusic)
+        {
+            if (Mode == GameMode.Jam)
+            {
+                if (Channel.GetAlbumList().TryGetValue(MusicId, out var album) &&
+                    member.Actor.Gem < album.Price)
+                {
+                    state = WaitingState.InsufficientGem;
+                }
+            }
+            else
+            {
+                if (Channel.GetMusicList().TryGetValue(MusicId, out var music) &&
+                    music.IsPurchasable &&
+                    !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
+                {
+                    state = WaitingState.NoAccess;
+                }
+            }
+        }
+
+        member.WaitingState = state;
+
+        UserWaitingStateChanged?.Invoke(this, new RoomUserWaitingStateChangedEventArgs
+        {
+            MemberId = memberId,
+            Member   = member,
+            State    = state
+        });
+    }
+
     public void UpdateSlot(Session session, int slotId)
     {
         if (session != Master)
@@ -437,10 +483,10 @@ public class Room : Broadcastable, IRoom
 
     private async Task ScheduleStartTimeout()
     {
-        if (_musicLoadTimeout == null)
+        if (_options.MusicLoadTimeout <= 0)
             return;
 
-        await Task.Delay(_musicLoadTimeout.Value);
+        await Task.Delay(TimeSpan.FromSeconds(_options.MusicLoadTimeout));
 
         if (State != RoomState.Playing || ScoreTracker.Count == UserCount)
             return;
