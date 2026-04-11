@@ -8,6 +8,10 @@ on:
         required: false
         default: true
         type: boolean
+      tag:
+        description: 'Release tag name'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -98,21 +102,35 @@ jobs:
             EXE="${ASSEMBLY}"
           fi
 
-          # Verify executable
+          # Build expected file list
+          EXPECTED=()
+          EXPECTED+=("$EXE")
+
+          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "$PROJECT" | grep -oP '(?<=Update=")[^"]+' || true)
+          for f in $PRESERVE_FILES; do
+            EXPECTED+=("$f")
+          done
+
+          EXPECTED+=("README.md")
+
+          # Prepare staging directory with only the expected files
+          mkdir -p staging
+
+          # Copy executable from publish output
           if [ ! -f "publish/$EXE" ]; then
             echo "::error::Executable $EXE not found in publish output"
             ls -la publish/
             exit 1
           fi
+          cp "publish/$EXE" staging/
 
           # Copy PreserveNewest content files from project directory
-          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "$PROJECT" | grep -oP '(?<=Update=")[^"]+' || true)
           for f in $PRESERVE_FILES; do
             if [ ! -f "$PROJECT_DIR/$f" ]; then
               echo "::error::PreserveNewest file $f not found in project directory"
               exit 1
             fi
-            cp "$PROJECT_DIR/$f" publish/
+            cp "$PROJECT_DIR/$f" staging/
           done
 
           # Copy README.md
@@ -120,13 +138,26 @@ jobs:
             echo "::error::README.md not found in repository root"
             exit 1
           fi
-          cp README.md publish/
+          cp README.md staging/
 
-          # Remove pdb files
-          rm -f publish/*.pdb
+          # Verify staging contains exactly the expected files
+          ACTUAL=$(ls -1 staging | sort)
+          EXPECTED=$(printf '%s\n' "${EXPECTED[@]}" | sort)
 
-          # Create zip (only the executable, content files, and README)
-          cd publish
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::Staging directory contents do not match expected files"
+            echo "Expected:"
+            echo "$EXPECTED"
+            echo "Actual:"
+            echo "$ACTUAL"
+            exit 1
+          fi
+
+          echo "Verified: zip will contain exactly these files:"
+          echo "$ACTUAL"
+
+          # Create zip
+          cd staging
           zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}.zip" .
 
       - uses: actions/upload-artifact@v4
@@ -159,7 +190,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          TAG="v$(date -u +%Y.%m.%d-%H%M%S)"
+          TAG="${{ inputs.tag }}"
           gh release create "$TAG" \
             --draft \
             --title "Draft Release $TAG" \
