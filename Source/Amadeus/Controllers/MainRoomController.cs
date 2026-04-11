@@ -56,6 +56,7 @@ public class MainRoomController(
                     .Select(m => (ushort)m.Id)
                     .ToList()
                 : actor.AcquiredMusicIds,
+            UnreadGiftMessages = actor.GiftMessages.Count,
             ItemGiftBox        = actor.GiftItems.Select(i =>
                 new CharacterInfoResponse.GiftItemInfo
                 {

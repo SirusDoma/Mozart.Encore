@@ -59,7 +59,7 @@ public class GatewayController(ChannelSession session, IChannelAggregator aggreg
             await client.WriteFrame(codec.Encode(new ChannelLoginResponse
             {
                 Failed    = !response.Success,
-                ErrorCode = LoginErrorCode.Undefined,
+                Info      = new ChannelLoginResponse.SuccessInfo(),
                 Username  = response.Username,
                 Nickname  = response.Nickname,
                 Ranking   = response.Ranking
