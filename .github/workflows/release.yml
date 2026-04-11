@@ -1,0 +1,160 @@
+name: Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      all_branches:
+        description: 'Build all (`main` is excluded)'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ inputs.all_branches }}
+        with:
+          fetch-depth: 0
+
+      - id: set
+        run: |
+          if [ "${{ inputs.all_branches }}" == "true" ]; then
+            BRANCHES=$(git branch -r --format='%(refname:short)' \
+              | sed 's|^origin/||' \
+              | grep -v -E '^(HEAD|main)$' \
+              | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          else
+            BRANCHES='["${{ github.ref_name }}"]'
+          fi
+          echo "matrix={\"branch\":$BRANCHES,\"rid\":[\"win-x86\",\"linux-x64\"]}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Detect project
+        id: project
+        run: |
+          PROJECT=$(grep -rl '<OutputType>Exe</OutputType>' Source/*/*.csproj | head -1)
+          if [ -z "$PROJECT" ]; then
+            echo "::error::No executable project found"
+            exit 1
+          fi
+          ASSEMBLY=$(grep -oP '(?<=<AssemblyName>)[^<]+' "$PROJECT")
+          echo "path=$PROJECT" >> "$GITHUB_OUTPUT"
+          echo "assembly=$ASSEMBLY" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve platform
+        id: platform
+        run: |
+          case "${{ matrix.rid }}" in
+            win-x86)   echo "value=x86" >> "$GITHUB_OUTPUT" ;;
+            linux-x64) echo "value=x64" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Publish
+        run: |
+          dotnet publish "${{ steps.project.outputs.path }}" \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            -p:Platform=${{ steps.platform.outputs.value }} \
+            --self-contained \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:IncludeAllContentForSelfExtract=true \
+            -o publish
+
+      - name: Verify and package
+        run: |
+          ASSEMBLY="${{ steps.project.outputs.assembly }}"
+          RID="${{ matrix.rid }}"
+
+          # Determine executable name
+          if [[ "$RID" == win-* ]]; then
+            EXE="${ASSEMBLY}.exe"
+          else
+            EXE="${ASSEMBLY}"
+          fi
+
+          # Verify executable
+          if [ ! -f "publish/$EXE" ]; then
+            echo "::error::Executable $EXE not found in publish output"
+            ls -la publish/
+            exit 1
+          fi
+
+          # Verify PreserveNewest content files
+          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "${{ steps.project.outputs.path }}" | grep -oP '(?<=Update=")[^"]+' || true)
+          for f in $PRESERVE_FILES; do
+            if [ ! -f "publish/$f" ]; then
+              echo "::error::PreserveNewest file $f not found in publish output"
+              ls -la publish/
+              exit 1
+            fi
+          done
+
+          # Verify and copy README.md
+          if [ ! -f "README.md" ]; then
+            echo "::error::README.md not found in repository root"
+            exit 1
+          fi
+          cp README.md publish/
+
+          # Create zip
+          cd publish
+          zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}.zip" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}
+          path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Delete existing draft releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          DRAFTS=$(gh release list --json tagName,isDraft -q '.[] | select(.isDraft) | .tagName')
+          for TAG in $DRAFTS; do
+            echo "Deleting existing draft release: $TAG"
+            gh release delete "$TAG" --yes --cleanup-tag
+          done
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="v$(date -u +%Y.%m.%d-%H%M%S)"
+          gh release create "$TAG" \
+            --draft \
+            --title "Draft Release $TAG" \
+            --generate-notes \
+            artifacts/*.zip
