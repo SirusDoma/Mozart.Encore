@@ -39,6 +39,8 @@ public class SyncItemPurchaseResponse : IMessage
     [CollectionMessageField(order: 7, prefixSizeType: TypeCode.Int32)]
     public IList<AttributiveItemInfo> AttributiveItems { get; init; } = [];
 
+    public TimeSpan FreePassExtensionPeriod { get; init; }
+
     [MessageField(order: 8)]
-    public int Unknown { get; init; }
+    private int FreePassExtensionDays => Math.Max((int)Math.Ceiling(FreePassExtensionPeriod.TotalDays), 0);
 }
