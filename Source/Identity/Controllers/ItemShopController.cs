@@ -43,17 +43,21 @@ public class ItemShopController(
         var user      = (await repository.Find(actor.UserId, cancellationToken))!;
         var inventory = user.Inventory;
 
+        var extensionPeriod = TimeSpan.Zero;
+        if (actor.FreePass.Type != FreePassType.None || user.FreePass.Type != FreePassType.None)
+            extensionPeriod = (actor.FreePass.ExpiryDate - user.FreePass.ExpiryDate).Duration();
+
         actor.Sync(user);
 
         return new SyncItemPurchaseResponse
         {
-            Gem              = user.Gem,
-            Point            = user.Point,
-            O2Cash           = user.O2Cash,
-            Inventory        = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
-            ItemCash         = user.ItemCash,
-            MusicCash        = user.MusicCash,
-            AttributiveItems = user.Inventory
+            Gem                     = user.Gem,
+            Point                   = user.Point,
+            O2Cash                  = user.O2Cash,
+            Inventory               = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
+            ItemCash                = user.ItemCash,
+            MusicCash               = user.MusicCash,
+            AttributiveItems        = user.Inventory
                 .Where(i => i.Count > 0)
                 .Select(i => new SyncItemPurchaseResponse.AttributiveItemInfo
                 {
@@ -61,6 +65,7 @@ public class ItemShopController(
                     ItemCount         = i.Count
                 })
                 .ToList(),
+            FreePassExtensionPeriod =  extensionPeriod
         };
     }
 
