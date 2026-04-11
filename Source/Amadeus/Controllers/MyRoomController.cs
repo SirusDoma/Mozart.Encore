@@ -27,7 +27,7 @@ public class MyRoomController(
     public async Task<EquipItemResponse> EquipItem(EquipItemRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.SyncItemPurchase,
+        logger.LogInformation((int)RequestCommand.EquipItem,
             "[{User}] Equip item slot: {Item}", actor.Nickname, request.InventorySlotIndex);
 
         var user       = (await repository.Find(actor.UserId, cancellationToken))!;
@@ -64,7 +64,7 @@ public class MyRoomController(
     public async Task<ClaimGiftResponse> ClaimGift(ClaimGiftRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.SyncItemPurchase,
+        logger.LogInformation((int)RequestCommand.ClaimGift,
             "[{User}] Claim gift: ({Type}) {Item}", actor.Nickname, request.GiftType, request.ResourceId);
 
         var user = (await repository.Find(actor.UserId, cancellationToken))!;
