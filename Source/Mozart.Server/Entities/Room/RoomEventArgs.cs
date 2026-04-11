@@ -63,6 +63,13 @@ public class RoomUserTeamChangedEventArgs : EventArgs
     public required RoomTeam Team          { get; init; }
 }
 
+public class RoomUserWaitingStateChangedEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+    public required Room.MemberSlot Member { get; init; }
+    public required WaitingState State     { get; init; }
+}
+
 public class RoomSlotChangedEventArgs : EventArgs
 {
     public required int SlotId                    { get; init; }
