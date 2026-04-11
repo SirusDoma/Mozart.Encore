@@ -87,8 +87,8 @@ public class CharacterInfoResponse : IMessage
     [CollectionMessageField(order: 14, minCount: 30, maxCount: 30)]
     public IList<int> Inventory { get; init; } = [];
 
-    [MessageField(order: 15)]
-    public int UnreadGiftMessages { get; set; }
+    [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
+    public IReadOnlyList<ushort> AcquiredMusicIds { get; init; } = [];
 
     [MessageField(order: 16)]
     public int UnreadGiftMessages { get; set; }
