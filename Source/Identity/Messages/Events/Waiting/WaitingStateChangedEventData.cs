@@ -11,5 +11,5 @@ public class WaitingStateChangedEventData : IMessage
     public byte MemberId { get; init; }
 
     [MessageField(order: 1)]
-    public WaitingState WaitingState { get; init; }
+    public WaitingState State { get; init; }
 }

@@ -72,27 +72,21 @@ public class WaitingController(
     }
 
     [CommandHandler]
-    public async Task<WaitingStateChangedEventData> GetWaitingState(
-        CheckUserAlbumEligibilityRequest request,
-        CancellationToken cancellationToken)
+    public WaitingStateChangedEventData GetWaitingState(GetWaitingStateRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.SetRoomArena,
+            (int)RequestCommand.GetWaitingState,
             "Update room [{RoomId:000}] [{Member:00}] waiting state",
             Room.Id, request.MemberId
         );
 
-        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
-        await Room.Broadcast(Session, new WaitingStateChangedEventData
-        {
-            MemberId     = request.MemberId,
-            WaitingState = member.WaitingState
-        }, cancellationToken);
+        Room.UpdateWaitingState(Session, request.MemberId);
 
+        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
         return new WaitingStateChangedEventData
         {
-            MemberId     = request.MemberId,
-            WaitingState = member.WaitingState
+            MemberId = request.MemberId,
+            State    = member.WaitingState
         };
     }
 
