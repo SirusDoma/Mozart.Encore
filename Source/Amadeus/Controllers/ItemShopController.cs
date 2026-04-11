@@ -68,8 +68,8 @@ public class ItemShopController(
             Point            = user.Point,
             O2Cash           = 0,
             Inventory        = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
-            ItemCash         = 0,
-            MusicCash        = 0,
+            ItemCash         = user.ItemCash,
+            MusicCash        = user.MusicCash,
             AttributiveItems = user.Inventory
                 .Where(i => i.Count > 0)
                 .Select(i => new SyncItemPurchaseResponse.AttributiveItemInfo
