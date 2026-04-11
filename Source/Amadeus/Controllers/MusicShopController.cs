@@ -30,10 +30,10 @@ public class MusicShopController(
         {
             Gem       = user.Gem,
             Point     = user.Point,
-            O2Cash    = 0,
+            O2Cash    = user.O2Cash,
             MusicIds  = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList(),
-            ItemCash  = 0,
-            MusicCash = 0
+            MusicCash = user.MusicCash,
+            ItemCash  = user.ItemCash
         };
     }
 }

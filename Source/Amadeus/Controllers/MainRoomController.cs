@@ -42,21 +42,19 @@ public class MainRoomController(
             Gender             = actor.Gender,
             Gem                = actor.Gem,
             Point              = actor.Point,
+            O2Cash             = actor.O2Cash,
             Level              = actor.Level,
             Win                = actor.Win,
             Lose               = actor.Lose,
             Draw               = actor.Draw,
-            Experience         = actor.Experience,
             Battles            = actor.Win + actor.Lose + actor.Draw,
+            Experience         = actor.Experience,
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
             Inventory          = actor.Inventory.Select(i => (int)i.Id).ToList(),
-            AcquiredMusicIds   = Channel.FreeMusic ?? gameOptions.Value.FreeMusic
-                ? Channel.GetMusicList()
-                    .Values.Where(m => m.IsPurchasable)
-                    .Select(m => (ushort)m.Id)
-                    .ToList()
-                : actor.AcquiredMusicIds,
+            CashPoint          = actor.CashPoint,
+            PenaltyCount       = (short)actor.PenaltyCount,
+            PenaltyLevel       = (short)actor.PenaltyLevel,
             UnreadGiftMessages = actor.GiftMessages.Count,
             ItemGiftBox        = actor.GiftItems.Select(i =>
                 new CharacterInfoResponse.GiftItemInfo
@@ -66,7 +64,7 @@ public class MainRoomController(
                     Sender = i.SenderNickname
                 }
             ).ToList(),
-            MusicGiftBox        = actor.GiftMusics.Select(m =>
+            MusicGiftBox       = actor.GiftMusics.Select(m =>
                 new CharacterInfoResponse.GiftMusicInfo
                 {
                     GiftId  = m.Id,
