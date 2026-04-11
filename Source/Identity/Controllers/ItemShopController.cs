@@ -53,7 +53,14 @@ public class ItemShopController(
             Inventory        = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
             ItemCash         = user.ItemCash,
             MusicCash        = user.MusicCash,
-            AttributiveItems = []
+            AttributiveItems = user.Inventory
+                .Where(i => i.Count > 0)
+                .Select(i => new SyncItemPurchaseResponse.AttributiveItemInfo
+                {
+                    AttributiveItemId = i.Id,
+                    ItemCount         = i.Count
+                })
+                .ToList(),
         };
     }
 
