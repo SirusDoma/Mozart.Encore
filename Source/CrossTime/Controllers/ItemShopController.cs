@@ -81,20 +81,10 @@ public class ItemShopController(
 
         return new SyncItemPurchaseResponse
         {
-            Gem              = user.Gem,
-            Point            = user.Point,
-            O2Cash           = user.O2Cash,
-            Inventory        = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
-            ItemCash         = user.ItemCash,
-            MusicCash        = user.MusicCash,
-            AttributiveItems = user.Inventory
-                .Where(i => i.Count > 0)
-                .Select(i => new SyncItemPurchaseResponse.AttributiveItemInfo
-                {
-                    AttributiveItemId = i.Id,
-                    ItemCount         = i.Count
-                })
-                .ToList(),
+            Gem       = user.Gem,
+            Point     = user.Point,
+            GemStar   = user.GemStar,
+            Inventory = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
         };
     }
 
