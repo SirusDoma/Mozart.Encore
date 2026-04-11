@@ -24,11 +24,12 @@ public class AlbumListParser
                 ServerId = reader.ReadInt32(),
                 AlbumId  = reader.ReadInt32(),
                 Name     = reader.ReadBytes(64),
-                MasterId = reader.ReadInt16(),
-                Level    = reader.ReadInt16()
+                Price    = reader.ReadInt16(),
+                Level    = reader.ReadByte(),
+                Ranked   = reader.ReadByte() != 0
             };
 
-            reader.ReadInt32(); // padding
+            _ = reader.ReadInt32(); // padding?
             for (int j = 0; j < 10; j++)
             {
                 int musicId = reader.ReadInt32();
