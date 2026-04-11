@@ -37,9 +37,9 @@ public class MainRoomController(
         {
             Gem             = actor.Gem,
             Point           = actor.Point,
-            O2Cash          = actor.Point,
-            ItemCash        = actor.Point,
-            MusicCash       = actor.Point,
+            O2Cash          = 0,
+            ItemCash        = 0,
+            MusicCash       = 0,
             MembershipType  = actor.MembershipType
         }, cancellationToken);
 
@@ -55,8 +55,8 @@ public class MainRoomController(
             Point      = actor.Point,
             Level      = actor.Level,
             Win        = actor.Win,
-            Lose       = 0,
-            Draw       = 0,
+            Lose       = actor.Lose,
+            Draw       = actor.Draw,
             Equipments = actor.Equipments,
             Inventory  = actor.Inventory.Select(i => (int)i.Id).ToList(),
             GemStar    = actor.GemStar,
@@ -126,6 +126,7 @@ public class MainRoomController(
         };
     }
 
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     [CommandHandler(RequestCommand.GetUserList)]
     public UserListResponse GetUserList()
     {
@@ -150,11 +151,11 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetRoomList)]
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     public RoomListResponse GetRoomList()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetRoomList,
+            (int)RequestCommand.GetChannelInfo,
             "Get room list: [0/{channelId:00}]",
             Channel.Id
         );
