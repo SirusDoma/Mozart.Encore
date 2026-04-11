@@ -24,6 +24,7 @@ jobs:
           fetch-depth: 0
 
       - id: set
+        name: Detect build mode
         run: |
           if [ "${{ inputs.all_branches }}" == "true" ]; then
             BRANCHES=$(git branch -r --format='%(refname:short)' \
@@ -80,10 +81,13 @@ jobs:
             -p:PublishSingleFile=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:IncludeAllContentForSelfExtract=true \
+            -p:DebugType=none \
             -o publish
 
       - name: Verify and package
         run: |
+          PROJECT="${{ steps.project.outputs.path }}"
+          PROJECT_DIR=$(dirname "$PROJECT")
           ASSEMBLY="${{ steps.project.outputs.assembly }}"
           RID="${{ matrix.rid }}"
 
@@ -101,24 +105,27 @@ jobs:
             exit 1
           fi
 
-          # Verify PreserveNewest content files
-          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "${{ steps.project.outputs.path }}" | grep -oP '(?<=Update=")[^"]+' || true)
+          # Copy PreserveNewest content files from project directory
+          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "$PROJECT" | grep -oP '(?<=Update=")[^"]+' || true)
           for f in $PRESERVE_FILES; do
-            if [ ! -f "publish/$f" ]; then
-              echo "::error::PreserveNewest file $f not found in publish output"
-              ls -la publish/
+            if [ ! -f "$PROJECT_DIR/$f" ]; then
+              echo "::error::PreserveNewest file $f not found in project directory"
               exit 1
             fi
+            cp "$PROJECT_DIR/$f" publish/
           done
 
-          # Verify and copy README.md
+          # Copy README.md
           if [ ! -f "README.md" ]; then
             echo "::error::README.md not found in repository root"
             exit 1
           fi
           cp README.md publish/
 
-          # Create zip
+          # Remove pdb files
+          rm -f publish/*.pdb
+
+          # Create zip (only the executable, content files, and README)
           cd publish
           zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}.zip" .
 
