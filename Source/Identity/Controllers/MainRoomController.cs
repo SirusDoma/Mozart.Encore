@@ -187,6 +187,7 @@ public class MainRoomController(
         };
     }
 
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     [CommandHandler(RequestCommand.GetUserList)]
     public UserListResponse GetUserList()
     {
@@ -212,11 +213,11 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetRoomList)]
+    [CommandHandler(RequestCommand.GetChannelInfo)]
     public RoomListResponse GetRoomList()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetRoomList,
+            (int)RequestCommand.GetChannelInfo,
             "Get room list: [0/{channelId:00}]",
             Channel.Id
         );
