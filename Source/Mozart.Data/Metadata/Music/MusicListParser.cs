@@ -121,8 +121,9 @@ public static class MusicListParser
 
             if (headers.TryGetValue(id, out var header))
             {
-                header.PriceO2Cash = o2Cash;
-                header.PriceGem    = gem;
+                header.IsPurchasable = o2Cash > 0 || gem > 0;
+                header.PriceO2Cash   = o2Cash;
+                header.PriceGem      = gem;
             }
         }
 
