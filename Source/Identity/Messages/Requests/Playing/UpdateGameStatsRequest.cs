@@ -12,4 +12,13 @@ public class UpdateGameStatsRequest : IMessage
 
     [MessageField(order: 1)]
     public ushort Value { get; init; }
+
+    [MessageField(order: 2)]
+    public int Sequence { get; init; }
+
+    [MessageField(order: 3)]
+    public int Score { get; init; }
+
+    [MessageField(order: 4)]
+    public int Penalty { get; init; }
 }

@@ -1,6 +1,7 @@
 using Identity.Messages.Events;
 using Identity.Messages.Responses;
 using Microsoft.Extensions.Logging;
+using Mozart.Data.Entities;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
@@ -35,17 +36,20 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
             await room.Broadcast(sender: e.Member.Session, new UserJoinWaitingEventData
             {
-                MemberId     = (byte)e.MemberId,
-                Nickname     = e.Member.Actor.Nickname,
-                Level        = e.Member.Actor.Level,
-                Gender       = e.Member.Actor.Gender,
-                Gem          = e.Member.Actor.Gem,
-                Team         = e.Member.Team,
-                Ready        = e.Member.IsReady,
-                WaitingState = e.Member.WaitingState,
-                Equipments   = e.Member.Actor.Equipments,
-                MusicIds     = e.Member.Actor.InstalledMusicIds,
-                CashPoint    = e.Member.Actor.CashPoint
+                MemberId        = (byte)e.MemberId,
+                Nickname        = e.Member.Actor.Nickname,
+                Level           = e.Member.Actor.Level,
+                Gender          = e.Member.Actor.Gender,
+                Gem             = e.Member.Actor.Gem,
+                Team            = e.Member.Team,
+                Ready           = e.Member.IsReady,
+                WaitingState    = e.Member.WaitingState,
+                Equipments      = e.Member.Actor.Equipments,
+                MusicIds        = e.Member.Actor.InstalledMusicIds,
+                CashPoint       = e.Member.Actor.CashPoint,
+                FreePass        = e.Member.Actor.FreePass.Type,
+                IsPlaying       = room.ScoreTracker.IsTracked(e.Member.Session),
+                IsAdministrator = e.Member.Actor.IsAdministrator
             }, CancellationToken.None);
         }
         catch (Exception ex)

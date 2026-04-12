@@ -15,13 +15,13 @@
         <InvariantGlobalization>true</InvariantGlobalization>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x86;x64</Platforms>
-        <AssemblyName>Identity.Encore</AssemblyName>
+        <AssemblyName>Identity-Part2.Encore</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
         <ApplicationIcon>Mozart.ico</ApplicationIcon>
-        <PackageId>Identity.Encore</PackageId>
-        <Authors>Identity.Encore</Authors>
-        <Company>Identity.Encore</Company>
-        <Product>Identity.Encore</Product>
+        <PackageId>Identity-Part2.Encore</PackageId>
+        <Authors>Identity-Part2.Encore</Authors>
+        <Company>Identity-Part2.Encore</Company>
+        <Product>Identity-Part2.Encore</Product>
         <RootNamespace>Identity</RootNamespace>
     </PropertyGroup>
 

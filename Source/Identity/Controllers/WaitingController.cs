@@ -27,6 +27,27 @@ public class WaitingController(
 {
     private IRoom Room => Session.Room!;
 
+    [CommandHandler(RequestCommand.GetMusicScoreList)]
+    public MusicScoreListResponse GetMusicScoreList()
+    {
+        logger.LogInformation(
+            (int)RequestCommand.GetMusicScoreList,
+            "Get music score list"
+        );
+
+        return new MusicScoreListResponse
+        {
+            MaxScores = [
+                new MusicScoreListResponse.MusicScoreEntry
+                {
+                    MusicId = 100,
+                    Scores  = [1000, 1000, 1000],
+                    Ranks   = [1, 5, 6]
+                }
+            ]
+        };
+    }
+
     [RoomMasterAuthorize]
     [CommandHandler]
     public WaitingMusicChangedEventData SetRoomMusic(SetRoomMusicRequest request)

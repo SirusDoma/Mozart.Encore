@@ -1,9 +1,9 @@
-# Identity.Encore
+# Identity-Part2.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Beta)**  
+Supported client version: **v5.89\* (O2JamO2)**  
 
 > [!NOTE]
 > **Penalty is not enforced**  
@@ -24,6 +24,7 @@ Supported client version: **v5.89\* (O2JamO2 Beta)**
 | [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
 | [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
 | [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
 
 ## Features
 
@@ -275,29 +276,27 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
 
 ```shell
-OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
-  <gateway_address_1> <gateway_port_1> \
-  <gateway_address_2> <gateway_port_2> \
+OTwo.exe <encrypted_parameters> \
+  |test|??|<gateway_address_1>|<gateway_port_1> \
+  |test|??|<gateway_address_2>|<gateway_port_2> \
   … \
-  <gateway_address_n> <gateway_port_n>
+  |test|??|<gateway_address_n>|<gateway_port_n>
 ```
+> [!CAUTION]
+> If you are using batch or terminal directly, make sure that the pipe (`|`) are escaped using `^`.  
+> For example: `^|test^|??^|127.0.0.1^|15010^`
 
 > [!NOTE]
-> There are 2 modes:
->
-> **O2_INET**: Use value of `0`. Gender passed as `m` or `f` string.
-> **INET**: Use value of `1`. Gender passed as `1` or `2` string.
-> 
-> Use `0` for rank if the player is unranked.
-
+> The number of servers are not explicitly specified.  
+> See [AuthParameters](Source/Identity/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Identity/Utilities/AuthParameterRsaCipher.cs) to encode or decode the `encrypted_parameters`
 
 For example, if you have three Planets (three Gateways), you might use:
 
 ```shell 
-OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
-192.168.10.1 15010 \
-192.168.10.2 15010 \
-192.168.10.3 15010
+OTwo.exe 00C70200E85000DF8E00E..... \
+  |test|??|192.168.10.1|15010 \
+  |test|??|192.168.10.2|15011 \
+  |test|??|192.168.10.3|15012 \
 ```
 
 > [!TIP]
@@ -305,10 +304,10 @@ OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
 > For example:
 > 
 > ```shell 
-> OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
-> 192.168.10.1 15010 \
-> 192.168.10.1 15010 \
-> 192.168.10.1 15010
+> OTwo.exe 00C70200E85000DF8E00E..... \
+> |test|??|192.168.10.1|15010 \
+> |test|??|192.168.10.1|15010 \
+> |test|??|192.168.10.1|15010 \
 > ```
 
 ### Channel
@@ -329,7 +328,7 @@ The server application has built-in utilities to help local player usage or serv
 
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
-- `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
+- `user:authorize`: Authorize user credential. Display encoded auth parameters that can be used to launch the game.
 - `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
 
 Run the CLI with `--help` flag for more details.

@@ -16,11 +16,11 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
 
     private IScoreTracker Tracker => Session.Room!.ScoreTracker;
 
-    [CommandHandler(RequestCommand.ConfirmMusicLoaded)]
-    public void ConfirmMusicLoaded()
+    [CommandHandler]
+    public void ConfirmMusicLoaded(ConfirmMusicLoadedRequest request)
     {
         logger.LogInformation((int)RequestCommand.ConfirmMusicLoaded,
-            "User music loaded: [{RoomId:000}]", Room.Id);
+            "User music loaded: [{RoomId:000}] - {Unk}", Room.Id, request.Unknown);
 
         var slots = Room.Slots.ToList();
         int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
