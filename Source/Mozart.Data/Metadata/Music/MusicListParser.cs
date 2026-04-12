@@ -28,8 +28,7 @@ public static class MusicListParser
         }
 
         // Check if OJNList is a new version of OJNList
-        long remaining = stream.Length - stream.Position;
-        if (remaining < sizeof(int))
+        if (stream.Position == stream.Length)
             return headers;
 
         // Parse the extra payload of the new version of OJNList
@@ -70,6 +69,9 @@ public static class MusicListParser
             }
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- Planet section
         // Controls song availability across different planet difficulty tiers.
 
@@ -92,10 +94,13 @@ public static class MusicListParser
             // Easy planet is specifically made for beginner adult.
             int easyAvailability = reader.ReadInt32();
 
-            // -- Unknown
-            // Unused and always 0, presumably, a flag for Beginner / Practice Server
-            int unused = reader.ReadInt32();
+            // -- fallbackAvailability
+            // Override availability when the server is not SuperEasy, Easy or 3K Planet.
+            int fallbackAvailability = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Premium section
         // Defines pricing for songs. Removing a song from this section removes its premium status.
@@ -121,28 +126,34 @@ public static class MusicListParser
 
             if (headers.TryGetValue(id, out var header))
             {
-                header.PriceO2Cash = o2Cash;
-                header.PriceGem    = gem;
+                header.IsPurchasable = o2Cash > 0 || gem > 0;
+                header.PriceO2Cash   = o2Cash;
+                header.PriceGem      = gem;
             }
         }
 
-        // -- SuperEasy section
-        // Overrides premium behavior specifically for the SuperEasy planet.
+        if (stream.Position == stream.Length)
+            return headers;
+
+        // -- VIP Exclusion section
+        // Overrides premium behavior.
 
         songCount = reader.ReadInt32();
         for (int i = 0; i < songCount; i++)
         {
             int id = reader.ReadInt32();
 
-            // -- Unknown
+            // -- availability
+            //  If non-zero, the song is free and playable in SuperEasy, music will not be part of VIP package.
+            int availability = reader.ReadInt32();
+
+            // -- Unused
             // Unused, observed value is always 0
             int unused = reader.ReadInt32();
-
-            // -- availability
-            // If non-zero, the song is free and playable in SuperEasy,
-            // overriding any premium restrictions defined in the Premium section.
-            int availability = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Music Label section
         // Assigns a colored label (1–5) to each song
@@ -164,6 +175,9 @@ public static class MusicListParser
             int labelId = reader.ReadInt32();
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- Discount section
         // Defines discount percentages applied to premium songs.
 
@@ -172,10 +186,60 @@ public static class MusicListParser
         {
             int id = reader.ReadInt32();
 
-            // -- Discount
+            // -- O2Cash Discount
             // Discount percentage (e.g., 50 = 50% off).
-            int discount = reader.ReadInt32();
+            int cashDiscount = reader.ReadInt32();
+
+            // -- Gem Discount
+            // Discount percentage (e.g., 50 = 50% off).
+            int gemDiscount = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
+
+        // -- Unknown section
+        // Stored partially inside the client, but has no reference, never being used
+        // The actual OJNList.dat has song count set to 0.
+
+        songCount = reader.ReadInt32();
+        for (int i = 0; i < songCount; i++)
+        {
+            int id = reader.ReadInt32();
+
+            // -- Unknown
+            int p1 = reader.ReadInt16();
+
+            // -- Unknown
+            int p2 = reader.ReadInt16();
+        }
+
+        if (stream.Position == stream.Length)
+            return headers;
+
+        // -- Key mode
+        // Defines key mode of the music.
+        songCount = reader.ReadInt32();
+        for (int i = 0; i < songCount; i++)
+        {
+            int id = reader.ReadInt32();
+
+            // -- Key Mode
+            // Defines the key mode of the song, only one key mode can be active at a time per music entry.
+            // 0x03 = 3K, 0x07 = 7K
+            byte mode = reader.ReadByte();
+
+            // -- Unused
+            // Unused, observed value is always 244
+            byte p2 = reader.ReadByte();
+
+            // -- Unused
+            // Unused, observed value is always 67
+            short p3 = reader.ReadInt16();
+        }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Release date section
         // Defines release date of a music

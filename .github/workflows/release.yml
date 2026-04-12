@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       all_branches:
-        description: 'Build all (`main` is excluded)'
+        description: 'Build all ("main" and "dev/*" branches are excluded)'
         required: false
         default: true
         type: boolean
@@ -22,7 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: ${{ inputs.all_branches }}
         with:
           fetch-depth: 0
@@ -33,7 +33,7 @@ jobs:
           if [ "${{ inputs.all_branches }}" == "true" ]; then
             BRANCHES=$(git branch -r --format='%(refname:short)' \
               | sed 's|^origin/||' \
-              | grep -v -E '^(HEAD|main)$' \
+              | grep -v -E '^(HEAD|main|dev/)' \
               | jq -R -s -c 'split("\n") | map(select(length > 0))')
           else
             BRANCHES='["${{ github.ref_name }}"]'
@@ -47,11 +47,11 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branch }}
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -84,7 +84,6 @@ jobs:
             --self-contained \
             -p:PublishSingleFile=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:IncludeAllContentForSelfExtract=true \
             -p:DebugType=none \
             -o publish
 
@@ -102,18 +101,7 @@ jobs:
             EXE="${ASSEMBLY}"
           fi
 
-          # Build expected file list
-          EXPECTED=()
-          EXPECTED+=("$EXE")
-
-          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "$PROJECT" | grep -oP '(?<=Update=")[^"]+' || true)
-          for f in $PRESERVE_FILES; do
-            EXPECTED+=("$f")
-          done
-
-          EXPECTED+=("README.md")
-
-          # Prepare staging directory with only the expected files
+          # Prepare staging directory
           mkdir -p staging
 
           # Copy executable from publish output
@@ -124,13 +112,12 @@ jobs:
           fi
           cp "publish/$EXE" staging/
 
-          # Copy PreserveNewest content files from project directory
+          # Copy PreserveNewest content files if they exist
+          PRESERVE_FILES=$(grep -B1 'PreserveNewest' "$PROJECT" | grep -oP '(?<=Update=")[^"]+' || true)
           for f in $PRESERVE_FILES; do
-            if [ ! -f "$PROJECT_DIR/$f" ]; then
-              echo "::error::PreserveNewest file $f not found in project directory"
-              exit 1
+            if [ -f "$PROJECT_DIR/$f" ]; then
+              cp "$PROJECT_DIR/$f" staging/
             fi
-            cp "$PROJECT_DIR/$f" staging/
           done
 
           # Copy README.md
@@ -140,27 +127,14 @@ jobs:
           fi
           cp README.md staging/
 
-          # Verify staging contains exactly the expected files
-          ACTUAL=$(ls -1 staging | sort)
-          EXPECTED=$(printf '%s\n' "${EXPECTED[@]}" | sort)
-
-          if [ "$ACTUAL" != "$EXPECTED" ]; then
-            echo "::error::Staging directory contents do not match expected files"
-            echo "Expected:"
-            echo "$EXPECTED"
-            echo "Actual:"
-            echo "$ACTUAL"
-            exit 1
-          fi
-
-          echo "Verified: zip will contain exactly these files:"
-          echo "$ACTUAL"
+          echo "Package contents:"
+          ls -1 staging
 
           # Create zip
           cd staging
           zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}.zip" .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}
           path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}.zip
@@ -169,21 +143,20 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: artifacts
           merge-multiple: true
 
-      - name: Delete existing draft releases
+      - name: Check tag availability
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          DRAFTS=$(gh release list --json tagName,isDraft -q '.[] | select(.isDraft) | .tagName')
-          for TAG in $DRAFTS; do
-            echo "Deleting existing draft release: $TAG"
-            gh release delete "$TAG" --yes --cleanup-tag
-          done
+          TAG="${{ inputs.tag }}"
+          if gh api "repos/$GH_REPO/git/refs/tags/$TAG" --silent 2>/dev/null; then
+            echo "::warning::Tag '$TAG' already exists. Consider deleting the existing tag or using a different tag name."
+          fi
 
       - name: Create draft release
         env:

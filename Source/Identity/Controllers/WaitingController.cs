@@ -29,7 +29,7 @@ public class WaitingController(
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingMusicChangedEventData SetRoomMusic(SetRoomMusicRequest request)
+    public void SetRoomMusic(SetRoomMusicRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomMusic,
@@ -40,22 +40,15 @@ public class WaitingController(
         Room.MusicId = request.MusicId;
         Room.Difficulty = request.Difficulty;
         Room.Speed = request.Speed;
-        Room.SaveMetadataChanges();
-
-        return new WaitingMusicChangedEventData
-        {
-            MusicId    = request.MusicId,
-            Difficulty = request.Difficulty,
-            Speed      = request.Speed
-        };
+        Room.SaveMetadataChanges(refresh: true);
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingAlbumChangedEventData SetRoomAlbum(SetRoomAlbumRequest request)
+    public void SetRoomAlbum(SetRoomAlbumRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.SetRoomMusic,
+            (int)RequestCommand.SetRoomAlbum,
             "Update room [{RoomId:000}] album settings: [{Speed} / {AlbumId}]",
             Room.Id, request.Speed, request.AlbumId
         );
@@ -63,52 +56,108 @@ public class WaitingController(
         Room.MusicId = request.AlbumId;
         Room.Speed = request.Speed;
         Room.SaveMetadataChanges();
-
-        return new WaitingAlbumChangedEventData
-        {
-            AlbumId = request.AlbumId,
-            Speed = request.Speed
-        };
     }
 
     [CommandHandler]
-    public WaitingStateChangedEventData GetWaitingState(GetWaitingStateRequest request)
+    public async Task AcquireMusic(AcquireMusicRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            (int)RequestCommand.GetWaitingState,
-            "Update room [{RoomId:000}] [{Member:00}] waiting state",
+            (int)RequestCommand.AcquireMusicRequest,
+            "Room update [{RoomId:000}] acquire music",
+            Room.Id
+        );
+
+        await Room.Broadcast(new AcquireMusicEventData
+        {
+            States = Room.Slots.Select((slot, i) =>
+            {
+                return slot switch
+                {
+                    Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
+                    {
+                        MemberId = (byte)i,
+                        State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
+                    },
+                    _ => new AcquireMusicEventData.MemberMusicState
+                    {
+                        MemberId = byte.MaxValue,
+                        State    = MusicState.NoMusic
+                    },
+                };
+            }).Where(s => request.MemberIds.Contains(s.MemberId)).ToList()
+        }, cancellationToken);
+    }
+
+    [CommandHandler]
+    public async Task SyncMemberMusicState(SyncMemberMusicStateRequest request, CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SyncMemberMusicState,
+            "Sync room member [{RoomId:000}] [{MemberId}] music state",
             Room.Id, request.MemberId
         );
 
-        Room.UpdateWaitingState(Session, request.MemberId);
-
-        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
-        return new WaitingStateChangedEventData
+        var member = (Room.MemberSlot)Room.Slots[request.MemberId];
+        await Room.Broadcast(new SyncMemberMusicStateEventData
         {
             MemberId = request.MemberId,
-            State    = member.WaitingState
-        };
+            State    = member.MusicState
+        }, cancellationToken);
+    }
+
+    [CommandHandler]
+    public void UpdateMusicState(UpdateMusicStateRequest request)
+    {
+        var slots    = Room.Slots.ToList();
+        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+
+        logger.LogInformation(
+            (int)RequestCommand.UpdateMusicState,
+            "Update room member [{RoomId:000}] [{MemberId}: {State}] music state",
+            Room.Id, memberId, request.State
+        );
+
+        Room.UpdateMusicState(Session, request.State);
+    }
+
+    [CommandHandler]
+    public async Task SetDownloadProgress(SetDownloadProgressRequest request,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetDownloadProgress,
+            "Update room member [{RoomId:000}] [{MemberId}: {progress:00}%] download progress",
+            Room.Id, request.MemberId, request.Progress
+        );
+
+        if (request.Progress >= 100)
+        {
+            var member = (Room.MemberSlot)Room.Slots[request.MemberId];
+            member.MusicState = MusicState.Ready;
+            member.Actor.InstalledMusicIds.Add((ushort)(Room.MusicId | 0x8000));
+        }
+
+        await Room.Broadcast(new DownloadProgressChangedEventData
+        {
+            MemberId   = request.MemberId,
+            Percentage = request.Progress
+        }, cancellationToken);
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingRoomTitleEventData SetRoomTitle(SetRoomTitleRequest request)
+    public void SetRoomTitle(SetRoomTitleRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomTitle,
             "Update room [{RoomId:000}] title: [{Title}]", Room.Id, request.Title);
 
         Room.Title = request.Title;
         Room.SaveMetadataChanges();
-
-        return new WaitingRoomTitleEventData
-        {
-            Title = request.Title[..Math.Min(21, request.Title.Length)]
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingArenaChangedEventData SetRoomArena(SetRoomArenaRequest request)
+    public void SetRoomArena(SetRoomArenaRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomArena,
@@ -119,17 +168,11 @@ public class WaitingController(
         Room.Arena           = request.Payload.Arena;
         Room.ArenaRandomSeed = request.Payload.RandomSeed;
         Room.SaveMetadataChanges();
-
-        return new WaitingArenaChangedEventData
-        {
-            Arena      = request.Payload.Arena,
-            RandomSeed = request.Payload.RandomSeed
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingSkillChangedEventData SetRoomSkill(SetRoomSkillRequest request)
+    public void SetRoomSkill(SetRoomSkillRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomSkill,
@@ -143,11 +186,6 @@ public class WaitingController(
             : 0;
 
         Room.SaveMetadataChanges();
-
-        return new WaitingSkillChangedEventData
-        {
-            Skills = request.Skills
-        };
     }
 
     [CommandHandler]
@@ -183,17 +221,18 @@ public class WaitingController(
 
     [CommandHandler(RequestCommand.StartGame)]
     [RoomMasterAuthorize]
-    public async Task<StartGameEventData> StartGame(CancellationToken cancellationToken)
+    public async Task StartGame(CancellationToken cancellationToken)
     {
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
 
         if (Room.Metadata.Mode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
         {
-            return new StartGameEventData
+            await Session.WriteMessage(new StartGameEventData
             {
                 Result = StartGameEventData.StartResult.InsufficientPlayers
-            };
+            }, cancellationToken);
+            return;
         }
 
         var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
@@ -205,24 +244,59 @@ public class WaitingController(
 
             if (counts.Count == 1 || counts.Values.Max() - counts.Values.Min() != 0)
             {
-                return new StartGameEventData
+                await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.TeamUnbalanced
-                };
+                }, cancellationToken);
+
+                return;
             }
 
             if (slots.Any(m => !m.IsReady))
             {
-                return new StartGameEventData
+                await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.NotReady
-                };
+                }, cancellationToken);
+
+                return;
+            }
+
+            if (slots.Any(m => m.MusicState != MusicState.Ready))
+            {
+                await Room.Broadcast(new AcquireMusicEventData
+                {
+                    States = Room.Slots.Select((slot, i) =>
+                    {
+                        return slot switch
+                        {
+                            Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
+                            {
+                                MemberId = (byte)i,
+                                State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
+                            },
+                            _ => new AcquireMusicEventData.MemberMusicState
+                            {
+                                MemberId = byte.MaxValue,
+                                State    = MusicState.NoMusic
+                            },
+                        };
+                    }).Where(s => s.MemberId != byte.MaxValue).ToList()
+                }, cancellationToken);
+
+                await Session.WriteMessage(new StartGameEventData
+                {
+                    Result = StartGameEventData.StartResult.None
+                }, cancellationToken);
+
+                return;
             }
         }
 
         var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
         var skills = new List<int>();
         skills.AddRange(Room.Skills.Where(s => s != 0));
+        bool pendingChanges = false;
 
         if (skills.Count > 0)
         {
@@ -253,26 +327,59 @@ public class WaitingController(
             if (skills.Count > 0)
             {
                 // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
-                return new StartGameEventData
+                await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.GenericError,
-                };
+                }, cancellationToken);
+
+                return;
             }
 
             await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
+            pendingChanges = true;
         }
 
-        Session.Actor.Sync(user);
+        bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
+        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        if (!freeMusic)
+        {
+            if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
+                && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
+            {
+                var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+                foreach (var member in members.Where(member => member.Actor.FreePass.Type == FreePassType.None))
+                {
+                    var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                    if (memberUser.CashPoint < 10)
+                    {
+                        await Session.WriteMessage(new StartGameEventData
+                        {
+                            Result = StartGameEventData.StartResult.GenericError,
+                        }, cancellationToken);
+                        return;
+                    }
+
+                    memberUser.CashPoint -= 10;
+                    await repository.Update(memberUser, cancellationToken);
+                    memberUsers.Add((member, memberUser));
+                }
+                pendingChanges = true;
+            }
+        }
+
+        if (pendingChanges)
+        {
+            await repository.Commit(cancellationToken);
+
+            foreach (var (member, memberUser) in memberUsers)
+                member.Actor.Sync(memberUser);
+
+            Session.Actor.Sync(user);
+        }
+
         Room.StartGame();
 
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
-
-        return new StartGameEventData
-        {
-            Result = StartGameEventData.StartResult.Success,
-            SkillsSeed = Room.SkillsSeed
-        };
     }
 
     [CommandHandler(RequestCommand.Ready)]
@@ -290,14 +397,14 @@ public class WaitingController(
         var actor = Session.Actor;
         logger.LogInformation(
             (int)RequestCommand.ExitWaiting,
-            "Exit room: [{RoomId:000}]: {Reason:000}",
+            "Exit room: [{RoomId:000}]: {Reason}",
             Room.Id,
-            request.Reason
+            request.Type
         );
 
         // Since reason payload can be forged easily, we need to add additional guard
         // TODO: Implement this handling in disconnection?
-        if (request.Reason == 1 || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
+        if (request.Type == ExitWaitingRequest.ExitType.Penalized || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
         {
             var user = (await repository.Find(actor.UserId, cancellationToken))!;
             user.PenaltyCount += 1;

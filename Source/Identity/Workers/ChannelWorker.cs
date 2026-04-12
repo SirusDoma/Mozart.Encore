@@ -28,7 +28,7 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
 
             try
             {
-                logger.LogInformation($"Identity.Encore (Channel Mode): Version {Program.Version}");
+                logger.LogInformation($"IdentityP2.Encore (Channel Mode): Version {Program.Version}");
 
                 // Validate config
                 if (gatewayOptions.Value.Channels.Count != 1)

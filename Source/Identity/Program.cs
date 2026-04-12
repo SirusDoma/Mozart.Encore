@@ -30,8 +30,8 @@ namespace Identity;
 
 public class Program
 {
-    public static Version Version        => new(4, 1, 0);
-    public static Version NetworkVersion => new(5, 89);
+    public static Version Version        => new(5, 0, 0);
+    public static Version NetworkVersion => new(5, 89, 9);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
@@ -113,6 +113,7 @@ public class Program
                     .Map<ChargeController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
+                    .Map<RankingController>()
                     .Map<MyRoomController>()
                     .Map<ItemShopController>()
                     .Map<MusicShopController>()

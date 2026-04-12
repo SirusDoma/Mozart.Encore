@@ -8,7 +8,10 @@ public class AuthRequest : IMessage
 {
     public static Enum Command => RequestCommand.Authorize;
 
-    [StringMessageField(order: 0)]
+    [MessageField(order: 0)]
+    public int UserId { get; private set; }
+
+    [StringMessageField(order: 1)]
     public string Token { get; private set; } = string.Empty;
 
     [MessageField<AuthGenderCodec>(order: 1)]

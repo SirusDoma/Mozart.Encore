@@ -1,5 +1,6 @@
 using Identity.Messages.Codecs;
 using Encore.Messaging;
+using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
@@ -51,7 +52,7 @@ public class JoinRoomResponse : IMessage
         public bool Ready { get; init; }
 
         [MessageField(order: 7)]
-        public WaitingState WaitingState { get; init; }
+        public MusicState MusicState { get; init; }
 
         [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
@@ -61,6 +62,15 @@ public class JoinRoomResponse : IMessage
 
         [MessageField(order: 10)]
         public int CashPoint { get; init; }
+
+        [MessageField(order: 11)]
+        public FreePassType FreePass { get; init; }
+
+        [MessageField(order: 12)]
+        public bool IsPlaying { get; init; }
+
+        [MessageField(order: 13)]
+        public bool IsAdministrator { get; init; }
     }
 
     public class RoomSlotInfo : SubMessage

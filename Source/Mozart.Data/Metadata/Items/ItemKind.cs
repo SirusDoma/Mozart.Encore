@@ -28,5 +28,6 @@ public enum ItemKind : byte
     HairAccessories    = 23,
     AttributiveItem    = 24,
     NameChanger        = 25,
-    PenaltyReset       = 26
+    PenaltyReset       = 26,
+    BagExpansion       = 27,
 }
