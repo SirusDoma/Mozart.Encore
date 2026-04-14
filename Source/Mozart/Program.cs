@@ -31,7 +31,7 @@ namespace Mozart;
 
 public class Program
 {
-    public static Version Version        => new(1, 12, 0);
+    public static Version Version        => new(1, 13, 0);
     public static Version NetworkVersion => new(3, 10);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
