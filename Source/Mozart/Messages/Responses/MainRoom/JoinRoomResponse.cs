@@ -44,7 +44,10 @@ public class JoinRoomResponse() : IMessage
         [MessageField(order: 5)]
         public bool Ready { get; init; }
 
-        [MessageField<CharacterEquipmentInfoCodec>(order: 6)]
+        [MessageField(order: 7)]
+        public MusicState MusicState { get; init; }
+
+        [MessageField<CharacterEquipmentInfoCodec>(order: 8)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
         [CollectionMessageField(order: 7, prefixSizeType: TypeCode.Int32)]
