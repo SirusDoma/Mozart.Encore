@@ -3,13 +3,13 @@ using Mozart.Metadata;
 
 namespace CrossTime.Messages.Responses;
 
-public class WaitingStateChangedEventData : IMessage
+public class MusicStateChangedEventData : IMessage
 {
-    public static Enum Command => EventCommand.WaitingStateChanged;
+    public static Enum Command => EventCommand.MusicStateChanged;
 
     [MessageField(order: 0)]
     public byte MemberId { get; init; }
 
     [MessageField(order: 1)]
-    public WaitingState State { get; init; } = WaitingState.None;
+    public MusicState State { get; init; } = MusicState.None;
 }

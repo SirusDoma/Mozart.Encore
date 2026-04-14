@@ -16,7 +16,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         room.UserLeft                += OnUserLeft;
         room.UserDisconnected        += OnUserDisconnected;
         room.UserTeamChanged         += OnUserTeamChanged;
-        room.UserWaitingStateChanged += OnUserWaitingStateChanged;
+        room.UserMusicStateChanged += OnUserMusicStateChanged;
         room.UserReadyStateChanged   += OnUserReadyStateChanged;
 
         room.MusicChanged      += OnMusicChanged;
@@ -112,13 +112,13 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         }
     }
 
-    private async void OnUserWaitingStateChanged(object? sender, RoomUserWaitingStateChangedEventArgs e)
+    private async void OnUserMusicStateChanged(object? sender, RoomUserMusicStateChangedEventArgs e)
     {
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(new WaitingStateChangedEventData
+            await room.Broadcast(new MusicStateChangedEventData
             {
                 MemberId = (byte)e.MemberId,
                 State    = e.State
@@ -127,7 +127,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         catch (Exception ex)
         {
             logger.LogWarning(ex,
-                "Failed to broadcast [Room::OnUserWaitingStateChanged] event to one or more subscribers");
+                "Failed to broadcast [Room::OnUserMusicStateChanged] event to one or more subscribers");
         }
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace Encore.Messaging;
 
@@ -42,8 +43,27 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         var codec          = _defaultCodec;
 
         var elementType = GetEnumerableElementType(sourceType);
-        var items  = Resize(
-            ((IEnumerable)value).Cast<object>().ToList(), minCount, maxCount, CreateDefaultValue(elementType)
+
+        IEnumerable enumerable;
+        if (typeof(IDictionary).IsAssignableFrom(sourceType))
+        {
+            IEnumerable<DictionaryEntry> GetEntries(IDictionary dict)
+            {
+                foreach (DictionaryEntry entry in dict)
+                    yield return entry;
+            }
+
+            enumerable = GetEntries((IDictionary)value)
+                .OrderBy(entry => entry.Key as IComparable)
+                .Select(entry => entry.Value);
+        }
+        else
+        {
+            enumerable = ((IEnumerable)value);
+        }
+
+        var items = Resize(
+            enumerable.Cast<object>().ToList(), minCount, maxCount, CreateDefaultValue(elementType)
         );
 
         if (prefixSizeType != TypeCode.Empty)
@@ -71,6 +91,8 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         int realCount = minCount;
         if (prefixSizeType != TypeCode.Empty)
             realCount = Convert.ToInt32(reader.ReadInteger(prefixSizeType));
+        else if (typeof(IDictionary).IsAssignableFrom(targetType) && targetType.GetGenericArguments().First().IsEnum)
+            realCount = Enum.GetValues(targetType.GetGenericArguments().First()).Length;
         else if (elementType == typeof(byte) || elementType == typeof(char) || elementType == typeof(bool))
             realCount = (int)(reader.BaseStream.Length - reader.BaseStream.Position);
 
@@ -90,6 +112,29 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
                 array.SetValue(items[i], i);
 
             return array;
+        }
+
+        if (typeof(IDictionary).IsAssignableFrom(targetType) && targetType.IsGenericType)
+        {
+            var genericArgs = targetType.GetGenericArguments();
+            var keyType     = genericArgs[0];
+            var dictType    = typeof(Dictionary<,>).MakeGenericType(keyType, elementType);
+            var dict        = (IDictionary)Activator.CreateInstance(dictType)!;
+
+            var keys = keyType.IsEnum
+                ? Enum.GetValues(keyType).Cast<object>().OrderBy(v => v).ToList()
+                : [];
+
+            for (int i = 0; i < count; i++)
+            {
+                object key = i < keys.Count
+                    ? keys[i]
+                    : Convert.ChangeType(dict.Count + 1, keyType);
+
+                dict[key] = Convert.ChangeType(items[i], elementType);
+            }
+
+            return dict;
         }
 
         List<Type> genericEnumerableTypes = targetType.IsGenericType  ? [targetType] : [];
@@ -120,15 +165,17 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
             return ToSupportedFieldType(type.GetElementType()) ?? throw ex;
 
         var enumerableInterface = type.GetInterfaces()
-            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            .FirstOrDefault(i => i.IsGenericType
+                                 && (i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                                     || i.GetGenericTypeDefinition() == typeof(IDictionary<,>)));
 
         if (enumerableInterface != null)
-            return ToSupportedFieldType(enumerableInterface.GetGenericArguments()[0]) ?? throw ex;
+            return ToSupportedFieldType(enumerableInterface.GetGenericArguments().Last()) ?? throw ex;
 
         if (type.IsGenericType &&
             typeof(IEnumerable).IsAssignableFrom(type.GetGenericTypeDefinition()))
         {
-            return ToSupportedFieldType(type.GetGenericArguments()[0]) ?? throw ex;
+            return ToSupportedFieldType(type.GetGenericArguments().Last()) ?? throw ex;
         }
 
         throw ex;

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       all_branches:
-        description: 'Build all (`main` is excluded)'
+        description: 'Build all ("main" and "dev/*" branches are excluded)'
         required: false
         default: true
         type: boolean
@@ -33,7 +33,7 @@ jobs:
           if [ "${{ inputs.all_branches }}" == "true" ]; then
             BRANCHES=$(git branch -r --format='%(refname:short)' \
               | sed 's|^origin/||' \
-              | grep -v -E '^(HEAD|main)$' \
+              | grep -v -E '^(HEAD|main|dev/)' \
               | jq -R -s -c 'split("\n") | map(select(length > 0))')
           else
             BRANCHES='["${{ github.ref_name }}"]'
@@ -84,7 +84,6 @@ jobs:
             --self-contained \
             -p:PublishSingleFile=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:IncludeAllContentForSelfExtract=true \
             -p:DebugType=none \
             -o publish
 

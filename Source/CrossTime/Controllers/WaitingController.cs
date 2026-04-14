@@ -65,21 +65,21 @@ public class WaitingController(
     }
 
     [CommandHandler]
-    public WaitingStateChangedEventData GetWaitingState(GetWaitingStateRequest request)
+    public MusicStateChangedEventData GetMusicState(GetMusicStateRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.GetWaitingState,
-            "Update room [{RoomId:000}] [{Member:00}] waiting state",
+            (int)RequestCommand.GetMusicState,
+            "Update room [{RoomId:000}] [{Member:00}] music state",
             Room.Id, request.MemberId
         );
 
-        Room.UpdateWaitingState(Session, request.MemberId);
+        Room.UpdateMusicState(Session, request.MemberId);
 
         var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
-        return new WaitingStateChangedEventData
+        return new MusicStateChangedEventData
         {
             MemberId = request.MemberId,
-            State    = member.WaitingState
+            State    = member.MusicState
         };
     }
 
