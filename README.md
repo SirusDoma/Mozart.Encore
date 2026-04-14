@@ -130,11 +130,12 @@ The metadata files are not optional and can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                               |
-|-------------|-------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89`.   |
-| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`5.89`. |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89`.  |
+> [!WARNING]
+> Client v3.10 does not support `OJNList.dat`
+
+| Option     | Description                                                                              |
+|------------|------------------------------------------------------------------------------------------|
+| `ItemData` | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.10`. |
 
 ## Game settings
 Gameplay-specific settings.
