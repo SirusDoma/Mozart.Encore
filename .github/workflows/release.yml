@@ -22,7 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: ${{ inputs.all_branches }}
         with:
           fetch-depth: 0
@@ -47,7 +47,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branch }}
 
@@ -159,7 +159,7 @@ jobs:
           cd staging
           zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}.zip" .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}
           path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}.zip
@@ -168,21 +168,21 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: artifacts
           merge-multiple: true
 
-      - name: Delete existing draft releases
+      - name: Check tag availability
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          DRAFTS=$(gh release list --json tagName,isDraft -q '.[] | select(.isDraft) | .tagName')
-          for TAG in $DRAFTS; do
-            echo "Deleting existing draft release: $TAG"
-            gh release delete "$TAG" --yes --cleanup-tag
-          done
+          TAG="${{ inputs.tag }}"
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q .; then
+            echo "::error::Tag '$TAG' already exists. Delete the existing tag or use a different tag name."
+            exit 1
+          fi
 
       - name: Create draft release
         env:
