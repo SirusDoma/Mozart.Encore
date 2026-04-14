@@ -303,7 +303,12 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
                 value = DecodeValue(reader, memberType, attribute);
 
             if (!memberType.IsInstanceOfType(value))
-                value = Convert.ChangeType(value, memberType);
+            {
+                if (memberType.IsEnum)
+                    value = Enum.ToObject(memberType, Convert.ChangeType(value, Enum.GetUnderlyingType(memberType)));
+                else
+                    value = Convert.ChangeType(value, memberType);
+            }
 
             member.SetValue(message, value);
         }

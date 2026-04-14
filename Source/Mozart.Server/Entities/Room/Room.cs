@@ -64,7 +64,7 @@ public class Room : Broadcastable, IRoom
 
         public bool IsReady { get; set; }
 
-        public WaitingState WaitingState { get; set; } = WaitingState.None;
+        public MusicState MusicState { get; set; } = MusicState.None;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
@@ -149,7 +149,7 @@ public class Room : Broadcastable, IRoom
     public event EventHandler<RoomUserLeftEventArgs>? UserLeft;
     public event EventHandler<RoomUserLeftEventArgs>? UserDisconnected;
     public event EventHandler<RoomUserTeamChangedEventArgs>? UserTeamChanged;
-    public event EventHandler<RoomUserWaitingStateChangedEventArgs>? UserWaitingStateChanged;
+    public event EventHandler<RoomUserMusicStateChangedEventArgs>? UserMusicStateChanged;
     public event EventHandler<RoomUserReadyStateChangedEventArgs>? UserReadyStateChanged;
 
     public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
@@ -359,7 +359,7 @@ public class Room : Broadcastable, IRoom
         });
     }
 
-    public void UpdateWaitingState(Session session, int memberId)
+    public void UpdateMusicState(Session session, int memberId)
     {
         if (memberId is < 0 or >= MaxCapacity)
             throw new ArgumentOutOfRangeException(nameof(memberId));
@@ -367,7 +367,7 @@ public class Room : Broadcastable, IRoom
         if (_slots[memberId] is not MemberSlot member)
             throw new ArgumentOutOfRangeException(nameof(memberId));
 
-        var state = WaitingState.None;
+        var state = MusicState.None;
         bool freeMusic = Channel.FreeMusic ?? _options.FreeMusic;
 
         if (!freeMusic)
@@ -377,7 +377,7 @@ public class Room : Broadcastable, IRoom
                 if (Channel.GetAlbumList().TryGetValue(MusicId, out var album) &&
                     member.Actor.Gem < album.Price)
                 {
-                    state = WaitingState.InsufficientGem;
+                    state = MusicState.NoAccess;
                 }
             }
             else
@@ -386,14 +386,14 @@ public class Room : Broadcastable, IRoom
                     music.IsPurchasable &&
                     !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
                 {
-                    state = WaitingState.NoAccess;
+                    state = MusicState.NoAccess;
                 }
             }
         }
 
-        member.WaitingState = state;
+        member.MusicState = state;
 
-        UserWaitingStateChanged?.Invoke(this, new RoomUserWaitingStateChangedEventArgs
+        UserMusicStateChanged?.Invoke(this, new RoomUserMusicStateChangedEventArgs
         {
             MemberId = memberId,
             Member   = member,
