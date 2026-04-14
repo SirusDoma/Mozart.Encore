@@ -9,9 +9,6 @@ public class JoinRoomRequest : IMessage
     [MessageField(order: 0)]
     public int RoomNumber { get; init; }
 
-    [MessageField(order: 1)]
-    public MusicState MusicState { get; init; }
-
-    [StringMessageField(order: 2)]
+    [StringMessageField(order: 1)]
     public string Password { get; init; } = "\0\0\0\0";
 }

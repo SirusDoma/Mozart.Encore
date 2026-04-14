@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Events;
+namespace Amadeus.Messages.Events;
 
 public class GetMusicStateRequest : IMessage
 {
