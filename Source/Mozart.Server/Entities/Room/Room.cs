@@ -403,27 +403,13 @@ public class Room : Broadcastable, IRoom
             throw new ArgumentOutOfRangeException(nameof(memberId));
 
         var state = MusicState.None;
-        bool freeMusic = Channel.FreeMusic ?? _options.FreeMusic;
 
         if (!_options.FreeMission)
         {
             if (Channel.GetMusicList().TryGetValue(MusicId, out _) &&
                 !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
             {
-                if (Channel.GetAlbumList().TryGetValue(MusicId, out var album) &&
-                    member.Actor.Gem < album.Price)
-                {
-                    state = MusicState.NoAccess;
-                }
-            }
-            else
-            {
-                if (Channel.GetMusicList().TryGetValue(MusicId, out var music) &&
-                    music.IsPurchasable &&
-                    !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
-                {
-                    state = MusicState.NoAccess;
-                }
+                state = MusicState.NoAccess;
             }
         }
 

@@ -42,7 +42,7 @@ public enum RequestCommand : ushort
     SubmitScore         = 0x0FB0, // 4016
     ExitPlaying         = 0x0FB5, // 4021
     SetRoomSkill        = 0x0FB7, // 4023
-    GetMusicState     = 0x0FB9, // 4025
+    GetMusicState       = 0x0FB9, // 4025
     SetRoomAlbum        = 0x0FBB, // 4027
     GetMusicList        = 0x0FBE, // 4030
     StartMission        = 0x0FD2, // 4050
@@ -103,36 +103,40 @@ public enum ResponseCommand : ushort
 
 public enum EventCommand : ushort
 {
-    RoomCreated           = 0x07D5, // 2005
-    RoomRemoved           = 0x07D7, // 2007
-    RoomTitleChanged      = 0x07D8, // 2008
-    RoomUserCountChanged  = 0x07D9, // 2009
-    ReceiveWhisper        = 0x07E3, // 2019
-    RoomStateChanged      = 0x07E4, // 2020
-    RoomParameterChanged  = 0x07E7, // 2023
-    RoomSkillChanged      = 0x07E9, // 2025
-    MusicPremiumTimeList  = 0x07EA, // 2026
-    WaitingTitleChanged   = 0x0BB9, // 3001
-    UserJoinWaiting       = 0x0BBC, // 3004
-    UserLeaveWaiting      = 0x0BBF, // 3007
-    RoomSlotUpdate        = 0x0BC1, // 3009
-    Kick                  = 0x0BC2, // 3010
-    RoomForceRemoved      = 0x0BC6, // 3014
-    WaitingMusicChanged   = 0x0FA1, // 4001
-    RoomArenaChanged      = 0x0FA3, // 4003
-    UserTeamChanged       = 0x0FA5, // 4005
-    UserInstrumentChanged = 0x0FA7, // 4007
-    UserReadyStateChanged = 0x0FA9, // 4009
-    StartGame             = 0x0FAB, // 4011
-    MusicLoaded           = 0x0FAD, // 4013
-    GameStatsUpdate       = 0x0FAF, // 4015
-    ScoreSubmission       = 0x0FB1, // 4017
-    ScoreCompleted        = 0x0FB2, // 4018
-    UserLeaveGame         = 0x0FB6, // 4022
-    WaitingSkillChanged   = 0x0FB8, // 4024
-    MusicStateChanged   = 0x0FBA, // 4026
-    WaitingAlbumChanged   = 0x0FBC, // 4028
-    AlbumScoreCompleted   = 0x0FBD, // 4029
+    RoomCreated             = 0x07D5, // 2005
+    RoomRemoved             = 0x07D7, // 2007
+    RoomTitleChanged        = 0x07D8, // 2008
+    RoomUserCountChanged    = 0x07D9, // 2009
+    ReceiveWhisper          = 0x07E3, // 2019
+    RoomStateChanged        = 0x07E4, // 2020
+    RoomParameterChanged    = 0x07E7, // 2023
+    RoomSkillChanged        = 0x07E9, // 2025
+    InvalidateCharacterInfo = 0x07EA, // 2026
+    RoomModeChanged         = 0x07EE, // 2030
+    WaitingTitleChanged     = 0x0BB9, // 3001
+    UserJoinWaiting         = 0x0BBC, // 3004
+    UserLeaveWaiting        = 0x0BBF, // 3007
+    RoomSlotUpdate          = 0x0BC1, // 3009
+    Kick                    = 0x0BC2, // 3010
+    RoomForceRemoved        = 0x0BC6, // 3014
+    WaitingModeChanged      = 0x0BCD, // 3021
+    ToggleTeamMode          = 0x0BCF, // 3023
+    WaitingMusicChanged     = 0x0FA1, // 4001
+    RoomArenaChanged        = 0x0FA3, // 4003
+    UserTeamChanged         = 0x0FA5, // 4005
+    UserInstrumentChanged   = 0x0FA7, // 4007
+    UserReadyStateChanged   = 0x0FA9, // 4009
+    StartGame               = 0x0FAB, // 4011
+    MusicLoaded             = 0x0FAD, // 4013
+    GameStatsUpdate         = 0x0FAF, // 4015
+    ScoreSubmission         = 0x0FB1, // 4017
+    ScoreCompleted          = 0x0FB2, // 4018
+    UserLeaveGame           = 0x0FB6, // 4022
+    WaitingSkillChanged     = 0x0FB8, // 4024
+    MusicStateChanged       = 0x0FBA, // 4026
+    WaitingAlbumChanged     = 0x0FBC, // 4028
+    AlbumScoreCompleted     = 0x0FBD, // 4029
+    SyncMembership          = 0x13A2, // 5026
 }
 
 public enum GatewayCommand : ushort

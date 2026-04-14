@@ -36,17 +36,16 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
             await room.Broadcast(sender: e.Member.Session, new UserJoinWaitingEventData
             {
-                MemberId     = (byte)e.MemberId,
-                Nickname     = e.Member.Actor.Nickname,
-                Level        = e.Member.Actor.Level,
-                Gender       = e.Member.Actor.Gender,
-                Gem          = e.Member.Actor.Gem,
-                Team         = e.Member.Team,
-                Ready        = e.Member.IsReady,
-                MusicState   = e.Member.MusicState,
-                Equipments   = e.Member.Actor.Equipments,
-                MusicIds     = e.Member.Actor.InstalledMusicIds,
-                CashPoint    = e.Member.Actor.CashPoint
+                MemberId        = (byte)e.MemberId,
+                Nickname        = e.Member.Actor.Nickname,
+                Level           = e.Member.Actor.Level,
+                Gender          = e.Member.Actor.Gender,
+                Team            = e.Member.Team,
+                Ready           = e.Member.IsReady,
+                AlbumEligible   = true,
+                Equipments      = e.Member.Actor.Equipments,
+                MusicIds        = e.Member.Actor.InstalledMusicIds,
+                GemStar         = e.Member.Actor.GemStar
             }, CancellationToken.None);
         }
         catch (Exception ex)

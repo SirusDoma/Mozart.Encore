@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Responses;
+namespace CrossTime.Messages.Responses;
 
 public class MusicStateChangedEventData : IMessage
 {
@@ -11,5 +11,5 @@ public class MusicStateChangedEventData : IMessage
     public byte MemberId { get; init; }
 
     [MessageField(order: 1)]
-    public MusicState State { get; init; }
+    public MusicState State { get; init; } = MusicState.None;
 }
