@@ -30,8 +30,8 @@ namespace Amadeus;
 
 public class Program
 {
-    public static Version Version        => new(2, 3, 0);
-    public static Version NetworkVersion => new(3, 82);
+    public static Version Version        => new(4, 2, 0);
+    public static Version NetworkVersion => new(5, 89);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)

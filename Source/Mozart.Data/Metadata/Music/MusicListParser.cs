@@ -82,8 +82,9 @@ public static class MusicListParser
             // Regardless of parameters, it is marked as new (even if all parameters are 0)
             if (headers.TryGetValue(id, out var header))
             {
-                header.IsPurchasable = true;
-                header.PricePoint =  point;
+                header.IsPurchasable = o2Cash > 0 || gem > 0;
+                header.PriceO2Cash   = o2Cash;
+                header.PriceGem      = gem;
             }
         }
 

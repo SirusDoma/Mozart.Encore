@@ -246,6 +246,7 @@ public class MainRoomController(
             Session.Register(room);
             int index  = room.Slots.ToList().FindIndex(r => r is Room.MemberSlot m && m.Session == Session);
             var member = (room.Slots[index] as Room.MemberSlot)!;
+            member.MusicState = request.MusicState;
 
             return new JoinRoomResponse
             {
@@ -280,15 +281,17 @@ public class MainRoomController(
                             State = JoinRoomResponse.RoomSlotState.Occupied,
                             MemberInfo = new JoinRoomResponse.RoomMemberInfo
                             {
-                                Nickname        = m.Actor.Nickname,
-                                Level           = m.Actor.Level,
-                                Gender          = m.Actor.Gender,
-                                IsRoomMaster    = m.IsMaster,
-                                Team            = m.Team,
-                                Ready           = m.IsReady,
-                                IsAdministrator = m.IsReady,
-                                Equipments      = m.Actor.Equipments,
-                                MusicIds        = m.Actor.InstalledMusicIds
+                                Nickname     = m.Actor.Nickname,
+                                Level        = m.Actor.Level,
+                                Gender       = m.Actor.Gender,
+                                Gem          = m.Actor.Gem,
+                                IsRoomMaster = m.IsMaster,
+                                Team         = m.Team,
+                                Ready        = m.IsReady,
+                                MusicState   = m.MusicState,
+                                Equipments   = m.Actor.Equipments,
+                                MusicIds     = m.Actor.InstalledMusicIds,
+                                CashPoint    = m.Actor.CashPoint
                             }
                         },
                         _ => throw new UnreachableException()
