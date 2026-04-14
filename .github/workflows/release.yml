@@ -179,9 +179,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           TAG="${{ inputs.tag }}"
-          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q .; then
-            echo "::error::Tag '$TAG' already exists. Delete the existing tag or use a different tag name."
-            exit 1
+          if gh api "repos/$GH_REPO/git/refs/tags/$TAG" --silent 2>/dev/null; then
+            echo "::warning::Tag '$TAG' already exists. Consider deleting the existing tag or using a different tag name."
           fi
 
       - name: Create draft release
