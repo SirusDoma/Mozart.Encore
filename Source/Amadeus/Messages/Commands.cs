@@ -37,7 +37,7 @@ public enum RequestCommand : ushort
     SubmitScore         = 0x0FB0, // 4016
     ExitPlaying         = 0x0FB5, // 4021
     SetRoomSkill        = 0x0FB7, // 4023
-    GetWaitingState     = 0x0FB9, // 4025
+    GetMusicState       = 0x0FB9, // 4025
     SetRoomAlbum        = 0x0FBB, // 4027
     GetMusicList        = 0x0FBE, // 4030
     SyncItemPurchase    = 0x1388, // 5000
@@ -115,7 +115,7 @@ public enum EventCommand : ushort
     ScoreCompleted        = 0x0FB2, // 4018
     UserLeaveGame         = 0x0FB6, // 4022
     WaitingSkillChanged   = 0x0FB8, // 4024
-    WaitingStateChanged   = 0x0FBA, // 4026
+    MusicStateChanged     = 0x0FBA, // 4026
     WaitingAlbumChanged   = 0x0FBC, // 4028
     AlbumScoreCompleted   = 0x0FBD, // 4029
 }
