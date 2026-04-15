@@ -29,7 +29,7 @@ public class WaitingController(
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingMusicChangedEventData SetRoomMusic(SetRoomMusicRequest request)
+    public void SetRoomMusic(SetRoomMusicRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomMusic,
@@ -40,32 +40,20 @@ public class WaitingController(
         Room.MusicId = request.MusicId;
         Room.MissionLevel = request.MissionLevel;
         Room.SaveMetadataChanges();
-
-        return new WaitingMusicChangedEventData
-        {
-            MusicId = request.MusicId,
-            MissionLevel = request.MissionLevel
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingAlbumChangedEventData SetRoomAlbum(SetRoomAlbumRequest request)
+    public void SetRoomAlbum(SetRoomAlbumRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomMusic,
             "Update room [{RoomId:000}] album settings", Room.Id);
 
         // Not supported: request does not include selected music ids
-
-        return new WaitingAlbumChangedEventData
-        {
-            AlbumId = Room.MusicId,
-            Speed   = Room.Speed
-        };
     }
 
     [CommandHandler]
-    public MusicStateChangedEventData GetMusicState(GetMusicStateRequest request)
+    public void GetMusicState(GetMusicStateRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.GetMusicState,
@@ -74,34 +62,22 @@ public class WaitingController(
         );
 
         Room.UpdateMusicState(Session, request.MemberId);
-
-        var member = Room.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == Session);
-        return new MusicStateChangedEventData
-        {
-            MemberId = request.MemberId,
-            State    = member.MusicState
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingRoomTitleEventData SetRoomTitle(SetRoomTitleRequest request)
+    public void SetRoomTitle(SetRoomTitleRequest request)
     {
         logger.LogInformation((int)RequestCommand.SetRoomTitle,
             "Update room [{RoomId:000}] title: [{Title}]", Room.Id, request.Title);
 
         Room.Title = request.Title;
         Room.SaveMetadataChanges();
-
-        return new WaitingRoomTitleEventData
-        {
-            Title = request.Title
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingArenaChangedEventData SetRoomArena(SetRoomArenaRequest request)
+    public void SetRoomArena(SetRoomArenaRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomArena,
@@ -112,17 +88,11 @@ public class WaitingController(
         Room.Arena           = request.Payload.Arena;
         Room.ArenaRandomSeed = request.Payload.RandomSeed;
         Room.SaveMetadataChanges();
-
-        return new WaitingArenaChangedEventData
-        {
-            Arena      = request.Payload.Arena,
-            RandomSeed = request.Payload.RandomSeed
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingSkillChangedEventData SetRoomSkill(SetRoomSkillRequest request)
+    public void SetRoomSkill(SetRoomSkillRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomSkill,
@@ -136,16 +106,11 @@ public class WaitingController(
             : 0;
 
         Room.SaveMetadataChanges();
-
-        return new WaitingSkillChangedEventData
-        {
-            Skills = request.Skills
-        };
     }
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public WaitingModeChangedEventData SetRoomMode(SetRoomModeRequest request)
+    public void SetRoomMode(SetRoomModeRequest request)
     {
         logger.LogInformation(
             (int)RequestCommand.SetRoomMusic,
@@ -157,16 +122,6 @@ public class WaitingController(
         Room.Mode = request.Mode;
         Room.Password = request.HasPassword == 1 ? request.Password : string.Empty;
         Room.SaveMetadataChanges();
-
-        return new WaitingModeChangedEventData
-        {
-            Number       = request.Number,
-            Title        = request.Title,
-            Mode         = request.Mode,
-            HasPassword  = request.HasPassword == 1,
-            Password     = request.Password,
-            TeamDisabled = !Room.TeamEnabled
-        };
     }
 
     [CommandHandler(RequestCommand.ToggleTeamMode)]
@@ -212,17 +167,18 @@ public class WaitingController(
 
     [CommandHandler(RequestCommand.StartGame)]
     [RoomMasterAuthorize]
-    public async Task<StartGameEventData> StartGame(CancellationToken cancellationToken)
+    public async Task StartGame(CancellationToken cancellationToken)
     {
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
 
         if (Room.Metadata.Mode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
         {
-            return new StartGameEventData
+            await Session.WriteMessage(new StartGameEventData
             {
                 Result = StartGameEventData.StartResult.InsufficientPlayers
-            };
+            }, cancellationToken);
+            return;
         }
 
         if (Room.UserCount > 1)
@@ -234,18 +190,20 @@ public class WaitingController(
 
             if (counts.Count == 1 || counts.Values.Max() - counts.Values.Min() != 0)
             {
-                return new StartGameEventData
+                await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.TeamUnbalanced
-                };
+                }, cancellationToken);
+                return;
             }
 
             if (slots.Any(m => !m.IsReady))
             {
-                return new StartGameEventData
+                await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.NotReady
-                };
+                }, cancellationToken);
+                return;
             }
         }
 
@@ -293,12 +251,6 @@ public class WaitingController(
 
         Room.StartGame();
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
-
-        return new StartGameEventData
-        {
-            Result = StartGameEventData.StartResult.Success,
-            SkillsSeed = Room.SkillsSeed
-        };
     }
 
     [CommandHandler(RequestCommand.Ready)]
