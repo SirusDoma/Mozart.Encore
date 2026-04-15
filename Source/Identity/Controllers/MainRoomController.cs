@@ -90,7 +90,7 @@ public class MainRoomController(
     }
 
     [CommandHandler(RequestCommand.GetCharacterInfo)]
-    public MusicPremiumTimeEventData GetMusicPremiumTimeList()
+    public async Task GetMusicPremiumTimeList(CancellationToken cancellationToken)
     {
         var actor  = Session.Actor;
         var expiry = DateTime.MinValue;
@@ -100,7 +100,10 @@ public class MainRoomController(
         {
             // TODO: Support time-limited promotion/event?
             if (Session.Actor.FreePass.Type == FreePassType.None)
-                return new MusicPremiumTimeEventData();
+            {
+                await Session.WriteMessage(new MusicPremiumTimeEventData(), cancellationToken);
+                return;
+            }
 
             // FreePass in the original server implementation may a lot more complex than this.
             // But we have no way to know how it works now.
@@ -108,7 +111,7 @@ public class MainRoomController(
         }
 
         var acquiredMusic = new HashSet<int>(actor.AcquiredMusicIds.Select(i => (int)i));
-        return new MusicPremiumTimeEventData
+        await Session.WriteMessage(new MusicPremiumTimeEventData
         {
             Entries = actor.Top100.Select(id =>
                 new MusicPremiumTimeEventData.MusicEntry
@@ -121,7 +124,7 @@ public class MainRoomController(
                     Minute  = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Minute)
                 }
             ).ToList()
-        };
+        }, cancellationToken);
     }
 
     [CommandHandler]
