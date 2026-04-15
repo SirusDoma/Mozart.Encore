@@ -190,6 +190,7 @@ public class WaitingController(
         var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
         var skills = new List<int>();
         skills.AddRange(Room.Skills.Where(s => s != 0));
+        bool pendingChanges = false;
 
         if (skills.Count > 0)
         {
@@ -228,10 +229,74 @@ public class WaitingController(
             }
 
             await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
+            pendingChanges = true;
         }
 
-        Session.Actor.Sync(user);
+        bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
+        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        if (!freeMusic)
+        {
+            var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+
+            if (Room.Metadata.Mode == GameMode.Jam)
+            {
+                if (Session.Channel!.GetAlbumList().TryGetValue(Room.MusicId, out var album))
+                {
+                    foreach (var member in members)
+                    {
+                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                        if (memberUser.Gem < album.Price)
+                        {
+                            await Session.WriteMessage(new StartGameEventData
+                            {
+                                Result = StartGameEventData.StartResult.GenericError,
+                            }, cancellationToken);
+                            return;
+                        }
+
+                        memberUser.Gem -= album.Price;
+                        await repository.Update(memberUser, cancellationToken);
+                        memberUsers.Add((member, memberUser));
+                    }
+                    pendingChanges = true;
+                }
+            }
+            else
+            {
+                if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
+                    && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
+                {
+                    foreach (var member in members)
+                    {
+                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                        if (memberUser.CashPoint < 10)
+                        {
+                            await Session.WriteMessage(new StartGameEventData
+                            {
+                                Result = StartGameEventData.StartResult.GenericError,
+                            }, cancellationToken);
+                            return;
+                        }
+
+                        memberUser.CashPoint -= 10;
+                        await repository.Update(memberUser, cancellationToken);
+                        memberUsers.Add((member, memberUser));
+                    }
+                    pendingChanges = true;
+                }
+            }
+        }
+
+        if (pendingChanges)
+        {
+            await repository.Commit(cancellationToken);
+
+            foreach (var (member, memberUser) in memberUsers)
+                member.Actor.Sync(memberUser);
+
+            Session.Actor.Sync(user);
+        }
+
         Room.StartGame();
 
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
