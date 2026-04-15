@@ -406,8 +406,9 @@ public class Room : Broadcastable, IRoom
 
         if (!_options.FreeMission)
         {
-            if (Channel.GetMusicList().TryGetValue(MusicId, out _) &&
-                !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
+            if (Channel.GetMusicList().TryGetValue(MusicId, out _)
+                && member.Actor.MembershipType == 0
+                && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
             {
                 state = MusicState.NoAccess;
             }
