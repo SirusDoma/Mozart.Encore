@@ -154,7 +154,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new WaitingRoomTitleEventData
+            await room.Broadcast(new WaitingRoomTitleEventData
             {
                 Title  = room.Title
             }, CancellationToken.None);
@@ -178,7 +178,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new WaitingMusicChangedEventData
+            await room.Broadcast(new WaitingMusicChangedEventData
             {
                 MusicId    = (ushort)room.MusicId,
                 Difficulty = room.Difficulty,
@@ -209,7 +209,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new WaitingAlbumChangedEventData
+            await room.Broadcast(new WaitingAlbumChangedEventData
             {
                 AlbumId = e.AlbumId,
                 Speed = e.Speed
@@ -238,7 +238,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new WaitingArenaChangedEventData
+            await room.Broadcast(new WaitingArenaChangedEventData
             {
                 Arena      = room.Arena,
                 RandomSeed = room.ArenaRandomSeed
@@ -259,7 +259,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
 
             if (e.PreviousState == RoomState.Waiting)
             {
-                await room.Broadcast(sender: room.Master, new StartGameEventData
+                await room.Broadcast(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.Success,
                     SkillsSeed = room.SkillsSeed
@@ -317,7 +317,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(sender: room.Master, new WaitingSkillChangedEventData()
+            await room.Broadcast(new WaitingSkillChangedEventData()
             {
                 Skills = e.Skills
             }, CancellationToken.None);
