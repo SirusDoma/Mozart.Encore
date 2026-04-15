@@ -4,6 +4,7 @@ A cross-platform re-implementation of O2Jam game server in C#.
 This project is inspired by the _Mozart Project 0.028_.
 
 Supported client version: **v5.89\* (O2JamO2 Beta)**  
+<sub>* Beta client that has Easy and SuperEasy planet. 3K Mode is not supported yet.</sub>
 
 > [!NOTE]
 > **Penalty is not enforced**  
