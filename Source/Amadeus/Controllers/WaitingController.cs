@@ -188,6 +188,7 @@ public class WaitingController(
         }
 
         var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
+        bool pendingChanges = false;
         {
             var skills = new List<int>();
             skills.AddRange(Room.Skills.Where(s => s != 0));
@@ -226,12 +227,48 @@ public class WaitingController(
                 else
                 {
                     await repository.Update(user, cancellationToken);
-                    await repository.Commit(cancellationToken);
+                    pendingChanges = true;
                 }
             }
         }
 
-        Session.Actor.Sync(user);
+        bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
+        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        if (!freeMusic && Room.Metadata.Mode == GameMode.Jam)
+        {
+            if (Session.Channel!.GetAlbumList().TryGetValue(Room.MusicId, out var album))
+            {
+                var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+                foreach (var member in members)
+                {
+                    var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                    if (memberUser.Gem < album.Price)
+                    {
+                        await Session.WriteMessage(new StartGameEventData
+                        {
+                            Result = StartGameEventData.StartResult.GenericError,
+                        }, cancellationToken);
+                        return;
+                    }
+
+                    memberUser.Gem -= album.Price;
+                    await repository.Update(memberUser, cancellationToken);
+                    memberUsers.Add((member, memberUser));
+                }
+                pendingChanges = true;
+            }
+        }
+
+        if (pendingChanges)
+        {
+            await repository.Commit(cancellationToken);
+
+            foreach (var (member, memberUser) in memberUsers)
+                member.Actor.Sync(memberUser);
+
+            Session.Actor.Sync(user);
+        }
+
         Room.StartGame();
 
         publisher.Monitor((ScoreTracker)Room.ScoreTracker);
