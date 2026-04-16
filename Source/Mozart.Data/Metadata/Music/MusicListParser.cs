@@ -28,8 +28,7 @@ public static class MusicListParser
         }
 
         // Check if OJNList is a new version of OJNList
-        long remaining = stream.Length - stream.Position;
-        if (remaining < sizeof(int))
+        if (stream.Position == stream.Length)
             return headers;
 
         // Parse the extra payload of the new version of OJNList
@@ -58,6 +57,9 @@ public static class MusicListParser
                 header.IsNew = true;
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- Mission section
         // Mainly used for mission mapping
 
@@ -81,6 +83,9 @@ public static class MusicListParser
                 header.MissionLevel = level;
             }
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Extra metadata section
         // Mainly contain song release date
