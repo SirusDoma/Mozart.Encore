@@ -2,12 +2,12 @@ using Encore.Messaging;
 
 namespace Identity.Messages.Responses;
 
-public enum ChannelLoginResult : int
+public enum ChannelLoginResult : uint
 {
-    Success                = 0,
-    PremiumNotAuthorized   = 1,
-    ChannelInfoUnavailable = 6,
-    ChannelUnavailable     = 7,
+    Success                = 0x00000000, // 0
+    PremiumNotAuthorized   = 0x00000001, // 1
+    ChannelInfoUnavailable = 0x00000006, // 6
+    ChannelUnavailable     = 0x00000007  // 7
 }
 
 public class ChannelLoginResponse : IMessage

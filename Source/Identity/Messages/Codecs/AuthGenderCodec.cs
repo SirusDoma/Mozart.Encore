@@ -25,10 +25,10 @@ public class AuthGenderCodec : MessageFieldCodec
         string code = reader.ReadString(Encoding.UTF8).Trim('\0');
 
         const StringComparison comp = StringComparison.InvariantCultureIgnoreCase;
-        if (code.Equals("m", comp))
+        if (code.Equals("m", comp) || code.Equals("1", comp))
             return Gender.Male;
 
-        if (code.Equals("f", comp))
+        if (code.Equals("f", comp) || code.Equals("0", comp))
             return Gender.Female;
 
         return Gender.Any;

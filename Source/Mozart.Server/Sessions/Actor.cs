@@ -19,12 +19,15 @@ public class Actor
         ItemCash              = user.ItemCash;
         CashPoint             = user.CashPoint;
         Level                 = user.Level;
+        Battle                = user.Battle;
         Win                   = user.Win;
         Lose                  = user.Lose;
         Draw                  = user.Draw;
         Experience            = user.Experience;
         IsAdministrator       = user.IsAdministrator;
         Ranking               = user.Ranking;
+        RankDeltaType         = user.RankDeltaType;
+        RankDelta             = user.RankDelta;
         PenaltyLevel          = user.PenaltyLevel;
         PenaltyCount          = user.PenaltyCount;
         FreePass              = user.FreePass;
@@ -35,10 +38,11 @@ public class Actor
             e => (int)e.Value
         );
         Inventory        = user.Inventory.ToList();
-        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
-        GiftItems        = user.GiftBox.Items;
-        GiftMusics       = user.GiftBox.Musics;
-        GiftMessages     = user.GiftMessages;
+        AcquiredMusicIds  = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        MusicScoreRecords = user.MusicScoreRecords;
+        GiftItems         = user.GiftBox.Items;
+        GiftMusics        = user.GiftBox.Musics;
+        GiftMessages      = user.GiftMessages;
     }
 
     public void Sync(User user)
@@ -51,11 +55,14 @@ public class Actor
         ItemCash              = user.ItemCash;
         CashPoint             = user.CashPoint;
         Level                 = user.Level;
+        Battle                = user.Battle;
         Win                   = user.Win;
         Lose                  = user.Lose;
         Draw                  = user.Draw;
         Experience            = user.Experience;
         Ranking               = user.Ranking;
+        RankDeltaType         = user.RankDeltaType;
+        RankDelta             = user.RankDelta;
         PenaltyLevel          = user.PenaltyLevel;
         PenaltyCount          = user.PenaltyCount;
         FreePass              = user.FreePass;
@@ -65,11 +72,12 @@ public class Actor
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory        = user.Inventory.ToList();
-        AcquiredMusicIds = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
-        GiftItems        = user.GiftBox.Items;
-        GiftMusics       = user.GiftBox.Musics;
-        GiftMessages     = user.GiftMessages;
+        Inventory         = user.Inventory.ToList();
+        AcquiredMusicIds  = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
+        MusicScoreRecords = user.MusicScoreRecords;
+        GiftItems         = user.GiftBox.Items;
+        GiftMusics        = user.GiftBox.Musics;
+        GiftMessages      = user.GiftMessages;
     }
 
     public required string Token { get; init; }
@@ -98,6 +106,8 @@ public class Actor
 
     public int Level { get; set; }
 
+    public int Battle { get; set; }
+
     public int Win { get; set; }
 
     public int Lose { get; set; }
@@ -109,6 +119,10 @@ public class Actor
     public bool IsAdministrator { get; init; }
 
     public int Ranking { get; set; }
+
+    public RankDeltaType RankDeltaType { get; set; }
+
+    public int RankDelta { get; set; }
 
     public int PenaltyLevel { get; set; }
 
@@ -132,7 +146,9 @@ public class Actor
 
     public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
 
-    public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
+    public IReadOnlyList<MusicScoreRecord> MusicScoreRecords { get; set; }
+
+    public IList<ushort> InstalledMusicIds { get; set; } = [];
 
     public IReadOnlyList<int> Top100 { get; set; } = [];
 
