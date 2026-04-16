@@ -26,8 +26,8 @@ Supported client version: **v2.33 (O2Jam X2)**
 > In other words, treat this as an experimental server build for X2.
 >
 > **Known limitations:**
-> - The server IP addresses are hard-coded in the client executable. Binary patching is required to connect to a custom server.
-> - The item shop is non-functional. It requires the user account to be paired with a mgame account, but no such pairing mechanism exists in the network protocol. Even if the client is patched to bypass this checking, the game crashes on the payment page.
+> - The server IP addresses are hard-coded in the client executable. Modifying the game client or configuring client-side ip tables is required to connect to a custom server.
+> - The item shop is non-functional. It requires the user account to be paired with a mgame account, but no such pairing mechanism exists in the network protocol.
 > - Hall of Fame and Artist Room are not implemented.
 > - Album mode is not implemented. While a workaround exists to access it, gameplay becomes broken after the first song.
 > - User list is not working.
@@ -294,7 +294,7 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 ### Gateway
 
 The server IP addresses are hard-coded in the client executable. 
-Binary patching is required to connect to a custom server.
+Modifying the game client or configuring client-side ip tables is required to connect to a custom server.
 
 ### Channel
 
