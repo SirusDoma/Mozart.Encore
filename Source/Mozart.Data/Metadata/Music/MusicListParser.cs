@@ -28,8 +28,7 @@ public static class MusicListParser
         }
 
         // Check if OJNList is a new version of OJNList
-        long remaining = stream.Length - stream.Position;
-        if (remaining < sizeof(int))
+        if (stream.Position == stream.Length)
             return headers;
 
         // Parse the extra payload of the new version of OJNList
@@ -70,6 +69,9 @@ public static class MusicListParser
             }
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- Planet section
         // Controls song availability across different planet difficulty tiers.
 
@@ -96,6 +98,9 @@ public static class MusicListParser
             // Unused and always 0, presumably, a flag for Beginner / Practice Server
             int unused = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Premium section
         // Defines pricing for songs. Removing a song from this section removes its premium status.
@@ -127,6 +132,9 @@ public static class MusicListParser
             }
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- SuperEasy section
         // Overrides premium behavior specifically for the SuperEasy planet.
 
@@ -144,6 +152,9 @@ public static class MusicListParser
             // overriding any premium restrictions defined in the Premium section.
             int availability = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Music Label section
         // Assigns a colored label (1–5) to each song
@@ -165,6 +176,9 @@ public static class MusicListParser
             int labelId = reader.ReadInt32();
         }
 
+        if (stream.Position == stream.Length)
+            return headers;
+
         // -- Discount section
         // Defines discount percentages applied to premium songs.
 
@@ -177,6 +191,9 @@ public static class MusicListParser
             // Discount percentage (e.g., 50 = 50% off).
             int discount = reader.ReadInt32();
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Release date section
         // Defines release date of a music
