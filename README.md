@@ -226,7 +226,7 @@ The original web server files (ASP Classic) are not included and cannot be hoste
 This functionality considered out-of-scope, and unlikely to be added in the future.
 
 > [!WARNING]
-> Official e-Games clients does not allow custom web server url by default.
+> Official NOWCOM clients does not allow custom web server url by default.
 > The game simply does not respect the web server address in the launch argument.
 >
 > Therefore, even if the original web server is ported into this Web Server module,
