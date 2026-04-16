@@ -15,7 +15,7 @@ namespace Mozart.Services;
 public interface IRoomService
 {
     Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit, bool premium);
+        int minLevelLimit, int maxLevelLimit);
 
     Room DeleteRoom(IChannel channel, int id);
 
@@ -52,7 +52,7 @@ public class RoomService : Broadcastable, IRoomService
         _rooms.Values.SelectMany(e => e.Values.SelectMany(r => r.Sessions)).ToList();
 
     public Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit, bool premium)
+        int minLevelLimit, int maxLevelLimit)
     {
         if (session.Room != null)
             throw new ArgumentOutOfRangeException(nameof(session));
@@ -68,9 +68,6 @@ public class RoomService : Broadcastable, IRoomService
             throw new InvalidOperationException("Channel is full");
 
         int musicId = session.GetAuthorizedToken<Actor>().InstalledMusicIds.FirstOrDefault((ushort)0);
-        if (mode == GameMode.Jam)
-            musicId = channel.GetAlbumList().FirstOrDefault().Value.AlbumId;
-
         for (int i = 0; i < channel.Capacity; i++)
         {
             var room = new Room(this, session, new RoomMetadata
@@ -79,6 +76,7 @@ public class RoomService : Broadcastable, IRoomService
                 Title           = title,
                 Mode            = mode,
                 MusicId         = musicId,
+                MissionLevel    = 0,
                 Difficulty      = Difficulty.EX,
                 Speed           = GameSpeed.X10,
                 MinLevelLimit   = minLevelLimit,
@@ -86,8 +84,7 @@ public class RoomService : Broadcastable, IRoomService
                 Arena           = Arena.Random,
                 ArenaRandomSeed = (byte)Random.Shared.Next(0, (int)Arena.AWhaleOfAqua),
                 Password        = password,
-                State           = RoomState.Waiting,
-                Premium         = premium
+                State           = RoomState.Waiting
             }, _options.Value);
 
             if (rooms.TryAdd(i, room))

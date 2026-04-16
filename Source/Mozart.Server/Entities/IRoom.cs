@@ -14,15 +14,17 @@ public interface IRoom : IBroadcastable
     int Capacity { get; }
     int UserCount { get; }
     string Title { get; set; }
-    string Password { get; }
+    string Password { get; set; }
     int MusicId { get; set; }
-    GameMode Mode { get; }
+    int MissionLevel { get; set; }
+    GameMode Mode { get; set; }
     Difficulty Difficulty { get; set; }
     GameSpeed Speed { get; set; }
     Arena Arena { get; set; }
     byte ArenaRandomSeed { get; set; }
     IList<int> Skills { get; set; }
     int SkillsSeed { get; set; }
+    bool TeamEnabled { get; set; }
     Session Master { get; }
     IReadOnlyList<Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }

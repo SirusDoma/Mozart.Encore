@@ -31,11 +31,11 @@ public sealed class MainDbContext(
         ConfigureLoadout(modelBuilder);
         ConfigureRanking(modelBuilder);
         ConfigureAcquiredMusicList(modelBuilder);
+        ConfigureCompletedMission(modelBuilder);
         ConfigureAttributiveItem(modelBuilder);
         ConfigureGiftItem(modelBuilder);
         ConfigureGiftMusic(modelBuilder);
         ConfigureUserMessage(modelBuilder);
-        ConfigurePenalty(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -81,8 +81,8 @@ public sealed class MainDbContext(
 
             entity.HasOne<Member>("Member")
                 .WithOne()
-                .HasForeignKey<Member>(m => m.Username)
                 .HasPrincipalKey<User>(u => u.Username)
+                .HasForeignKey<Member>(c => c.Username)
                 .IsRequired();
 
             entity.HasOne<Wallet>("Wallet")
@@ -106,6 +106,12 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasMany<CompletedMission>(u => u.CompletedMissionList)
+                .WithOne()
+                .HasForeignKey(m => m.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasMany<AttributiveItem>("AttributiveItems")
                 .WithOne()
                 .HasForeignKey(a => a.UserId)
@@ -124,19 +130,14 @@ public sealed class MainDbContext(
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.Navigation("Member")
+                .AutoInclude();
+
             entity.HasMany<UserMessage>("UserMessages")
                 .WithOne()
                 .HasForeignKey(m => m.ReceiverId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne<Penalty>("Penalty")
-                .WithOne()
-                .HasForeignKey<Penalty>(p => p.UserId)
-                .IsRequired(false);
-
-            entity.Navigation("Member")
-                .AutoInclude();
 
             entity.Navigation("Wallet")
                 .AutoInclude();
@@ -150,6 +151,9 @@ public sealed class MainDbContext(
             entity.Navigation(e => e.AcquiredMusicList)
                 .AutoInclude();
 
+            entity.Navigation(e => e.CompletedMissionList)
+                .AutoInclude();
+
             entity.Navigation("AttributiveItems")
                 .AutoInclude();
 
@@ -160,9 +164,6 @@ public sealed class MainDbContext(
                 .AutoInclude();
 
             entity.Navigation("UserMessages")
-                .AutoInclude();
-
-            entity.Navigation("Penalty")
                 .AutoInclude();
 
             entity.HasIndex(e => e.Username)
@@ -210,12 +211,13 @@ public sealed class MainDbContext(
                     );
             }
 
-            entity.Property(e => e.Vip)
+            entity.Property(e => e.MembershipType)
                 .HasColumnName("vip")
-                .HasDefaultValue((short)0);
+                .HasDefaultValue(0);
 
-            entity.Property(e => e.VipDate)
-                .HasColumnName("vipdate");
+            entity.Property(e => e.MembershipDate)
+                .HasColumnName("vipdate")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             entity.Property<DateTime>("registdate")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
@@ -361,6 +363,33 @@ public sealed class MainDbContext(
         });
     }
 
+    private void ConfigureCompletedMission(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CompletedMission>(entity =>
+        {
+            entity.ToTable("t_o2jam_user_mission");
+
+            entity.HasKey(e => new { e.UserId, e.GatewayId, e.SetId, e.Level });
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("USER_INDEX_ID")
+                .ValueGeneratedNever();
+
+            entity.Property(e => e.GatewayId)
+                .HasColumnName("GatewayID");
+
+            entity.Property(e => e.SetId)
+                .HasColumnName("SetID");
+
+            entity.Property(e => e.Level)
+                .HasColumnName("Level");
+
+            entity.Property(e => e.Rank)
+                .HasColumnName("Rank")
+                .HasConversion<int>();
+        });
+    }
+
     private void ConfigureGiftItem(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<GiftItem>(entity =>
@@ -488,28 +517,6 @@ public sealed class MainDbContext(
                 );
 
             entity.HasIndex(e => e.ReceiverId);
-
-            entity.HasQueryFilter(x => !x.IsRead);
-        });
-    }
-
-    private void ConfigurePenalty(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Penalty>(entity =>
-        {
-            entity.ToTable("t_o2jam_penalty");
-
-            entity.HasKey(e => e.UserId);
-
-            entity.Property(e => e.UserId)
-                .HasColumnName("USER_INDEX_ID")
-                .ValueGeneratedNever();
-
-            entity.Property(e => e.Level)
-                .HasColumnName("LEVEL");
-
-            entity.Property(e => e.Count)
-                .HasColumnName("COUNT");
         });
     }
 }

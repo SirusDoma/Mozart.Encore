@@ -8,7 +8,7 @@ public class Member
 
     public required byte[] Password { get; init; }
 
-    public short Vip { get; set; }
+    public int MembershipType { get; set; }
 
-    public DateTime VipDate { get; set; }
+    public DateTime MembershipDate { get; set; }
 }
