@@ -28,8 +28,7 @@ public static class MusicListParser
         }
 
         // Check if OJNList is a new version of OJNList
-        long remaining = stream.Length - stream.Position;
-        if (remaining < sizeof(int))
+        if (stream.Position == stream.Length)
             return headers;
 
         // Parse the extra payload of the new version of OJNList
@@ -57,6 +56,9 @@ public static class MusicListParser
             if (headers.TryGetValue(id, out var header))
                 header.IsNew = true;
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Premium section
         // Mainly used to mark music as paid music and need to be acquired in music shop
@@ -86,6 +88,9 @@ public static class MusicListParser
                 header.PricePoint =  point;
             }
         }
+
+        if (stream.Position == stream.Length)
+            return headers;
 
         // -- Extra metadata section
         // Mainly contain song release date
