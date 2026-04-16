@@ -141,7 +141,7 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database.
-They are optional for running the server, but features such as ranking and the equipment system will not function without them. 
+They are optional for running the server, but features such as play reward, ranking and the equipment system will not function without them. 
 
 Metadata can be usually overriden per channel.
 
