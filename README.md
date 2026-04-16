@@ -7,11 +7,12 @@ Supported client version: **v3.10 (O2Jam Original)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                        | Supported client version |
+|----------------------------------------------|--------------------------|
+| [Amadeus.Encore](../../tree/amadeus)         | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](../../tree/cross-time)    | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)       | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](../../tree/identity-p2)  | v5.89 (O2JamO2 Final)    |
 
 ## Features
 
