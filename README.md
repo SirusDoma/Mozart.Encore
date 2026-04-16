@@ -1,19 +1,31 @@
-# IdentityP2.Encore
+# Identity.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2)**  
-<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, 0.5 and v0.6</sub>
+Supported client version: **v5.89\* (O2JamO2 Beta)**  
+<sub>* Beta client that has Easy and SuperEasy planet. 3K Mode is not supported yet.</sub>
+
+> [!NOTE]
+> **Penalty is not enforced**
+>
+> The server tracks players who leave a game before it finishes.
+> Abandoning the game increments the player's penalty count and accumulates their penalty level.
+>
+> However, the current implementation does not impose any restrictions based on penalty level.
+> This is because penalty enforcement is handled server-side, and the original penalty logic has never been fully figured out.
+>
+> Keep in mind that the penalties are still properly tracked and reflected in the user status page,
+> and penalty reset items will still work correctly.
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                        | Supported client version |
+|----------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)           | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)         | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](../../tree/cross-time)    | v2.33 (O2Jam X2)         |
+| [IdentityP2.Encore](../../tree/identity-p2)  | v5.89 (O2JamO2 Final)    |
 
 ## Features
 
@@ -45,7 +57,7 @@ Supported client version: **v5.89\* (O2JamO2)**
 
 # Configuration
 
-The server can be configured either with `config.ini` or command-line arguments. 
+The server can be configured either with `config.ini` or command-line arguments.
 See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to set up command-line config.
 
 ## Server
@@ -124,14 +136,15 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                                              |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                                |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                                 |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                          |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                          |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)   |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)  |
+| Option      | Description                                                                                                                                                        |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                                          |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                           |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                    |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                    |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata)   |
+| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database.
@@ -144,10 +157,11 @@ Metadata can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                                                   |
-|-------------|---------------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).   |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).  |
+| Option      | Description                                                                                              |
+|-------------|----------------------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 Beta).   |
+| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`5.89` (O2JamO2 Beta). |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 Beta).  |
 
 ## Game settings
 Gameplay-specific settings.
@@ -162,6 +176,14 @@ Use `--Game:<Option>` to configure these settings via command-line arguments.
 | `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
 
 # Database Migration
+
+> [!Caution]
+> **CrossTime.Encore database schema not supported**
+>
+> The Identity.Encore application and its database schema are designed based on Amadeus.Encore.
+> As a result, migrating from a CrossTime.Encore database is not supported.
+>
+> However, migration from Amadeus.Encore database is supported.
 
 Use Entity Framework tools to run the database migration.
 See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
@@ -266,40 +288,40 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
 
 ```shell
-OTwo.exe <encrypted_parameters> \
-  |test|??|<gateway_address_1>|<gateway_port_1>\
-  |test|??|<gateway_address_2>|<gateway_port_2>\
-  …\
-  |test|??|<gateway_address_n>|<gateway_port_n>
+OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
+  <gateway_address_1> <gateway_port_1> \
+  <gateway_address_2> <gateway_port_2> \
+  … \
+  <gateway_address_n> <gateway_port_n>
 ```
-> [!CAUTION]
-> If you are using batch or terminal directly, make sure that the pipe (`|`) are escaped using `^`.  
-> For example: `^|test^|??^|127.0.0.1^|15010`
 
 > [!NOTE]
-> The number of servers are not explicitly specified.  
-> See [AuthParameters](Source/Identity/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Identity/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
+> There are 2 modes:
 >
-> Use [`user:authorize`](#cli-command) command to generate the session and the encrypted parameters.
+> **O2_INET**: Use value of `0`. Gender passed as `m` or `f` string.
+> **INET**: Use value of `1`. Gender passed as `1` or `2` string.
+>
+> Use `0` for rank if the player is unranked.
+
 
 For example, if you have three Planets (three Gateways), you might use:
 
 ```shell 
-OTwo.exe 00C70200E85000DF8E00E..... \
-  |test|??|192.168.10.1|15010\
-  |test|??|192.168.10.2|15011\
-  |test|??|192.168.10.3|15012\
+OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
+192.168.10.1 15010 \
+192.168.10.2 15010 \
+192.168.10.3 15010
 ```
 
 > [!TIP]
 > You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
 > For example:
-> 
+>
 > ```shell 
-> OTwo.exe 00C70200E85000DF8E00E..... \
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
+> OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 \
+> 192.168.10.1 15010 \
+> 192.168.10.1 15010 \
+> 192.168.10.1 15010
 > ```
 
 ### Channel
@@ -320,7 +342,7 @@ The server application has built-in utilities to help local player usage or serv
 
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
-- `user:authorize`: Authorize user credential. Display encoded auth parameters that can be used to launch the game.
+- `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
 - `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
 
 Run the CLI with `--help` flag for more details.
