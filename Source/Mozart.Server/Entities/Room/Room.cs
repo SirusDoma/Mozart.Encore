@@ -1,5 +1,4 @@
 using Encore.Sessions;
-using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Options;
@@ -381,11 +380,9 @@ public class Room : Broadcastable, IRoom
             }
             else
             {
-                if (Channel.GetMusicList().TryGetValue(MusicId, out var music)
-                    && music is { IsPurchasable: true, PriceO2Cash: > 0 }
-                    && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId)
-                    && member.Actor.FreePass.Type == FreePassType.None
-                    && member.Actor.CashPoint < 10)
+                if (Channel.GetMusicList().TryGetValue(MusicId, out var music) &&
+                    music.IsPurchasable &&
+                    !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
                 {
                     state = MusicState.NoAccess;
                 }

@@ -84,44 +84,6 @@ public class MainRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.GetCharacterInfo)]
-    public async Task GetMusicPremiumTimeList(CancellationToken cancellationToken)
-    {
-        var actor  = Session.Actor;
-        var expiry = DateTime.MinValue;
-        bool free  = gameOptions.Value.FreeMusic || Session.Actor.FreePass.Type == FreePassType.AllMusic;
-
-        if (!free)
-        {
-            // TODO: Support time-limited promotion/event?
-            if (Session.Actor.FreePass.Type == FreePassType.None)
-            {
-                await Session.WriteMessage(new MusicPremiumTimeEventData(), cancellationToken);
-                return;
-            }
-
-            // FreePass in the original server implementation may a lot more complex than this.
-            // But we have no way to know how it works now.
-            expiry = Session.Actor.FreePass.ExpiryDate;
-        }
-
-        var acquiredMusic = new HashSet<int>(actor.AcquiredMusicIds.Select(i => (int)i));
-        await Session.WriteMessage(new MusicPremiumTimeEventData
-        {
-            Entries = actor.Top100.Select(id =>
-                new MusicPremiumTimeEventData.MusicEntry
-                {
-                    MusicId = (ushort)id,
-                    Day     = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Day),
-                    Month   = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Month),
-                    Year    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Year % 1000),
-                    Hour    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Hour),
-                    Minute  = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Minute)
-                }
-            ).ToList()
-        }, cancellationToken);
-    }
-
     [CommandHandler]
     public void SendMusicList(MusicListRequest request)
     {
