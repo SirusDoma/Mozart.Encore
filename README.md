@@ -3,20 +3,7 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Beta)**  
-<sub>* Beta client that has Easy and SuperEasy planet. 3K Mode is not supported yet.</sub>
-
-> [!NOTE]
-> **Penalty is not enforced**  
-> 
-> The server tracks players who leave a game before it finishes. 
-> Abandoning the game increments the player's penalty count and accumulates their penalty level. 
-> 
-> However, the current implementation does not impose any restrictions based on penalty level. 
-> This is because penalty enforcement is handled server-side, and the original penalty logic has never been fully figured out. 
->
-> Keep in mind that the penalties are still properly tracked and reflected in the user status page, 
-> and penalty reset items will still work correctly.
+Supported client version: **v2.33 (O2Jam X2)**
 
 ### Other Builds
 
@@ -168,15 +155,14 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                                        |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                          |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                           |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                    |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                    |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata)   |
-| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata) |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata)  |
+| Option      | Description                                                                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                           |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                            |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                     |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                     |
+| `MusicList` | Path of `X2OJNList.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database. 
@@ -184,11 +170,10 @@ The metadata files are not optional and can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                                              |
-|-------------|----------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 Beta).   |
-| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`5.89` (O2JamO2 Beta). |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 Beta).  |
+| Option      | Description                                                                               |
+|-------------|-------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `X2OJNList.dat`. Format must compatible with client v`2.33`. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`2.33`.  |
 
 ## Game settings
 Gameplay-specific settings.

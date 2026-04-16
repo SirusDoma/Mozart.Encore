@@ -49,9 +49,7 @@ public class WaitingController(
         logger.LogInformation((int)RequestCommand.SetRoomMusic,
             "Update room [{RoomId:000}] album settings", Room.Id);
 
-        Room.MusicId = request.AlbumId;
-        Room.Speed = request.Speed;
-        Room.SaveMetadataChanges();
+        // Not supported: request does not include selected music ids
     }
 
     [CommandHandler]
@@ -107,6 +105,32 @@ public class WaitingController(
             ? Random.Shared.Next(0, int.MaxValue) // TODO: Crack how seed actually used in client
             : 0;
 
+        Room.SaveMetadataChanges();
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomMode(SetRoomModeRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] mode settings: {P1}",
+            Room.Id, request.Mode
+        );
+
+        Room.Title = request.Title;
+        Room.Mode = request.Mode;
+        Room.Password = request.HasPassword == 1 ? request.Password : string.Empty;
+        Room.SaveMetadataChanges();
+    }
+
+    [CommandHandler(RequestCommand.ToggleTeamMode)]
+    public void ToggleTeamMode()
+    {
+        logger.LogInformation((int)RequestCommand.SetRoomTeam,
+            "Toggle team mode room [{RoomId:000}]", Room.Id);
+
+        Room.TeamEnabled = !Room.TeamEnabled;
         Room.SaveMetadataChanges();
     }
 
@@ -186,7 +210,6 @@ public class WaitingController(
         var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
         var skills = new List<int>();
         skills.AddRange(Room.Skills.Where(s => s != 0));
-        bool pendingChanges = false;
 
         if (skills.Count > 0)
         {
@@ -217,80 +240,13 @@ public class WaitingController(
             if (skills.Count > 0)
             {
                 // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
-                await Session.WriteMessage(new StartGameEventData
-                {
-                    Result = StartGameEventData.StartResult.GenericError,
-                }, cancellationToken);
-                return;
-            }
-
-            await repository.Update(user, cancellationToken);
-            pendingChanges = true;
-        }
-
-        bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
-        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
-        if (!freeMusic)
-        {
-            var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
-
-            if (Room.Metadata.Mode == GameMode.Jam)
-            {
-                if (Session.Channel!.GetAlbumList().TryGetValue(Room.MusicId, out var album))
-                {
-                    foreach (var member in members)
-                    {
-                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
-                        if (memberUser.Gem < album.Price)
-                        {
-                            await Session.WriteMessage(new StartGameEventData
-                            {
-                                Result = StartGameEventData.StartResult.GenericError,
-                            }, cancellationToken);
-                            return;
-                        }
-
-                        memberUser.Gem -= album.Price;
-                        await repository.Update(memberUser, cancellationToken);
-                        memberUsers.Add((member, memberUser));
-                    }
-                    pendingChanges = true;
-                }
+                Room.SkillsSeed = 0;
             }
             else
             {
-                if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
-                    && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
-                {
-                    foreach (var member in members)
-                    {
-                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
-                        if (memberUser.CashPoint < 10)
-                        {
-                            await Session.WriteMessage(new StartGameEventData
-                            {
-                                Result = StartGameEventData.StartResult.GenericError,
-                            }, cancellationToken);
-                            return;
-                        }
-
-                        memberUser.CashPoint -= 10;
-                        await repository.Update(memberUser, cancellationToken);
-                        memberUsers.Add((member, memberUser));
-                    }
-                    pendingChanges = true;
-                }
+                await repository.Update(user, cancellationToken);
+                await repository.Commit(cancellationToken);
             }
-        }
-
-        if (pendingChanges)
-        {
-            await repository.Commit(cancellationToken);
-
-            foreach (var (member, memberUser) in memberUsers)
-                member.Actor.Sync(memberUser);
-
-            Session.Actor.Sync(user);
         }
 
         Room.StartGame();

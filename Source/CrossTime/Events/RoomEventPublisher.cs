@@ -150,30 +150,6 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         }
     }
 
-    private async void OnTitleChanged(object? sender, RoomTitleChangedEventArgs e)
-    {
-        try
-        {
-            var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
-
-            await room.Broadcast(new WaitingRoomTitleEventData
-            {
-                Title  = room.Title
-            }, CancellationToken.None);
-
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
-            {
-                Number = room.Id,
-                Title  = room.Title
-            }, CancellationToken.None);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex,
-                "Failed to broadcast [Room::OnTitleChanged] event to one or more subscribers");
-        }
-    }
-
     private async void OnMusicChanged(object? sender, RoomMusicChangedEventArgs e)
     {
         try
@@ -318,7 +294,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(new WaitingSkillChangedEventData()
+            await room.Broadcast(new WaitingSkillChangedEventData
             {
                 Skills = e.Skills
             }, CancellationToken.None);
