@@ -71,7 +71,14 @@ public class Channel : Broadcastable, IChannel
 
     public IReadOnlyDictionary<int, ItemData> GetItemData()
     {
-        return _metadataResolver.GetItemData(this);
+        try
+        {
+            return _metadataResolver.GetItemData(this);
+        }
+        catch (Exception)
+        {
+            return new Dictionary<int, ItemData>();
+        }
     }
 
     public override void Invalidate()

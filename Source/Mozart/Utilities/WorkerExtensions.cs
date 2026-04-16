@@ -9,15 +9,16 @@ public static class WorkerExtensions
     public static void ValidateMetadata(this IHostedService service, IChannelService channelService,
         IMetadataResolver resolver, ILogger logger)
     {
-        try
+        foreach (var channel in channelService.GetChannels())
         {
-            foreach (var channel in channelService.GetChannels())
+            try
+            {
                 _ = resolver.GetItemData(channel);
-        }
-        catch (Exception)
-        {
-            logger.LogError("Failed to validate metadata files");
-            throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to validate item data file");
+            }
         }
     }
 }
