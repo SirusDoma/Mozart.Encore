@@ -58,7 +58,7 @@ Supported client version: **v2.33 (O2Jam X2)**
 - Support multi planet and channels deployment.
 - Highly customizable with high-level network protocol implementation.
 
-<sub>* In-game web server features are not included.</sub>
+<sub>* FTP and In-game web server features are not included.</sub>
 
 ## Project Structure
 
@@ -165,8 +165,13 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
-Metadata files that act as source of truth of particular game data outside the database. 
-The metadata files are not optional and can be usually overriden per channel.
+Metadata files that act as source of truth of particular game data outside the database.
+They are optional for running the server, but features such as ranking and the equipment system will not function without them. 
+
+Metadata can be usually overriden per channel.
+
+> [!IMPORTANT]
+> You must supply the metadata files that are compatible with the client version supported by this build.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
