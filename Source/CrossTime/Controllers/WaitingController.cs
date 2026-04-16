@@ -53,10 +53,10 @@ public class WaitingController(
     }
 
     [CommandHandler]
-    public void GetMusicState(GetMusicStateRequest request)
+    public void UpdateMusicState(UpdateMusicStateRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.GetMusicState,
+            (int)RequestCommand.UpdateMusicState,
             "Update room [{RoomId:000}] [{Member:00}] music state",
             Room.Id, request.MemberId
         );
