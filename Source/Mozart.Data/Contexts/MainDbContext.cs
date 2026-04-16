@@ -17,8 +17,6 @@ public sealed class MainDbContext(
 
     public DbSet<UserRanking> UserRankings { get; init; }
 
-    public DbSet<UserRankingExtended> UserRankingsExtended { get; init; }
-
     public DbSet<Member> Members { get; init; }
 
     public DbSet<AuthSession> Sessions { get; init; }
@@ -38,8 +36,6 @@ public sealed class MainDbContext(
         ConfigureGiftItem(modelBuilder);
         ConfigureGiftMusic(modelBuilder);
         ConfigureUserMessage(modelBuilder);
-        ConfigureUserScore(modelBuilder);
-        ConfigurePenalty(modelBuilder);
     }
 
     private void ConfigureUser(ModelBuilder modelBuilder)
@@ -104,20 +100,15 @@ public sealed class MainDbContext(
                 .HasForeignKey<UserRanking>(r => r.UserId)
                 .IsRequired(false);
 
-            entity.HasOne<UserRankingExtended>("UserRankingExtended")
-                .WithOne()
-                .HasForeignKey<UserRankingExtended>(r => r.UserId)
-                .IsRequired(false);
-
             entity.HasMany<AcquiredMusic>(u => u.AcquiredMusicList)
                 .WithOne()
                 .HasForeignKey(a => a.UserId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(u => u.MusicScoreRecords)
+            entity.HasMany<CompletedMission>(u => u.CompletedMissionList)
                 .WithOne()
-                .HasForeignKey(r => r.UserId)
+                .HasForeignKey(m => m.UserId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -157,13 +148,10 @@ public sealed class MainDbContext(
             entity.Navigation("UserRanking")
                 .AutoInclude();
 
-            entity.Navigation("UserRankingExtended")
-                .AutoInclude();
-
             entity.Navigation(e => e.AcquiredMusicList)
                 .AutoInclude();
 
-            entity.Navigation(e => e.MusicScoreRecords)
+            entity.Navigation(e => e.CompletedMissionList)
                 .AutoInclude();
 
             entity.Navigation("AttributiveItems")
@@ -322,66 +310,6 @@ public sealed class MainDbContext(
                 .ValueGeneratedOnAdd();
 
             entity.HasIndex(e => e.UserId);
-        });
-
-        modelBuilder.Entity<UserRankingExtended>(entity =>
-        {
-            entity.ToTable("t_o2jam_user_ranking");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.Id)
-                .HasColumnName("Seq")
-                .ValueGeneratedOnAdd();
-
-            entity.Property(e => e.UserId)
-                .HasColumnName("User_Index_ID");
-
-            entity.Property(e => e.Username)
-                .HasColumnName("User_ID")
-                .HasMaxLength(40);
-
-            entity.Property(e => e.Nickname)
-                .HasColumnName("User_NickName")
-                .HasMaxLength(40);
-
-            entity.Property(e => e.Sex)
-                .HasColumnName("Sex");
-
-            entity.Property(e => e.Level)
-                .HasColumnName("Level");
-
-            entity.Property(e => e.Battle)
-                .HasColumnName("Battle");
-
-            entity.Property(e => e.Win)
-                .HasColumnName("Win");
-
-            entity.Property(e => e.Draw)
-                .HasColumnName("Draw");
-
-            entity.Property(e => e.Lose)
-                .HasColumnName("Lose");
-
-            entity.Property(e => e.Experience)
-                .HasColumnName("Experience");
-
-            entity.Property(e => e.WriteDate)
-                .HasColumnName("WriteDate")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS
-
-            entity.Property(e => e.Ranking)
-                .HasColumnName("Ranking")
-                .HasDefaultValue(0);
-
-            entity.Property(e => e.ChangeType)
-                .HasColumnName("ChangeType");
-
-            entity.Property(e => e.ChangeRanking)
-                .HasColumnName("ChangeRanking");
-
-            entity.HasIndex(e => e.UserId)
-                .IsUnique();
         });
     }
 
@@ -589,34 +517,6 @@ public sealed class MainDbContext(
                 );
 
             entity.HasIndex(e => e.ReceiverId);
-        });
-    }
-
-    private void ConfigureUserScore(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<MusicScoreRecord>(entity =>
-        {
-            entity.ToTable("t_o2jam_user_music_ranking");
-
-            entity.HasKey(e => new { e.UserId, e.MusicId, e.Difficulty });
-
-            entity.Property(e => e.UserId)
-                .HasColumnName("USER_INDEX_ID")
-                .ValueGeneratedNever();
-
-            entity.Property(e => e.MusicId)
-                .HasColumnName("MUSIC_INDEX_ID")
-                .ValueGeneratedNever();
-
-            entity.Property(e => e.Difficulty)
-                .HasColumnName("DIFFICULTY")
-                .ValueGeneratedNever();
-
-            entity.Property(e => e.Score)
-                .HasColumnName("USER_SCORE");
-
-            entity.Property(e => e.ClearType)
-                .HasColumnName("FLAG");
         });
     }
 }

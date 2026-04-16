@@ -1,19 +1,54 @@
-# IdentityP2.Encore
+# CrossTime.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2)**  
-<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, 0.5 and v0.6</sub>
+Supported client version: **v2.33 (O2Jam X2)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                        | Supported client version |
+|----------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)           | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)         | v3.82 (O2Jam NX)         |
+| [Identity.Encore](../../tree/identity)       | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](../../tree/identity-p2)  | v5.89 (O2JamO2 Final)    |
+
+> [!CAUTION]
+> **Cross.Time.Encore build is set to be diverged from the main build**
+> 
+> This mean database schema upgrade from this build to a newer build is **not** supported.
+> Moreover, any general improvements from the major release build is not guaranteed to be backported into this build.
+> 
+> This is because O2Jam X2 client never officially left beta and contains numerous game-breaking bugs.
+> X2 Client and this server build is **not recommended** as a primary uses for regular gameplay.
+>
+> Instead, it should be treated as a means of preserving and accessing a client version that has otherwise been lost.
+> In other words, treat this as an experimental server build for X2.
+>
+> **Known limitations:**
+> - The server IP addresses are hard-coded in the client executable. Modifying the game client or configuring client-side ip tables is required to connect to a custom server.
+> - The item shop is non-functional. It requires the user account to be paired with a mgame account, but no such pairing mechanism exists in the network protocol.
+> - Hall of Fame and Artist Room are not implemented.
+> - Album mode is not implemented. While a workaround exists to access it, gameplay becomes broken after the first song.
+> - User list is not working.
+> - Attributive (Ring modifier) is not working properly.
+> - Various other client bugs exist, such as inability to enter some servers, the client sending outdated or missing payload packet data, etc.
+
+> [!IMPORTANT]
+> **Gem Star** is not fully supported.
+> 
+> Gem Star is a rating system exclusive to O2Jam X2. 
+> Each server defines a Gem Star range and is only accessible to players whose Gem Star count falls within that range, except for the practice server, 
+> which is open to all players regardless of their Gem Star count.
+>
+> Gem Stars can be earned by completing missions, with rewards unique to each server, or by playing against other players in versus mode. 
+> However, versus matches can also result in Gem Star loss.
+>
+> The Gem Stars gain and loss are computed entirely on the server side, and the algorithm behind these calculations was never discovered. 
+> For this reason, the server does not implement Gem Star rewards or penalties.
+> 
+> However, Gem Star is defined in the schema and properly included in the network response.
 
 ## Features
 
@@ -43,7 +78,7 @@ The server can be configured either with `config.ini` or command-line arguments.
 See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to set up command-line config.
 
 ## Server
-Server deployment mode and TCP connection setting.
+Server deployment mode and TCP connection setting.  
 
 Use `--Server:<Option>` to configure these settings via command-line arguments (e.g, `--Server:Port=15010`)
 
@@ -113,7 +148,7 @@ These options can be configured under `Gateway` section.
 | `MissionCost`      | The amount of tickets or gems consumed per mission. Default: `1`                                                                                                                                                                                                        |
 
 ### Channels
-These options can be configured under `Gateway:Channels:<N>` section as explained above.
+These options can be configured under `Gateway:Channels:<N>` section as explained above. 
 
 > [!TIP]
 > This configuration is ignored in the `Gateway` deployment mode.
@@ -121,18 +156,18 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                                              |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                                |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                                 |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                          |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                          |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)   |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)  |
+| Option      | Description                                                                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                           |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                            |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                     |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                     |
+| `MusicList` | Path of `X2OJNList.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`2.33`. Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files that act as source of truth of particular game data outside the database.
-They are optional for running the server, but features such as play reward, ranking and the equipment system will not function without them.
+They are optional for running the server, but features such as play reward, ranking and the equipment system will not function without them. 
 
 Metadata can be usually overriden per channel.
 
@@ -141,10 +176,10 @@ Metadata can be usually overriden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                                                   |
-|-------------|---------------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).   |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).  |
+| Option      | Description                                                                               |
+|-------------|-------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `X2OJNList.dat`. Format must compatible with client v`2.33`. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`2.33`.  |
 
 ## Game settings
 Gameplay-specific settings.
@@ -165,7 +200,7 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >[!IMPORTANT]
 > You may notice that the database schema look funky with premature normalizations here and there.  
 > This is intentional because the app need to support the existing official database schema.
->
+> 
 > The table structure represents a best-effort attempt to follow the e-Games database distribution.
 > Structures that are known exclusive to the foreign database distribution are omitted.
 >
@@ -202,7 +237,7 @@ Use the following command to create a new migration:
 
 >[!TIP]
 > You can place the configured `config.ini` in your working directory to configure the database configuration
-> instead of passing them via CLI.
+> instead of passing them via CLI. 
 
 ## Execute Migration
 Run the following command to execute the migration:
@@ -250,7 +285,7 @@ To support this design, you must run Mozart.Encore in separate instances:
   - One instance per `Channel`
   - Handles persistent and non-persistent in-game states for its assigned Channel
 
-There can only be one "node" of `Gateway` or `Channel` instance at a time, and it cannot be horizontally scaled.
+There can only be one "node" of `Gateway` or `Channel` instance at a time, and it cannot be horizontally scaled. 
 You cannot run multiple instances to represent a single `Gateway` or `Channel`, because each instance is the scaling unit of the horizontal scaling itself.
 
 See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configuration section above to configure the `Gateway` and `Channel` instances.
@@ -259,44 +294,8 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 
 ### Gateway
 
-Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
-
-```shell
-OTwo.exe <encrypted_parameters> \
-  |test|??|<gateway_address_1>|<gateway_port_1>\
-  |test|??|<gateway_address_2>|<gateway_port_2>\
-  …\
-  |test|??|<gateway_address_n>|<gateway_port_n>
-```
-> [!CAUTION]
-> If you are using batch or terminal directly, make sure that the pipe (`|`) are escaped using `^`.  
-> For example: `^|test^|??^|127.0.0.1^|15010`
-
-> [!NOTE]
-> The number of servers are not explicitly specified.  
-> See [AuthParameters](Source/Identity/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Identity/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
->
-> Use [`user:authorize`](#cli-command) command to generate the session and the encrypted parameters.
-
-For example, if you have three Planets (three Gateways), you might use:
-
-```shell 
-OTwo.exe 00C70200E85000DF8E00E..... \
-  |test|??|192.168.10.1|15010\
-  |test|??|192.168.10.2|15011\
-  |test|??|192.168.10.3|15012\
-```
-
-> [!TIP]
-> You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
-> For example:
-> 
-> ```shell 
-> OTwo.exe 00C70200E85000DF8E00E..... \
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
-> ```
+The server IP addresses are hard-coded in the client executable. 
+Modifying the game client or configuring client-side ip tables is required to connect to a custom server.
 
 ### Channel
 
@@ -308,15 +307,15 @@ When the `Channel` lost its connection to its `Gateway`, it will automatically s
 ## Advanced scaling
 
 It might be possible to host and scale `Mozart.Encore` in kubernetes via [agones](https://agones.dev/). However, it may require code changes.
-Please refer to their [documentation](https://agones.dev/site/docs/) and [third-party examples](https://agones.dev/site/docs/third-party-content/examples/) to learn more.
+Please refer to their [documentation](https://agones.dev/site/docs/) and [third-party examples](https://agones.dev/site/docs/third-party-content/examples/) to learn more. 
 
 # CLI Command
 
-The server application has built-in utilities to help local player usage or server maintenance.
+The server application has built-in utilities to help local player usage or server maintenance. 
 
 - `db:migrate`: Execute database migration within the configured database.
 - `user:register`: Register a new user.
-- `user:authorize`: Authorize user credential. Display encoded auth parameters that can be used to launch the game.
+- `user:authorize`: Authorize user credential. Display both decoded and encoded auth token that can be used to launch the game.
 - `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
 
 Run the CLI with `--help` flag for more details.

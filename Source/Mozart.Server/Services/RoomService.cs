@@ -15,7 +15,7 @@ namespace Mozart.Services;
 public interface IRoomService
 {
     Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit, bool premium, int type);
+        int minLevelLimit, int maxLevelLimit);
 
     Room DeleteRoom(IChannel channel, int id);
 
@@ -52,7 +52,7 @@ public class RoomService : Broadcastable, IRoomService
         _rooms.Values.SelectMany(e => e.Values.SelectMany(r => r.Sessions)).ToList();
 
     public Room CreateRoom(Session session, string title, GameMode mode, string password,
-        int minLevelLimit, int maxLevelLimit, bool premium, int type)
+        int minLevelLimit, int maxLevelLimit)
     {
         if (session.Room != null)
             throw new ArgumentOutOfRangeException(nameof(session));
@@ -82,11 +82,9 @@ public class RoomService : Broadcastable, IRoomService
                 MinLevelLimit   = minLevelLimit,
                 MaxLevelLimit   = maxLevelLimit,
                 Arena           = Arena.Random,
-                ArenaRandomSeed = (byte)Random.Shared.Next(0, (int)Arena.NewXMas),
+                ArenaRandomSeed = (byte)Random.Shared.Next(0, (int)Arena.AWhaleOfAqua),
                 Password        = password,
-                State           = RoomState.Waiting,
-                Premium         = premium,
-                Type            = type
+                State           = RoomState.Waiting
             }, _options.Value);
 
             if (rooms.TryAdd(i, room))

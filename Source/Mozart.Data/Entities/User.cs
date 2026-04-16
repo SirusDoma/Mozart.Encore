@@ -27,13 +27,9 @@ public class User
 
     public int GemStar { get; set; }
 
-    public int Ranking => UserRankingExtended.Ranking;
+    public int Ticket { get; set; } = 10;
 
-    public RankDeltaType RankDeltaType => UserRankingExtended.ChangeType == 0
-        ? RankDeltaType.Down
-        : RankDeltaType.Up;
-
-    public int RankDelta => UserRankingExtended.ChangeRanking;
+    public required bool IsAdministrator { get; init; }
 
     [NotMapped]
     public int Gem
@@ -97,28 +93,4 @@ public class User
 
     [NotMapped]
     public EquipmentItems Equipments => new(Loadout);
-
-    private IReadOnlyList<UserMessage> UserMessages { get; init; } = [];
-
-    public List<AcquiredMusic> AcquiredMusicList { get; init; } = [];
-
-    public List<MusicScoreRecord> MusicScoreRecords { get; init; } = [];
-
-    private Member Member { get; init; } = null!;
-
-    private Wallet Wallet { get; init; } = new();
-
-    private Penalty Penalty { get; init; } = new();
-
-    private Loadout Loadout { get; init; } = new();
-
-    private List<AttributiveItem> AttributiveItems { get; init; } = [];
-
-    private UserRanking UserRanking { get; init; } = new();
-
-    private UserRankingExtended UserRankingExtended { get; init; } = new();
-
-    private List<GiftItem> GiftItems { get; init; } = [];
-
-    private List<GiftMusic> GiftMusics { get; init; } = [];
 }

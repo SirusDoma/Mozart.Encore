@@ -26,7 +26,7 @@ public class GatewayWorker(IServiceProvider provider, IClientServer clientServer
         {
             try
             {
-                logger.LogInformation($"IdentityP2.Encore (Gateway Mode): Version {Program.Version}");
+                logger.LogInformation($"CrossTime.Encore (Gateway Mode): Version {Program.Version}");
 
                 try
                 {

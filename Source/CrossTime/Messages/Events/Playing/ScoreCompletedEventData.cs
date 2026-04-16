@@ -55,10 +55,13 @@ public class ScoreCompletedEventData : IMessage
         public int? RewardGemStar { get; init; }
 
         [MessageField(order: 15)]
-        public GameSpeed? Speed { get; init; }
+        public int? RewardGem { get; init; }
 
         [MessageField(order: 16)]
-        public int? Penalty { get; init; }
+        public int? GemStar { get; init; }
+
+        [MessageField(order: 17)]
+        public RankExtended? Rank { get; init; }
     }
 
     [CollectionMessageField(order: 0, maxCount: 8, prefixSizeType: TypeCode.Int32)]

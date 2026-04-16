@@ -30,8 +30,8 @@ namespace CrossTime;
 
 public class Program
 {
-    public static Version Version        => new(5, 0, 0);
-    public static Version NetworkVersion => new(5, 89, 9);
+    public static Version Version        => new(3, 4, 0);
+    public static Version NetworkVersion => new(2, 33);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
@@ -108,7 +108,7 @@ public class Program
                     .Map<PlanetController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
-                    .Map<RankingController>()
+                    .Map<MissionController>()
                     .Map<MyRoomController>()
                     .Map<ItemShopController>()
                     .Map<MusicShopController>()
