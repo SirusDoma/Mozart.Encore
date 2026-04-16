@@ -8,11 +8,12 @@ Supported client version: **v3.82\* (O2Jam NX)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                        | Supported client version |
+|----------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)           | v3.10 (O2Jam Original)   |
+| [CrossTime.Encore](../../tree/cross-time)    | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)       | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](../../tree/identity-p2)  | v5.89 (O2JamO2 Final)    |
 
 ## Features
 
