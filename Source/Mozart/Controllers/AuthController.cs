@@ -52,16 +52,7 @@ public class AuthController(
                 }
             }
 
-            var token = new string(
-                request.Token
-                    .SkipWhile(c => !char.IsLetterOrDigit(c))
-                    .Reverse()
-                    .SkipWhile(c => !char.IsLetterOrDigit(c))
-                    .Reverse()
-                    .ToArray()
-            );
-
-            var authSession = await authService.Authorize(token, cancellationToken);
+            var authSession = await authService.Authorize(request.Token, cancellationToken);
             var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
 
             if (characterInfo == null)

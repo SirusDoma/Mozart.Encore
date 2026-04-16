@@ -1,5 +1,4 @@
 using Encore.Sessions;
-using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Services;
@@ -318,50 +317,6 @@ public class Room : Broadcastable, IRoom
             MemberId = index,
             Member   = member,
             Team     = member.Team
-        });
-    }
-
-    public void UpdateMusicState(Session session, int memberId)
-    {
-        if (memberId is < 0 or >= MaxCapacity)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
-
-        if (_slots[memberId] is not MemberSlot member)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
-
-        var state = MusicState.None;
-        bool freeMusic = Channel.FreeMusic ?? _options.FreeMusic;
-
-        if (!freeMusic)
-        {
-            if (Mode == GameMode.Jam)
-            {
-                if (Channel.GetAlbumList().TryGetValue(MusicId, out var album) &&
-                    member.Actor.Gem < album.Price)
-                {
-                    state = MusicState.NoAccess;
-                }
-            }
-            else
-            {
-                if (Channel.GetMusicList().TryGetValue(MusicId, out var music)
-                    && music is { IsPurchasable: true, PriceO2Cash: > 0 }
-                    && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId)
-                    && member.Actor.FreePass.Type == FreePassType.None
-                    && member.Actor.CashPoint < 10)
-                {
-                    state = MusicState.NoAccess;
-                }
-            }
-        }
-
-        member.MusicState = state;
-
-        UserMusicStateChanged?.Invoke(this, new RoomUserMusicStateChangedEventArgs
-        {
-            MemberId = memberId,
-            Member   = member,
-            State    = state
         });
     }
 
