@@ -63,7 +63,7 @@ public class RoomUserMusicStateChangedEventArgs : EventArgs
 {
     public required int MemberId           { get; init; }
     public required Room.MemberSlot Member { get; init; }
-    public required MusicState State       { get; init; }
+    public required MusicState State     { get; init; }
 }
 
 public class RoomSlotChangedEventArgs : EventArgs

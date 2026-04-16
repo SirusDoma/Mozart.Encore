@@ -34,6 +34,10 @@ public class RoomMetadata : ICloneable
 
     public RoomState State { get; set; } = RoomState.Waiting;
 
+    public bool Premium { get; set; }
+
+    public int Type { get; set; }
+
     public object Clone()
     {
         return MemberwiseClone();

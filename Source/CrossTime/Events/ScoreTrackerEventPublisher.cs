@@ -1,6 +1,7 @@
 using CrossTime.Messages.Events;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Events;
@@ -25,6 +26,16 @@ public class ScoreTrackerEventPublisher(
         tracker.ScoreCompleted     += OnScoreCompleted;
     }
 
+    private IReadOnlyList<byte> ComputeMemberRanks(IReadOnlyList<ScoreTracker.UserScore> states)
+    {
+        return states
+            .OrderByDescending(s => s.Score)
+            .Select(s => (byte)s.MemberId)
+            .Concat(Enumerable.Repeat(byte.MaxValue, Room.MaxCapacity))
+            .Take(Room.MaxCapacity)
+            .ToList();
+    }
+
     private async void OnUserTracked(object? sender, ScoreTrackEventArgs e)
     {
         try
@@ -32,7 +43,8 @@ public class ScoreTrackerEventPublisher(
             var tracker = (ScoreTracker)sender!;
             await tracker.Room.Broadcast(new MusicLoadedEventData
             {
-                MemberId = (byte)e.MemberId
+                MemberId  = (byte)e.MemberId,
+                IsPlaying = true
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -47,10 +59,16 @@ public class ScoreTrackerEventPublisher(
         try
         {
             var tracker = (ScoreTracker)sender!;
+            var user = await repository.Find(e.Session.Actor.UserId);
+            if (user != null)
+                e.Session.Actor.Sync(user);
+
             await tracker.Room.Broadcast(new UserLeaveGameEventData
             {
-                MemberId = (byte)e.MemberId,
-                Level    = e.Session.Actor.Level,
+                MemberId  = (byte)e.MemberId,
+                Level     = e.Session.Actor.Level,
+                CashPoint = e.Session.Actor.CashPoint,
+                FreePass  = e.Session.Actor.FreePass
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -65,14 +83,15 @@ public class ScoreTrackerEventPublisher(
         try
         {
             var tracker = (ScoreTracker)sender!;
-            if (tracker.Room.State != RoomState.Playing)
+            if (tracker.Completed ||tracker.Room.State != RoomState.Playing)
                 return;
 
             await tracker.Room.Broadcast(new GameStatsUpdateEventData
             {
-                MemberId = (byte)e.MemberId,
-                Type     = GameUpdateStatsType.Life,
-                Value    = (ushort)e.Value
+                MemberId    = (byte)e.MemberId,
+                Type        = GameUpdateStatsType.Life,
+                Value       = (ushort)e.Value,
+                MemberRanks = ComputeMemberRanks(e.States)
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -87,14 +106,15 @@ public class ScoreTrackerEventPublisher(
         try
         {
             var tracker = (ScoreTracker)sender!;
-            if (tracker.Room.State != RoomState.Playing)
+            if (tracker.Completed || tracker.Room.State != RoomState.Playing)
                 return;
 
             await tracker.Room.Broadcast(new GameStatsUpdateEventData
             {
-                MemberId = (byte)e.MemberId,
-                Type     = GameUpdateStatsType.Jam,
-                Value    = (ushort)e.Value
+                MemberId    = (byte)e.MemberId,
+                Type        = GameUpdateStatsType.Jam,
+                Value       = (ushort)e.Value,
+                MemberRanks = ComputeMemberRanks(e.States)
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -166,8 +186,8 @@ public class ScoreTrackerEventPublisher(
                     int maxJams   = (totalNotes - 26) / 25;
                     int remainder = (totalNotes - 26) % 25;
                     int maxScore  = 200 * totalNotes
-                                  + 25 * maxJams * (maxJams + 1)
-                                  + (remainder > 0 ? 2 * remainder * (maxJams + 1) : 0);
+                                    + 25 * 10 * maxJams * (maxJams + 1)
+                                    + (remainder > 0 ? 10 * remainder * (maxJams + 1) : 0);
 
                     percentage = Math.Clamp((float)state.Score / maxScore, 0f, 1f);
 
@@ -192,6 +212,12 @@ public class ScoreTrackerEventPublisher(
                     user.Gem        += rewardGem;
                     user.Experience += (int)(xpGain * channel.ExpRates);
                     if (user.Experience > xpNext)
+                        mission = MissionEvaluator.Evaluate(music, e.Difficulty, skills, state);
+
+                    if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                        mission = ScoreCompletedEventData.MissionResult.Failed;
+
+                    if (xpNext != 0 && user.Experience > xpNext)
                         user.Level++;
                 }
 
@@ -203,29 +229,57 @@ public class ScoreTrackerEventPublisher(
                 else
                     user.Lose++;
 
+                var record = user.MusicScoreRecords.FirstOrDefault(r =>
+                    r.MusicId == room.MusicId && r.Difficulty == room.Difficulty);
+
+                bool newRecord = record == null || record.Score < state.Score;
+                if (record == null)
+                {
+                    record = new MusicScoreRecord
+                    {
+                        UserId     = user.Id,
+                        MusicId    = room.MusicId,
+                        Difficulty = room.Difficulty
+                    };
+
+                    user.MusicScoreRecords.Add(record);
+                }
+
+                if (newRecord)
+                {
+                    record.Score = safe ? state.Score : 0;
+                    record.ClearType = ClearType.None;
+
+                    if (state.Cool == totalNotes)
+                        record.ClearType = ClearType.AllCool;
+                    else if (state.Cool + state.Good == totalNotes && state is { Bad: 0, Miss: 0 })
+                        record.ClearType = ClearType.AllCombo;
+                }
+
                 await repository.Commit();
                 state.Session.Actor.Sync(user);
 
                 entries.Add(new ScoreCompletedEventData.ScoreEntry
                 {
-                    MemberId      = (byte)id,
-                    Active        = true,
-                    Cool          = (ushort)state.Cool,
-                    Good          = (ushort)state.Good,
-                    Bad           = (ushort)state.Bad,
-                    Miss          = (ushort)state.Miss,
-                    MaxCombo      = (ushort)state.MaxCombo,
-                    JamCombo      = (ushort)state.MaxJamCombo,
-                    Score         = state.Score,
-                    Gem           = state.Session.Actor.Gem - rewardGem,
-                    Level         = state.Session.Actor.Level,
-                    Experience    = state.Session.Actor.Experience,
-                    Win           = win,
-                    Draw          = draw,
-                    RewardGemStar = 0,
-                    RewardGem     = rewardGem,
-                    GemStar       = state.Session.Actor.GemStar,
-                    Rank          = RankExtensions.FromPercentage(percentage, state is { Bad: 0, Miss: 0 })
+                    MemberId   = (byte)id,
+                    Active     = true,
+                    Cool       = (ushort)state.Cool,
+                    Good       = (ushort)state.Good,
+                    Bad        = (ushort)state.Bad,
+                    Miss       = (ushort)state.Miss,
+                    MaxCombo   = (ushort)state.MaxCombo,
+                    JamCombo   = (ushort)state.MaxJamCombo,
+                    Score      = state.Score,
+                    Reward     = (ushort)Math.Max(0, reward),
+                    Level      = state.Session.Actor.Level,
+                    Experience = state.Session.Actor.Experience,
+                    Result     = draw ? ScoreCompletedEventData.MatchResult.Draw :
+                                 win  ? ScoreCompletedEventData.MatchResult.Win  :
+                                        ScoreCompletedEventData.MatchResult.Lose,
+                    Gem        = state.Session.Actor.Gem,
+                    CashPoint  = state.Session.Actor.CashPoint,
+                    Speed      = state.Speed,
+                    Penalty    = state.LongNoteScore
                 });
             }
 

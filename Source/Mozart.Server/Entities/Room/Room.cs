@@ -64,7 +64,7 @@ public class Room : Broadcastable, IRoom
 
         public bool IsReady { get; set; }
 
-        public MusicState MusicState { get; set; } = MusicState.None;
+        public MusicState MusicState { get; set; } = MusicState.Ready;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
@@ -281,10 +281,18 @@ public class Room : Broadcastable, IRoom
         return _slots.Any(s => s is MemberSlot m && m.Actor == actor);
     }
 
-    public void SaveMetadataChanges()
+    public void SaveMetadataChanges(bool refresh = false)
     {
-        if (_previous.MusicId != _metadata.MusicId ||
-            _previous.MissionLevel != _metadata.MissionLevel ||
+        if (_previous.Title != _metadata.Title)
+        {
+            TitleChanged?.Invoke(this, new RoomTitleChangedEventArgs
+            {
+                Title = _metadata.Title
+            });
+        }
+
+        if (refresh ||
+            _previous.MusicId != _metadata.MusicId ||
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
@@ -383,7 +391,7 @@ public class Room : Broadcastable, IRoom
         if (index < 0)
             throw new ArgumentOutOfRangeException(nameof(session)); // request forged?
 
-        var member   = (_slots[index] as MemberSlot)!;
+        var member  = (_slots[index] as MemberSlot)!;
         member.Team = team;
 
         UserTeamChanged?.Invoke(this, new RoomUserTeamChangedEventArgs
@@ -394,31 +402,36 @@ public class Room : Broadcastable, IRoom
         });
     }
 
-    public void UpdateMusicState(Session session, int memberId)
+    public void UpdateMusicState(Session session, MusicState state)
     {
-        if (memberId is < 0 or >= MaxCapacity)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
+        int index = _slots.FindIndex(s => s is MemberSlot m && m.Session == session);
+        if (_slots[index] is not MemberSlot member)
+            throw new ArgumentOutOfRangeException(nameof(state));
 
-        if (_slots[memberId] is not MemberSlot member)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
-
-        var state = MusicState.None;
-
-        if (!_options.FreeMission)
+        switch (Channel.FreeMusic ?? _options.FreeMusic)
         {
-            if (Channel.GetMusicList().TryGetValue(MusicId, out _)
-                && member.Actor.MembershipType == 0
-                && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
+            case true when state is MusicState.NoAccess:
+                state = MusicState.Ready;
+                break;
+            case false when state == MusicState.Ready:
             {
-                state = MusicState.NoAccess;
+                if (Channel.GetMusicList().TryGetValue(MusicId, out var music)
+                    && music is { IsPurchasable: true, PriceO2Cash: > 0 }
+                    && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId)
+                    && member.Actor.FreePass.Type == FreePassType.None
+                    && member.Actor.CashPoint < 10)
+                {
+                    state = MusicState.NoAccess;
+                }
+
+                break;
             }
         }
 
         member.MusicState = state;
-
         UserMusicStateChanged?.Invoke(this, new RoomUserMusicStateChangedEventArgs
         {
-            MemberId = memberId,
+            MemberId = index,
             Member   = member,
             State    = state
         });
@@ -482,6 +495,9 @@ public class Room : Broadcastable, IRoom
     {
         if (!ScoreTracker.Completed || _metadata.State != RoomState.Playing)
             return;
+
+        foreach (var member in _slots.OfType<MemberSlot>())
+            member.IsReady = member.IsMaster;
 
         _metadata.State = RoomState.Waiting;
         SaveMetadataChanges();

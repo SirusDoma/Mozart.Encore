@@ -7,6 +7,6 @@ public class SetTeamRequest : IMessage
 {
     public static Enum Command => RequestCommand.SetRoomTeam;
 
-    [MessageField(order: 0)]
+    [MessageField<MessageFieldCodec<int>>(order: 0)] // Likely to be a human-error, but we have to deal with it
     public RoomTeam Team { get; init; }
 }

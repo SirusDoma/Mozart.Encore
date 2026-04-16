@@ -49,11 +49,11 @@ public class RoomListResponse : IMessage
         [CollectionMessageField(12, prefixSizeType: TypeCode.Int32)]
         public IReadOnlyList<int> Skills { get; set; } = [];
 
-        [MessageField(order: 13)]
-        public ushort Unknown1 { get; set; }
+        [MessageField<MessageFieldCodec<ushort>>(order: 13)]
+        public bool Premium { get; init; } = false;
 
-        [MessageField(order: 13)]
-        public byte Unknown2 { get; set; }
+        [MessageField(order: 14)]
+        public byte Type { get; init; } = 0;
     }
 
     [CollectionMessageField(order: 0, maxCount: 100, prefixSizeType: TypeCode.Int32)]
