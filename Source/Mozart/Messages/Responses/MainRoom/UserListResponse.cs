@@ -8,16 +8,10 @@ public class UserListResponse : IMessage
 
     public class UserInfo : SubMessage
     {
-        [MessageField(order: 0)]
-        public int UserIndexId { get; init; }
-
-        [StringMessageField(order: 1)]
-        public required string Username { get; init; }
-
-        [StringMessageField(order: 2)]
+        [StringMessageField(order: 0)]
         public required string Nickname { get; init; }
 
-        [MessageField(order: 3)]
+        [MessageField(order: 1)]
         public int Level { get; init; }
     }
 

@@ -27,7 +27,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
 
             try
             {
-                logger.LogInformation("IdentityP2.Encore: Version {Version}", Program.Version);
+                logger.LogInformation("Mozart.Encore: Version {Version}", Program.Version);
 
                 // Validate by loading metadata files
                 this.ValidateMetadata(channelService, resolver, logger);

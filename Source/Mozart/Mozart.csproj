@@ -15,14 +15,10 @@
         <InvariantGlobalization>true</InvariantGlobalization>
         <Configurations>Release;Debug</Configurations>
         <Platforms>x86;x64</Platforms>
-        <AssemblyName>IdentityP2.Encore</AssemblyName>
+        <RootNamespace>Mozart</RootNamespace>
+        <AssemblyName>Mozart.Encore</AssemblyName>
         <InvariantGlobalization>false</InvariantGlobalization>
         <ApplicationIcon>Mozart.ico</ApplicationIcon>
-        <PackageId>IdentityP2.Encore</PackageId>
-        <Authors>IdentityP2.Encore</Authors>
-        <Company>IdentityP2.Encore</Company>
-        <Product>IdentityP2.Encore</Product>
-        <RootNamespace>Identity</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -69,6 +65,6 @@
       <ProjectReference Include="..\Mozart.Migrations\Postgres\Mozart.Migrations.Postgres.csproj" />
       <ProjectReference Include="..\Mozart.Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj" />
       <ProjectReference Include="..\Mozart.Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj" />
-      <ProjectReference Include="..\Identity.Web\IdentityP2.Web.csproj" />
+      <ProjectReference Include="..\Mozart.Web\Mozart.Web.csproj" />
     </ItemGroup>
 </Project>

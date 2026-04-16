@@ -1,5 +1,5 @@
 using Encore.Messaging;
-using Mozart.Data.Entities;
+using Mozart.Messages.Codecs;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
@@ -47,20 +47,8 @@ public class JoinRoomResponse() : IMessage
         [MessageField<CharacterEquipmentInfoCodec>(order: 6)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-        [CollectionMessageField(order: 9, prefixSizeType: TypeCode.Int32)]
-        public IReadOnlyList<ushort> MusicIds { get; init; } = [];
-
-        [MessageField(order: 10)]
-        public int CashPoint { get; init; }
-
-        [MessageField(order: 11)]
-        public FreePassType FreePass { get; init; }
-
-        [MessageField(order: 12)]
-        public bool IsPlaying { get; init; }
-
-        [MessageField(order: 13)]
-        public bool IsAdministrator { get; init; }
+        [CollectionMessageField(order: 7, prefixSizeType: TypeCode.Int32)]
+        public IReadOnlyList<int> MusicIds { get; init; } = [];
     }
 
     public class RoomSlotInfo : SubMessage

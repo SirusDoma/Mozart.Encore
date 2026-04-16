@@ -20,11 +20,11 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
 
     private IScoreTracker Tracker => Session.Room!.ScoreTracker;
 
-    [CommandHandler]
-    public void ConfirmMusicLoaded(ConfirmMusicLoadedRequest request)
+    [CommandHandler(RequestCommand.ConfirmMusicLoaded)]
+    public void ConfirmMusicLoaded()
     {
         logger.LogInformation((int)RequestCommand.ConfirmMusicLoaded,
-            "User music loaded: [{RoomId:000}] - {PowerSkill}", Room.Id, request.PowerSkillId);
+            "User music loaded: [{RoomId:000}]", Room.Id);
 
         var slots = Room.Slots.ToList();
         int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
@@ -42,13 +42,13 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
     public void UpdateGameStats(UpdateGameStatsRequest request)
     {
         logger.LogInformation((int)RequestCommand.UpdateGameStats,
-            "Game [{RoomId:000}] Update #{Seq} - {Type}: {Value} (Bonus: {Bonus})",
-            Room.Id, request.Sequence, request.Type, request.Value, request.LongNoteScore);
+            "Game [{RoomId:000}] [{User}] Update {Type}: {Value}",
+            Room.Id, Session.Actor.Nickname, request.Type, request.Value);
 
         if (request.Type == GameUpdateStatsType.Life)
-            Tracker.UpdateLife(Session, request.Sequence, request.Value, request.Score, request.LongNoteScore);
+            Tracker.UpdateLife(Session, request.Value);
         else if (request.Type == GameUpdateStatsType.Jam)
-            Tracker.UpdateJamCombo(Session, request.Sequence, request.Value, request.Score, request.LongNoteScore);
+            Tracker.UpdateJamCombo(Session, request.Value);
     }
 
     [CommandHandler]
@@ -66,26 +66,8 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
             maxCombo: request.MaxCombo,
             maxJamCombo: request.MaxJamCombo,
             score: request.Score,
-            life: request.Life,
-            speed: request.Speed,
-            penalty: request.Penalty
+            life: request.Life
         );
-    }
-
-    [CommandHandler(RequestCommand.FinalizeRank)]
-    public void FinalizeRank()
-    {
-        logger.LogInformation((int)RequestCommand.FinalizeRank,
-            "Finalize rank: [{RoomId:000}]", Room.Id);
-
-        // await e.Room.Broadcast(new GameRankUpdateEventData
-        // {
-        //     MemberRanks = entries
-        //         .Select(s => s.MemberId)
-        //         .Concat(Enumerable.Repeat(byte.MaxValue, Room.MaxCapacity))
-        //         .Take(Room.MaxCapacity)
-        //         .ToList()
-        // }, CancellationToken.None);
     }
 
     [CommandHandler(RequestCommand.ExitPlaying)]

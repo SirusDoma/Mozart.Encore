@@ -31,8 +31,8 @@ namespace Mozart;
 
 public class Program
 {
-    public static Version Version        => new(5, 0, 0);
-    public static Version NetworkVersion => new(5, 89, 9);
+    public static Version Version        => new(1, 14, 0);
+    public static Version NetworkVersion => new(3, 10);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
@@ -111,7 +111,6 @@ public class Program
                     .Map<PlanetController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
-                    .Map<RankingController>()
                     .Map<MyRoomController>()
                     .Map<ItemShopController>()
                     .Map<MusicShopController>()
