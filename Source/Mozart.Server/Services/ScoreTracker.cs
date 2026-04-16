@@ -9,22 +9,26 @@ public interface IScoreTracker
     bool Completed { get; }
     int Count { get; }
 
-    void UpdateLife(Session session, int life);
-    void UpdateJamCombo(Session session, int combo);
+    void UpdateLife(Session session, int sequence, int life, uint score, int lnScore = 0);
+    void UpdateJamCombo(Session session, int sequence, int combo, uint score, int lnScore = 0);
 
     bool IsTracked(Session session);
     void Track(Session session);
     void Untrack(Session session);
 
     void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo, int maxJamCombo,
-        uint score, int life);
+        uint score, int life, GameSpeed speed, int penalty = 0);
+
+    void CompleteGame();
 }
 
 public class ScoreUpdateEventArgs : EventArgs
 {
-    public required int MemberId    { get; init; }
-    public required Session Session { get; init; }
-    public required int Value       { get; init; }
+    public required int MemberId                                 { get; init; }
+    public required Session Session                              { get; init; }
+    public required int Sequence                                 { get; init; }
+    public required int Value                                    { get; init; }
+    public required IReadOnlyList<ScoreTracker.UserScore> States { get; init; }
 }
 
 public class ScoreTrackEventArgs : EventArgs
@@ -51,20 +55,23 @@ public class ScoreTracker : IScoreTracker
         public required Session Session { get; init; }
         public required int MemberId    { get; init; }
 
-        public int Life        { get; set; } = 1000;
-        public int JamCombo    { get; set; } = 0;
+        public GameSpeed Speed { get; set; }
 
-        public int Cool        { get; set; } = 0;
-        public int Good        { get; set; } = 0;
-        public int Bad         { get; set; } = 0;
-        public int Miss        { get; set; } = 0;
+        public int Life          { get; set; } = 1000;
+        public int JamCombo      { get; set; } = 0;
 
-        public int MaxCombo    { get; set; } = 0;
-        public int MaxJamCombo { get; set; } = 0;
-        public uint Score      { get; set; } = 0;
+        public int Cool          { get; set; } = 0;
+        public int Good          { get; set; } = 0;
+        public int Bad           { get; set; } = 0;
+        public int Miss          { get; set; } = 0;
 
-        public bool Clear      { get; set; } = false;
-        public bool Completed  { get; set; } = false;
+        public int MaxCombo      { get; set; } = 0;
+        public int MaxJamCombo   { get; set; } = 0;
+        public uint Score        { get; set; } = 0;
+        public int LongNoteScore { get; set; } = 0;
+
+        public bool Clear        { get; set; } = false;
+        public bool Completed    { get; set; } = false;
     }
 
     private readonly Lock _mutex = new();
@@ -90,7 +97,7 @@ public class ScoreTracker : IScoreTracker
         Room = room;
     }
 
-    public void UpdateLife(Session session, int life)
+    public void UpdateLife(Session session, int sequence, int life, uint score, int lnScore = 0)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000, nameof(life));
         ArgumentOutOfRangeException.ThrowIfNegative(life, nameof(life));
@@ -103,15 +110,19 @@ public class ScoreTracker : IScoreTracker
             return;
 
         state.Life = life;
+        state.Score = score;
+        state.LongNoteScore = lnScore;
         UserLifeUpdated?.Invoke(this, new ScoreUpdateEventArgs
         {
             MemberId = state.MemberId,
             Session  = state.Session,
-            Value    = life
+            Sequence = sequence,
+            Value    = life,
+            States   = _states
         });
     }
 
-    public void UpdateJamCombo(Session session, int jamCombo)
+    public void UpdateJamCombo(Session session, int sequence, int jamCombo, uint score, int lnScore = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(jamCombo, nameof(jamCombo));
 
@@ -123,11 +134,15 @@ public class ScoreTracker : IScoreTracker
             return;
 
         state.JamCombo = jamCombo;
+        state.Score = score;
+        state.LongNoteScore = lnScore;
         UserJamIncreased?.Invoke(this, new ScoreUpdateEventArgs
         {
             MemberId = state.MemberId,
             Session  = state.Session,
-            Value    = jamCombo
+            Sequence = sequence,
+            Value    = jamCombo,
+            States   = _states
         });
     }
 
@@ -156,6 +171,7 @@ public class ScoreTracker : IScoreTracker
                 {
                     Session     = member.Session,
                     MemberId    = i,
+                    Speed       = Room.Speed,
                     Life        = 1000,
                     JamCombo    = 0,
                     Cool        = 0,
@@ -217,17 +233,17 @@ public class ScoreTracker : IScoreTracker
 
         if (Room.State == RoomState.Playing)
         {
-            // Client send exit room, but just to be safe - let's remove the member here
-            // Probably need to revise in the future network version
-            if (Room.Metadata.Mode != GameMode.Single)
-                state.Session.Exit(Room);
-            else if (Completed)
+            // Client no longer exit the room when manual exit initiated.
+
+            // TODO: Broadcast MusicState + Playing for each members
+
+            if (Completed)
                 Room.CompleteGame();
         }
     }
 
     public void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
-        int maxJamCombo, uint score, int life)
+        int maxJamCombo, uint score, int life, GameSpeed speed, int penalty = 0)
     {
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -238,39 +254,50 @@ public class ScoreTracker : IScoreTracker
             if (Completed)
                 return;
 
-            state.Cool = cool;
-            state.Good = good;
-            state.Bad = bad;
-            state.Miss = miss;
-            state.MaxCombo = maxCombo;
+            state.Cool        = cool;
+            state.Good        = good;
+            state.Bad         = bad;
+            state.Miss        = miss;
+            state.MaxCombo    = maxCombo;
             state.MaxJamCombo = maxJamCombo;
-            state.Score = score;
-            state.Life = life;
-            state.Clear = state.Life > 0;
-            state.Completed = true;
+            state.Score       = score;
+            state.LongNoteScore     = penalty;
+            state.Life        = life;
+            state.Speed       = speed;
+            state.Clear       = state.Life > 0;
+            state.Completed   = true;
         }
 
         state.Session.Disconnected -= OnSessionDisconnected;
-        var completedStates = _states.Where(s => s.Completed).ToList();
-
         UserScoreSubmitted?.Invoke(this, new ScoreSubmitEventArgs
         {
             MemberId = state.MemberId
         });
 
         if (Completed)
+            CompleteGame();
+    }
+
+    public void CompleteGame()
+    {
+        if (!Completed)
+            return;
+
+        var completedStates = _states.Where(s => s.Completed).ToList();
+
+        // Trigger normal score completion
+        ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
         {
-            foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
-                member.IsReady = member.IsMaster;
+            Room       = Room,
+            MusicId    = Room.MusicId,
+            Difficulty = Room.Difficulty,
+            States     = completedStates,
+            Mode       = Room.Mode
+        });
 
-            GameCompleted?.Invoke(this, new ScoreTrackedEventArgs
-            {
-                Room    = Room,
-                States  = completedStates
-            });
-
-            Room.CompleteGame();
-        }
+        // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
+        // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+        Room.CompleteGame();
     }
 
     public void OnSessionDisconnected(object? sender, EventArgs e)

@@ -2,7 +2,14 @@ namespace Mozart.Metadata;
 
 public enum GameMode : byte
 {
-    Single = 0,
-    Versus = 1,
-    Jam    = 2
+    // New mode
+    ThreeKeys = 0,
+    FiveKeys  = 1,
+    SevenKeys = 2,
+
+    // Legacy mode
+    Single,
+    Versus,
+    Jam,
+    Couple
 }

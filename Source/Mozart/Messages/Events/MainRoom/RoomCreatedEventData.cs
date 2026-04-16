@@ -24,4 +24,10 @@ public class RoomCreatedEventData : IMessage
 
     [MessageField(order: 5)]
     public byte MaxLevelLimit { get; set; } = 0;
+
+    [MessageField<MessageFieldCodec<short>>(order: 6)]
+    public bool Premium { get; set; }
+
+    [MessageField(order: 7)]
+    public byte Type { get; set; } = 0;
 }

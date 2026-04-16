@@ -24,7 +24,9 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                 Mode          = room.Metadata.Mode,
                 HasPassword   = !string.IsNullOrEmpty(room.Password),
                 MinLevelLimit = (byte)room.Metadata.MinLevelLimit,
-                MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit
+                MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit,
+                Premium       = room.Metadata.Premium,
+                Type          = (byte)room.Metadata.Type
             }, CancellationToken.None);
 
             await e.Channel.Broadcast(room.Master, new RoomMusicChangedEventData
