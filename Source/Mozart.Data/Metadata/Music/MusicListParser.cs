@@ -135,8 +135,8 @@ public static class MusicListParser
         if (stream.Position == stream.Length)
             return headers;
 
-        // -- SuperEasy section
-        // Overrides premium behavior specifically for the SuperEasy planet.
+        // -- VIP Exclusion section
+        // Overrides premium behavior.
 
         songCount = reader.ReadInt32();
         for (int i = 0; i < songCount; i++)
@@ -193,6 +193,49 @@ public static class MusicListParser
             // -- Gem Discount
             // Discount percentage (e.g., 50 = 50% off).
             int gemDiscount = reader.ReadInt32();
+        }
+
+        if (stream.Position == stream.Length)
+            return headers;
+
+        // -- Unknown section
+        // Stored partially inside the client, but has no reference, never being used
+        // The actual OJNList.dat has song count set to 0.
+
+        songCount = reader.ReadInt32();
+        for (int i = 0; i < songCount; i++)
+        {
+            int id = reader.ReadInt32();
+
+            // -- Unknown
+            int p1 = reader.ReadInt16();
+
+            // -- Unknown
+            int p2 = reader.ReadInt16();
+        }
+
+        if (stream.Position == stream.Length)
+            return headers;
+
+        // -- Key mode
+        // Defines key mode of the music.
+        songCount = reader.ReadInt32();
+        for (int i = 0; i < songCount; i++)
+        {
+            int id = reader.ReadInt32();
+
+            // -- Key Mode
+            // Defines the key mode of the song, only one key mode can be active at a time per music entry.
+            // 0x03 = 3K, 0x07 = 7K
+            byte mode = reader.ReadByte();
+
+            // -- Unused
+            // Unused, observed value is always 244
+            byte p2 = reader.ReadByte();
+
+            // -- Unused
+            // Unused, observed value is always 67
+            short p3 = reader.ReadInt16();
         }
 
         if (stream.Position == stream.Length)

@@ -9,41 +9,28 @@ public static class WorkerExtensions
     public static void ValidateMetadata(this IHostedService service, IChannelService channelService,
         IMetadataResolver resolver, ILogger logger)
     {
-
-        foreach (var channel in channelService.GetChannels())
+        try
         {
-            try
-            {
+            foreach (var channel in channelService.GetChannels())
                 _ = resolver.GetMusicList(channel);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to validate music list file");
-            }
-        }
 
-        foreach (var channel in channelService.GetChannels())
-        {
             try
             {
-                _ = resolver.GetAlbumList(channel);
+                foreach (var channel in channelService.GetChannels())
+                    _ = resolver.GetAlbumList(channel);
             }
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Failed to validate album list file");
             }
-        }
 
-        foreach (var channel in channelService.GetChannels())
-        {
-            try
-            {
+            foreach (var channel in channelService.GetChannels())
                 _ = resolver.GetItemData(channel);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to validate item data file");
-            }
+        }
+        catch (Exception)
+        {
+            logger.LogError("Failed to validate metadata files");
+            throw;
         }
     }
 }

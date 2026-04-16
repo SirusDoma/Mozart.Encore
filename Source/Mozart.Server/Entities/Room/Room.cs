@@ -65,7 +65,7 @@ public class Room : Broadcastable, IRoom
 
         public bool IsReady { get; set; }
 
-        public MusicState MusicState { get; set; } = MusicState.None;
+        public MusicState MusicState { get; set; } = MusicState.Ready;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
@@ -361,35 +361,18 @@ public class Room : Broadcastable, IRoom
         });
     }
 
-    public void UpdateMusicState(Session session, int memberId)
+    public void UpdateMusicState(Session session, MusicState state)
     {
         int index = _slots.FindIndex(s => s is MemberSlot m && m.Session == session);
         if (_slots[index] is not MemberSlot member)
             throw new ArgumentOutOfRangeException(nameof(state));
 
-        if (_slots[memberId] is not MemberSlot member)
-            throw new ArgumentOutOfRangeException(nameof(memberId));
-
-        var state = MusicState.None;
-        bool freeMusic = Channel.FreeMusic ?? _options.FreeMusic;
-
-        if (!freeMusic)
+        switch (Channel.FreeMusic ?? _options.FreeMusic)
         {
             case true when state is MusicState.NoAccess:
                 state = MusicState.Ready;
                 break;
             case false when state == MusicState.Ready:
-            {
-                if (Channel.GetMusicList().TryGetValue(MusicId, out var music)
-                    && music is { IsPurchasable: true, PriceO2Cash: > 0 }
-                    && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId)
-                    && member.Actor.FreePass.Type == FreePassType.None
-                    && member.Actor.CashPoint < 10)
-                {
-                    state = MusicState.NoAccess;
-                }
-            }
-            else
             {
                 if (Channel.GetMusicList().TryGetValue(MusicId, out var music)
                     && music is { IsPurchasable: true, PriceO2Cash: > 0 }
@@ -405,7 +388,6 @@ public class Room : Broadcastable, IRoom
         }
 
         member.MusicState = state;
-
         UserMusicStateChanged?.Invoke(this, new RoomUserMusicStateChangedEventArgs
         {
             MemberId = index,
