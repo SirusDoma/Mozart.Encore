@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace CrossTime.Messages.Events;
+namespace Identity.Messages.Events;
 
 public class UpdateMusicStateRequest : IMessage
 {

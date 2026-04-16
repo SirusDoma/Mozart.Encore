@@ -49,19 +49,86 @@ public class MainRoomController(
 
         return new CharacterInfoResponse
         {
-            Nickname   = actor.Nickname,
-            Gender     = actor.Gender,
-            Gem        = actor.Gem,
-            Point      = actor.Point,
-            Level      = actor.Level,
-            Win        = actor.Win,
-            Lose       = actor.Lose,
-            Draw       = actor.Draw,
-            Equipments = actor.Equipments,
-            Inventory  = actor.Inventory.Select(i => (int)i.Id).ToList(),
-            GemStar    = actor.GemStar,
-            Ticket     = actor.Ticket
+            Nickname           = actor.Nickname,
+            Gender             = actor.Gender,
+            Gem                = actor.Gem,
+            Point              = actor.Point,
+            O2Cash             = actor.O2Cash,
+            Level              = actor.Level,
+            Win                = actor.Win,
+            Lose               = actor.Lose,
+            Draw               = actor.Draw,
+            Battles            = actor.Win + actor.Lose + actor.Draw,
+            Experience         = actor.Experience,
+            IsAdministrator    = actor.IsAdministrator,
+            Equipments         = actor.Equipments,
+            Inventory          = actor.Inventory.Select(i => (int)i.Id).ToList(),
+            CashPoint          = actor.CashPoint,
+            PenaltyCount       = (short)actor.PenaltyCount,
+            PenaltyLevel       = (short)actor.PenaltyLevel,
+            UnreadGiftMessages = actor.GiftMessages.Count,
+            ItemGiftBox        = actor.GiftItems.Select(i =>
+                new CharacterInfoResponse.GiftItemInfo
+                {
+                    GiftId = i.Id,
+                    ItemId = i.ItemId,
+                    Sender = i.SenderNickname
+                }
+            ).ToList(),
+            MusicGiftBox       = actor.GiftMusics.Select(m =>
+                new CharacterInfoResponse.GiftMusicInfo
+                {
+                    GiftId  = m.Id,
+                    MusicId = m.MusicId,
+                    Sender  = m.SenderNickname
+                }
+            ).ToList(),
+            AttributiveItems   = actor.Inventory.Where(i => i.Count > 0).Select(i =>
+                new CharacterInfoResponse.AttributiveItemInfo
+                {
+                    AttributiveItemId = i.Id,
+                    ItemCount         = i.Count
+                }
+            ).ToList(),
         };
+    }
+
+    [CommandHandler(RequestCommand.GetCharacterInfo)]
+    public async Task GetMusicPremiumTimeList(CancellationToken cancellationToken)
+    {
+        var actor  = Session.Actor;
+        var expiry = DateTime.MinValue;
+        bool free  = gameOptions.Value.FreeMusic || Session.Actor.FreePass.Type == FreePassType.AllMusic;
+
+        if (!free)
+        {
+            // TODO: Support time-limited promotion/event?
+            if (Session.Actor.FreePass.Type == FreePassType.None)
+            {
+                await Session.WriteMessage(new MusicPremiumTimeEventData(), cancellationToken);
+                return;
+            }
+
+            // FreePass in the original server implementation may a lot more complex than this.
+            // But we have no way to know how it works now.
+            expiry = Session.Actor.FreePass.ExpiryDate;
+        }
+
+        var acquiredMusic = new HashSet<int>(actor.AcquiredMusicIds.Select(i => (int)i));
+        await Session.WriteMessage(new MusicPremiumTimeEventData
+        {
+            Entries = actor.Top100.Select(id =>
+                new MusicPremiumTimeEventData.MusicEntry
+                {
+                    MusicId = (ushort)id,
+                    Day     = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Day),
+                    Month   = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Month),
+                    Year    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Year % 1000),
+                    Hour    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Hour),
+                    Minute  = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Minute)
+                }
+            ).ToList()
+        }, cancellationToken);
     }
 
     [CommandHandler]
