@@ -76,17 +76,38 @@ public class Channel : Broadcastable, IChannel
 
     public IReadOnlyDictionary<int, MusicHeader> GetMusicList()
     {
-        return _metadataResolver.GetMusicList(this);
+        try
+        {
+            return _metadataResolver.GetMusicList(this);
+        }
+        catch (Exception)
+        {
+            return new Dictionary<int, MusicHeader>();
+        }
     }
 
     public IReadOnlyDictionary<int, AlbumHeader> GetAlbumList()
     {
-        return _metadataResolver.GetAlbumList(this);
+        try
+        {
+            return _metadataResolver.GetAlbumList(this);
+        }
+        catch (Exception)
+        {
+            return new Dictionary<int, AlbumHeader>();
+        }
     }
 
     public IReadOnlyDictionary<int, ItemData> GetItemData()
     {
-        return _metadataResolver.GetItemData(this);
+        try
+        {
+            return _metadataResolver.GetItemData(this);
+        }
+        catch (Exception)
+        {
+            return new Dictionary<int, ItemData>();
+        }
     }
 
     public override void Invalidate()
