@@ -17,6 +17,12 @@ Supported client version: **v3.82\* (O2Jam NX)**
 
 ## Features
 
+> [!IMPORTANT]
+> This project is free from copyrighted materials. All codes are original work written from scratch.  
+> No copyrighted game assets, binaries, or master data are distributed in this repository.
+>
+> You will have to provide metadata files in order to enable all functionalities. See [Metadata files](#metadata) to learn more.
+
 - Zero-Configuration for quick start.
 - Full online and local network multiplayer support.
 - Complete packet op-code coverage.
