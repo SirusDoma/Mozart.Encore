@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Events;
+namespace Amadeus.Messages.Responses;
 
 public class WaitingArenaChangedEventData : IMessage
 {

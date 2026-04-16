@@ -1,6 +1,5 @@
 using Amadeus.Messages.Codecs;
 using Encore.Messaging;
-using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
@@ -55,18 +54,6 @@ public class JoinRoomResponse : IMessage
 
         [CollectionMessageField(order: 8, prefixSizeType: TypeCode.Int32)]
         public IReadOnlyList<ushort> MusicIds { get; init; } = [];
-
-        [MessageField(order: 10)]
-        public int CashPoint { get; init; }
-
-        [MessageField(order: 11)]
-        public FreePassType FreePass { get; init; }
-
-        [MessageField(order: 12)]
-        public bool IsPlaying { get; init; }
-
-        [MessageField(order: 13)]
-        public bool IsAdministrator { get; init; }
     }
 
     public class RoomSlotInfo : SubMessage

@@ -10,13 +10,12 @@ public class StartGameEventData : IMessage
         NotReady            = 0x00000001, // 1
         TeamUnbalanced      = 0x00000002, // 2
         InsufficientPlayers = 0x00000003, // 3
-        GenericError        = 0x00000004, // 4
-        None                = 0xFFFFFFFF  // -1
+        GenericError        = 0xFFFFFFFF,
     }
 
     public static Enum Command => EventCommand.StartGame;
 
-    [MessageField(order: 0)]
+    [MessageField<MessageFieldCodec<int>>(order: 0)]
     public StartResult Result { get; init; } = StartResult.Success;
 
     [MessageField(order: 1)]

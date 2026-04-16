@@ -16,7 +16,6 @@ public class AuthController(
     IAuthService authService,
     IChannelService channelService,
     IUserRepository userRepository,
-    IOptions<GameOptions> gameOptions,
     ILogger<AuthController> logger
 ) : CommandController<Session>(session)
 {
@@ -50,7 +49,6 @@ public class AuthController(
                 }
             }
 
-            // TODO: Also check the request.UserId when authorizing
             var authSession = await authService.Authorize(request.Token, cancellationToken);
             var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
 
@@ -79,28 +77,16 @@ public class AuthController(
             };
         }
 
-        var actor = Session.Actor;
-        bool freeMusic = gameOptions.Value.FreeMusic;
-
         manager.CancelExpiry(Session);
         return new AuthResponse
         {
             Result = AuthResult.Success,
             Subscription = new AuthResponse.SubscriptionInfo
             {
-                Type   = freeMusic ? FreePassType.AllMusic : actor.FreePass.Type,
-                Expiry = !freeMusic && actor.FreePass.Type != FreePassType.None
-                    ? actor.FreePass.ExpiryDate.ToUniversalTime() - DateTime.UtcNow
-                    : TimeSpan.Zero
-            },
-            StarterPass = new AuthResponse.StarterPassInfo
-            {
-                Active = actor.StarterPass,
-                Expiry = actor.StarterPassExpiryDate.HasValue
-                    ? actor.StarterPassExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
-                    : TimeSpan.Zero
-            },
-            AcquiredMusicIds = actor.AcquiredMusicIds.Select(i => (int)i).ToList()
+                Billing                   = BillingCode.HB,
+                CurrentTimestamp          = DateTime.Now,
+                SubscriptionRemainingTime = TimeSpan.FromMinutes(0)
+            }
         };
     }
 

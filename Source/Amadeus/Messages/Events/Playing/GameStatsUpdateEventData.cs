@@ -15,7 +15,4 @@ public class GameStatsUpdateEventData : IMessage
 
     [MessageField(order: 2)]
     public ushort Value { get; init; }
-
-    [CollectionMessageField(order: 3, minCount: 8, maxCount: 8)]
-    public required IReadOnlyList<byte> MemberRanks { get; init; }
 }

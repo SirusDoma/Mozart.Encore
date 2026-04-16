@@ -11,7 +11,7 @@ public class VersionCommandTask : ICommandLineTask
 
     public int Execute()
     {
-        Console.WriteLine($"IdentityP2.Encore");
+        Console.WriteLine($"Amadeus.Encore");
         Console.WriteLine($"[v] Version: {Program.Version}");
         Console.WriteLine($"[!] Network environment: {Program.NetworkVersion}");
         Console.WriteLine($"[?] Github: {Program.RepositoryUrl}");

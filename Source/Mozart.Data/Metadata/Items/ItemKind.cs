@@ -26,8 +26,5 @@ public enum ItemKind : byte
     MusicalAccessories = 21,
     Pet                = 22,
     HairAccessories    = 23,
-    AttributiveItem    = 24,
-    NameChanger        = 25,
-    PenaltyReset       = 26,
-    BagExpansion       = 27,
+    AttributiveItem    = 24
 }

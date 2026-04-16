@@ -84,7 +84,7 @@ public class CharacterInfoResponse : IMessage
     [MessageField<CharacterEquipmentInfoCodec>(order: 13)]
     public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-    [CollectionMessageField(order: 14, prefixSizeType: TypeCode.Int32)]
+    [CollectionMessageField(order: 14, minCount: 30, maxCount: 30)]
     public IList<int> Inventory { get; init; } = [];
 
     [CollectionMessageField(order: 15, prefixSizeType: TypeCode.Int32)]
@@ -98,9 +98,6 @@ public class CharacterInfoResponse : IMessage
 
     [CollectionMessageField(order: 18, prefixSizeType: TypeCode.Int16)]
     public IList<GiftMusicInfo> MusicGiftBox { get; init; } = [];
-
-    [MessageField(order: 18)]
-    public int MusicCash { get; set; }
 
     [MessageField(order: 19)]
     public int ItemCash { get; set; }

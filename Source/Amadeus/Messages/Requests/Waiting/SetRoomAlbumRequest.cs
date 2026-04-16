@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Requests;
+namespace Amadeus.Messages.Events;
 
 public class SetRoomAlbumRequest : IMessage
 {
