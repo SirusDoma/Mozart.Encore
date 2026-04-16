@@ -26,7 +26,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
 
             try
             {
-                logger.LogInformation("Amadeus.Encore: Version {Version}", Program.Version);
+                logger.LogInformation("IdentityP2.Encore: Version {Version}", Program.Version);
 
                 // Validate by loading metadata files
                 this.ValidateMetadata(channelService, resolver, logger);

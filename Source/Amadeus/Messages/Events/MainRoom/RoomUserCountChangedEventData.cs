@@ -14,4 +14,10 @@ public class RoomUserCountChangedEventData : IMessage
 
     [MessageField(order: 3)]
     public byte UserCount { get; init; }
+
+    [MessageField<MessageFieldCodec<ushort>>(order: 4)]
+    public bool Premium { get; init; }
+
+    [MessageField(order: 4)]
+    public byte Type { get; init; }
 }

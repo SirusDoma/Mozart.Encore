@@ -1,4 +1,5 @@
 using Encore.Messaging;
+using Mozart.Metadata;
 
 namespace Amadeus.Messages.Events;
 
@@ -63,8 +64,16 @@ public class ScoreCompletedEventData : IMessage
         public MatchResult? Result { get; init; }
 
         [MessageField(order: 13)]
-        public MissionResult? Mission { get; init; } =  MissionResult.None;
+        public int? Gem { get; init; }
 
+        [MessageField(order: 14)]
+        public int? CashPoint { get; init; }
+
+        [MessageField(order: 15)]
+        public GameSpeed? Speed { get; init; }
+
+        [MessageField(order: 16)]
+        public int? Penalty { get; init; }
     }
 
     [CollectionMessageField(order: 0, maxCount: 8, prefixSizeType: TypeCode.Int32)]
