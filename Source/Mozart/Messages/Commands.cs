@@ -41,7 +41,11 @@ public enum RequestCommand : ushort
     UpdateGameStats     = 0x0FAE, // 4014
     SubmitScore         = 0x0FB0, // 4016
     ExitPlaying         = 0x0FB5, // 4021
-    PurchaseItem        = 0x1388, // 5000
+    SetRoomSkill        = 0x0FB7, // 4023
+    UpdateMusicState    = 0x0FB9, // 4025
+    SetRoomAlbum        = 0x0FBB, // 4027
+    GetMusicList        = 0x0FBE, // 4030
+    SyncItemPurchase    = 0x1388, // 5000
     SellItem            = 0x138A, // 5002
     EquipItem           = 0x138C, // 5004
     EnterShop           = 0x138E, // 5006
