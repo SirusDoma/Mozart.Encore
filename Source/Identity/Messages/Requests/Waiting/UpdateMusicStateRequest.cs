@@ -1,11 +1,12 @@
 using Encore.Messaging;
+using Mozart.Metadata;
 
-namespace Identity.Messages.Events;
+namespace Identity.Messages.Requests;
 
 public class UpdateMusicStateRequest : IMessage
 {
     public static Enum Command => RequestCommand.UpdateMusicState;
 
     [MessageField(order: 0)]
-    public byte MemberId { get; init; }
+    public MusicState State { get; init; }
 }
