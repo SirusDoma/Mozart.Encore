@@ -17,7 +17,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         room.UserLeft                += OnUserLeft;
         room.UserDisconnected        += OnUserDisconnected;
         room.UserTeamChanged         += OnUserTeamChanged;
-        room.UserMusicStateChanged   += OnUserMusicStateChanged;
+        room.UserMusicStateChanged += OnUserMusicStateChanged;
         room.UserReadyStateChanged   += OnUserReadyStateChanged;
 
         room.TitleChanged += OnTitleChanged;
@@ -36,20 +36,17 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
             await room.Broadcast(sender: e.Member.Session, new UserJoinWaitingEventData
             {
-                MemberId        = (byte)e.MemberId,
-                Nickname        = e.Member.Actor.Nickname,
-                Level           = e.Member.Actor.Level,
-                Gender          = e.Member.Actor.Gender,
-                Gem             = e.Member.Actor.Gem,
-                Team            = e.Member.Team,
-                Ready           = e.Member.IsReady,
-                MusicState      = e.Member.MusicState,
-                Equipments      = e.Member.Actor.Equipments,
-                MusicIds        = e.Member.Actor.InstalledMusicIds.ToList(),
-                CashPoint       = e.Member.Actor.CashPoint,
-                FreePass        = e.Member.Actor.FreePass.Type,
-                IsPlaying       = room.ScoreTracker.IsTracked(e.Member.Session),
-                IsAdministrator = e.Member.Actor.IsAdministrator
+                MemberId     = (byte)e.MemberId,
+                Nickname     = e.Member.Actor.Nickname,
+                Level        = e.Member.Actor.Level,
+                Gender       = e.Member.Actor.Gender,
+                Gem          = e.Member.Actor.Gem,
+                Team         = e.Member.Team,
+                Ready        = e.Member.IsReady,
+                MusicState   = e.Member.MusicState,
+                Equipments   = e.Member.Actor.Equipments,
+                MusicIds     = e.Member.Actor.InstalledMusicIds,
+                CashPoint    = e.Member.Actor.CashPoint
             }, CancellationToken.None);
         }
         catch (Exception ex)

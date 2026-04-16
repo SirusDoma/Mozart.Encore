@@ -51,8 +51,16 @@ public class AuthController(
                 }
             }
 
-            // TODO: Also check the request.UserId when authorizing
-            var authSession = await authService.Authorize(request.Token, cancellationToken);
+            var token = new string(
+                request.Token
+                    .SkipWhile(c => !char.IsLetterOrDigit(c))
+                    .Reverse()
+                    .SkipWhile(c => !char.IsLetterOrDigit(c))
+                    .Reverse()
+                    .ToArray()
+            );
+
+            var authSession = await authService.Authorize(token, cancellationToken);
             var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
 
             if (characterInfo == null)
