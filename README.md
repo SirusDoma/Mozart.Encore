@@ -80,7 +80,7 @@ Supported client version: **v2.33 (O2Jam X2)**
 
 # Configuration
 
-The server can be configured either with `config.ini` or command-line arguments. 
+The server can be configured either with `config.ini` or command-line arguments.
 See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to set up command-line config.
 
 ## Server
@@ -231,9 +231,9 @@ Use the following command to create a new migration:
 >[!IMPORTANT]
 > Database migration is automatically executed every start-up as long as the `Auth:Mode` equals to `Default`.  
 > This is because `Auth:Mode=Foreign` is a compatibility mode that enables Mozart to continue to work with an existing foreign database that has different auth schema than the original e-Games clients (such as 9you or GAMANIA).
->  
+>
 > Database migration will never be officially supported in `Foreign` mode<sup>*</sup>.
-> 
+>
 > <sub>* The server will likely raise an exception with [`PendingModelChangesWarning`](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-9.0/breaking-changes#exception-is-thrown-when-applying-migrations-if-there-are-pending-model-changes) when running database migration with `Foreign` mode.
 > The errors can be suppressed, but there's no guarantee that migration will continue to work using foreign auth schema for the future releases.</sub>
 
@@ -300,8 +300,44 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 
 ### Gateway
 
-The server IP addresses are hard-coded in the client executable. 
-Modifying the game client or configuring client-side ip tables is required to connect to a custom server.
+Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
+
+```shell
+OTwo.exe <encrypted_parameters> \
+  |test|??|<gateway_address_1>|<gateway_port_1>\
+  |test|??|<gateway_address_2>|<gateway_port_2>\
+  …\
+  |test|??|<gateway_address_n>|<gateway_port_n>
+```
+> [!CAUTION]
+> If you are using batch or terminal directly, make sure that the pipe (`|`) are escaped using `^`.  
+> For example: `^|test^|??^|127.0.0.1^|15010`
+
+> [!NOTE]
+> The number of servers are not explicitly specified.  
+> See [AuthParameters](Source/Identity/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Identity/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
+>
+> Use [`user:authorize`](#cli-command) command to generate the session and the encrypted parameters.
+
+For example, if you have three Planets (three Gateways), you might use:
+
+```shell 
+OTwo.exe 00C70200E85000DF8E00E..... \
+  |test|??|192.168.10.1|15010\
+  |test|??|192.168.10.2|15011\
+  |test|??|192.168.10.3|15012\
+```
+
+> [!TIP]
+> You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
+> For example:
+>
+> ```shell 
+> OTwo.exe 00C70200E85000DF8E00E..... \
+> |test|??|192.168.10.1|15010\
+> |test|??|192.168.10.1|15010\
+> |test|??|192.168.10.1|15010\
+> ```
 
 ### Channel
 
