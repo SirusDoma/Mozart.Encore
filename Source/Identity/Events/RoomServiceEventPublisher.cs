@@ -27,8 +27,7 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                 HasPassword   = !string.IsNullOrEmpty(room.Password),
                 MinLevelLimit = (byte)room.Metadata.MinLevelLimit,
                 MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit,
-                Premium       = room.Metadata.Premium,
-                Type          = (byte)room.Metadata.Type
+                Premium       = room.Metadata.Premium
             }, CancellationToken.None);
 
             if (room.Mode == GameMode.Jam)

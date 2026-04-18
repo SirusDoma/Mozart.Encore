@@ -51,9 +51,6 @@ public class RoomListResponse : IMessage
 
         [MessageField<MessageFieldCodec<ushort>>(order: 13)]
         public bool Premium { get; init; } = false;
-
-        [MessageField(order: 14)]
-        public byte Type { get; init; } = 0;
     }
 
     [CollectionMessageField(order: 0, maxCount: 100, minCount: 100, prefixSizeType: TypeCode.Int32)]

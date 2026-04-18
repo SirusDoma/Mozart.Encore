@@ -113,7 +113,6 @@ public class Program
                     .Map<ChargeController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
-                    .Map<RankingController>()
                     .Map<MyRoomController>()
                     .Map<ItemShopController>()
                     .Map<MusicShopController>()

@@ -32,8 +32,6 @@ public class RoomMetadata : ICloneable
 
     public bool Premium { get; set; }
 
-    public int Type { get; set; }
-
     public object Clone()
     {
         return MemberwiseClone();

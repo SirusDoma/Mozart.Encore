@@ -40,7 +40,7 @@ public class WaitingController(
         Room.MusicId = request.MusicId;
         Room.Difficulty = request.Difficulty;
         Room.Speed = request.Speed;
-        Room.SaveMetadataChanges(refresh: true);
+        Room.SaveMetadataChanges();
     }
 
     [RoomMasterAuthorize]
@@ -48,7 +48,7 @@ public class WaitingController(
     public void SetRoomAlbum(SetRoomAlbumRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.SetRoomAlbum,
+            (int)RequestCommand.SetRoomMusic,
             "Update room [{RoomId:000}] album settings: [{Speed} / {AlbumId}]",
             Room.Id, request.Speed, request.AlbumId
         );
@@ -59,89 +59,15 @@ public class WaitingController(
     }
 
     [CommandHandler]
-    public async Task AcquireMusic(AcquireMusicRequest request, CancellationToken cancellationToken)
+    public void UpdateMusicState(UpdateMusicStateRequest request)
     {
         logger.LogInformation(
-            (int)RequestCommand.AcquireMusicRequest,
-            "Room update [{RoomId:000}] acquire music",
-            Room.Id
-        );
-
-        await Room.Broadcast(new AcquireMusicEventData
-        {
-            States = Room.Slots.Select((slot, i) =>
-            {
-                return slot switch
-                {
-                    Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
-                    {
-                        MemberId = (byte)i,
-                        State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
-                    },
-                    _ => new AcquireMusicEventData.MemberMusicState
-                    {
-                        MemberId = byte.MaxValue,
-                        State    = MusicState.NoMusic
-                    },
-                };
-            }).Where(s => request.MemberIds.Contains(s.MemberId)).ToList()
-        }, cancellationToken);
-    }
-
-    [CommandHandler]
-    public async Task SyncMemberMusicState(SyncMemberMusicStateRequest request, CancellationToken cancellationToken)
-    {
-        logger.LogInformation(
-            (int)RequestCommand.SyncMemberMusicState,
-            "Sync room member [{RoomId:000}] [{MemberId}] music state",
+            (int)RequestCommand.UpdateMusicState,
+            "Update room [{RoomId:000}] [{Member:00}] music state",
             Room.Id, request.MemberId
         );
 
-        var member = (Room.MemberSlot)Room.Slots[request.MemberId];
-        await Room.Broadcast(new SyncMemberMusicStateEventData
-        {
-            MemberId = request.MemberId,
-            State    = member.MusicState
-        }, cancellationToken);
-    }
-
-    [CommandHandler]
-    public void UpdateMusicState(UpdateMusicStateRequest request)
-    {
-        var slots    = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
-
-        logger.LogInformation(
-            (int)RequestCommand.UpdateMusicState,
-            "Update room member [{RoomId:000}] [{MemberId}: {State}] music state",
-            Room.Id, memberId, request.State
-        );
-
-        Room.UpdateMusicState(Session, request.State);
-    }
-
-    [CommandHandler]
-    public async Task SetDownloadProgress(SetDownloadProgressRequest request,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation(
-            (int)RequestCommand.SetDownloadProgress,
-            "Update room member [{RoomId:000}] [{MemberId}: {progress:00}%] download progress",
-            Room.Id, request.MemberId, request.Progress
-        );
-
-        if (request.Progress >= 100)
-        {
-            var member = (Room.MemberSlot)Room.Slots[request.MemberId];
-            member.MusicState = MusicState.Ready;
-            member.Actor.InstalledMusicIds.Add((ushort)(Room.MusicId | 0x8000));
-        }
-
-        await Room.Broadcast(new DownloadProgressChangedEventData
-        {
-            MemberId   = request.MemberId,
-            Percentage = request.Progress
-        }, cancellationToken);
+        Room.UpdateMusicState(Session, request.MemberId);
     }
 
     [RoomMasterAuthorize]
@@ -248,7 +174,6 @@ public class WaitingController(
                 {
                     Result = StartGameEventData.StartResult.TeamUnbalanced
                 }, cancellationToken);
-
                 return;
             }
 
@@ -258,37 +183,6 @@ public class WaitingController(
                 {
                     Result = StartGameEventData.StartResult.NotReady
                 }, cancellationToken);
-
-                return;
-            }
-
-            if (slots.Any(m => m.MusicState != MusicState.Ready))
-            {
-                await Room.Broadcast(new AcquireMusicEventData
-                {
-                    States = Room.Slots.Select((slot, i) =>
-                    {
-                        return slot switch
-                        {
-                            Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
-                            {
-                                MemberId = (byte)i,
-                                State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
-                            },
-                            _ => new AcquireMusicEventData.MemberMusicState
-                            {
-                                MemberId = byte.MaxValue,
-                                State    = MusicState.NoMusic
-                            },
-                        };
-                    }).Where(s => s.MemberId != byte.MaxValue).ToList()
-                }, cancellationToken);
-
-                await Session.WriteMessage(new StartGameEventData
-                {
-                    Result = StartGameEventData.StartResult.None
-                }, cancellationToken);
-
                 return;
             }
         }
@@ -331,7 +225,6 @@ public class WaitingController(
                 {
                     Result = StartGameEventData.StartResult.GenericError,
                 }, cancellationToken);
-
                 return;
             }
 
@@ -343,27 +236,54 @@ public class WaitingController(
         var memberUsers = new List<(Room.MemberSlot Member, User User)>();
         if (!freeMusic)
         {
-            if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
-                && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
-            {
-                var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
-                foreach (var member in members.Where(member => member.Actor.FreePass.Type == FreePassType.None))
-                {
-                    var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
-                    if (memberUser.CashPoint < 10)
-                    {
-                        await Session.WriteMessage(new StartGameEventData
-                        {
-                            Result = StartGameEventData.StartResult.GenericError,
-                        }, cancellationToken);
-                        return;
-                    }
+            var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
 
-                    memberUser.CashPoint -= 10;
-                    await repository.Update(memberUser, cancellationToken);
-                    memberUsers.Add((member, memberUser));
+            if (Room.Metadata.Mode == GameMode.Jam)
+            {
+                if (Session.Channel!.GetAlbumList().TryGetValue(Room.MusicId, out var album))
+                {
+                    foreach (var member in members)
+                    {
+                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                        if (memberUser.Gem < album.Price)
+                        {
+                            await Session.WriteMessage(new StartGameEventData
+                            {
+                                Result = StartGameEventData.StartResult.GenericError,
+                            }, cancellationToken);
+                            return;
+                        }
+
+                        memberUser.Gem -= album.Price;
+                        await repository.Update(memberUser, cancellationToken);
+                        memberUsers.Add((member, memberUser));
+                    }
+                    pendingChanges = true;
                 }
-                pendingChanges = true;
+            }
+            else
+            {
+                if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
+                    && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
+                {
+                    foreach (var member in members)
+                    {
+                        var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                        if (memberUser.CashPoint < 10)
+                        {
+                            await Session.WriteMessage(new StartGameEventData
+                            {
+                                Result = StartGameEventData.StartResult.GenericError,
+                            }, cancellationToken);
+                            return;
+                        }
+
+                        memberUser.CashPoint -= 10;
+                        await repository.Update(memberUser, cancellationToken);
+                        memberUsers.Add((member, memberUser));
+                    }
+                    pendingChanges = true;
+                }
             }
         }
 
@@ -397,14 +317,14 @@ public class WaitingController(
         var actor = Session.Actor;
         logger.LogInformation(
             (int)RequestCommand.ExitWaiting,
-            "Exit room: [{RoomId:000}]: {Reason}",
+            "Exit room: [{RoomId:000}]: {Reason:000}",
             Room.Id,
-            request.Type
+            request.Reason
         );
 
         // Since reason payload can be forged easily, we need to add additional guard
         // TODO: Implement this handling in disconnection?
-        if (request.Type == ExitWaitingRequest.ExitType.Penalized || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
+        if (request.Reason == 1 || (Room.ScoreTracker.IsTracked(Session) && Room.State == RoomState.Playing))
         {
             var user = (await repository.Find(actor.UserId, cancellationToken))!;
             user.PenaltyCount += 1;

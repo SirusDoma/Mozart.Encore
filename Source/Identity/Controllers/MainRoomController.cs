@@ -96,41 +96,34 @@ public class MainRoomController(
         var expiry = DateTime.MinValue;
         bool free  = gameOptions.Value.FreeMusic || Session.Actor.FreePass.Type == FreePassType.AllMusic;
 
-        var acquiredMusic = new HashSet<int>();
         if (!free)
         {
             // TODO: Support time-limited promotion/event?
-            if (Session.Actor.FreePass.Type != FreePassType.None)
-                acquiredMusic = [..actor.AcquiredMusicIds.Select(i => (int)i)];
+            if (Session.Actor.FreePass.Type == FreePassType.None)
+            {
+                await Session.WriteMessage(new MusicPremiumTimeEventData(), cancellationToken);
+                return;
+            }
 
             // FreePass in the original server implementation may a lot more complex than this.
             // But we have no way to know how it works now.
             expiry = Session.Actor.FreePass.ExpiryDate;
         }
-        else
-        {
-            acquiredMusic = [..Session.Channel!.GetMusicList()
-                .Where(m => m.Value.IsPurchasable).Select(m => m.Key)];
-        }
 
+        var acquiredMusic = new HashSet<int>(actor.AcquiredMusicIds.Select(i => (int)i));
         await Session.WriteMessage(new MusicPremiumTimeEventData
         {
-            Entries = Session.Channel!.GetMusicList()
-                .Where(m =>
-                    m.Value.IsPurchasable
-                    && (free || (acquiredMusic.Contains(m.Key) || expiry != DateTime.MinValue))
-                )
-                .Select(m =>
-                    new MusicPremiumTimeEventData.MusicEntry
-                    {
-                        MusicId = (ushort)m.Key,
-                        Day     = (byte)(free || acquiredMusic.Contains(m.Key) ? 0 : expiry.Day),
-                        Month   = (byte)(free || acquiredMusic.Contains(m.Key) ? 0 : expiry.Month),
-                        Year    = (byte)(free || acquiredMusic.Contains(m.Key) ? 0 : expiry.Year % 1000),
-                        Hour    = (byte)(free || acquiredMusic.Contains(m.Key) ? 0 : expiry.Hour),
-                        Minute  = (byte)(free || acquiredMusic.Contains(m.Key) ? 0 : expiry.Minute)
-                    }
-                ).ToList()
+            Entries = actor.Top100.Select(id =>
+                new MusicPremiumTimeEventData.MusicEntry
+                {
+                    MusicId = (ushort)id,
+                    Day     = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Day),
+                    Month   = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Month),
+                    Year    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Year % 1000),
+                    Hour    = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Hour),
+                    Minute  = (byte)(free || acquiredMusic.Contains(id) ? 0 : expiry.Minute)
+                }
+            ).ToList()
         }, cancellationToken);
     }
 
@@ -167,7 +160,7 @@ public class MainRoomController(
         //
         // Why this over a new field? Go figure yourself, but it is stupid regardless!
 
-        Session.Actor.InstalledMusicIds = request.MusicIds.ToList();
+        Session.Actor.InstalledMusicIds = request.MusicIds;
     }
 
     [CommandHandler(RequestCommand.GetMusicList)]
@@ -214,11 +207,10 @@ public class MainRoomController(
                 var actor = e.GetAuthorizedToken<Actor>();
                 return new UserListResponse.UserInfo
                 {
-                    UserIndexId = actor.UserId,
-                    Username    = actor.Nickname, // Supposed to be username, but the server inject nickname anyway
-                                                  // This may affect user list webpage function (see `CTuser_id`)
-                    Nickname    = actor.Nickname,
-                    Level       = actor.Level
+                    Level    = actor.Level,
+                    Username = actor.Nickname, // Supposed to be username, but the server inject nickname anyway
+                    // This may affect user list webpage function (see `CTuser_id`)
+                    Nickname = actor.Nickname
                 };
             }).ToList()
         };
@@ -254,8 +246,7 @@ public class MainRoomController(
                 MinLevelLimit    = (byte)(room?.MinLevelLimit ?? 0),
                 MaxLevelLimit    = (byte)(room?.MaxLevelLimit ?? 0),
                 Skills           = room?.Skills.ToList() ?? [],
-                Premium          = false,
-                Type             = (byte)(room?.Metadata?.Type ?? 0)
+                Premium          = room?.Premium ?? false
             });
         }
 
@@ -280,6 +271,14 @@ public class MainRoomController(
             return new JoinRoomResponse
             {
                 Result = JoinRoomResponse.JoinResult.InvalidMode
+            };
+        }
+
+        if (room.State != RoomState.Waiting)
+        {
+            return new JoinRoomResponse
+            {
+                Result = JoinRoomResponse.JoinResult.InProgress
             };
         }
 
@@ -333,20 +332,17 @@ public class MainRoomController(
                             State = JoinRoomResponse.RoomSlotState.Occupied,
                             MemberInfo = new JoinRoomResponse.RoomMemberInfo
                             {
-                                Nickname        = m.Actor.Nickname,
-                                Level           = m.Actor.Level,
-                                Gender          = m.Actor.Gender,
-                                Gem             = m.Actor.Gem,
-                                IsRoomMaster    = m.IsMaster,
-                                Team            = m.Team,
-                                Ready           = m.IsReady,
-                                MusicState      = m.MusicState,
-                                Equipments      = m.Actor.Equipments,
-                                MusicIds        = m.Actor.InstalledMusicIds.ToList(),
-                                CashPoint       = m.Actor.CashPoint,
-                                FreePass        = m.Actor.FreePass.Type,
-                                IsPlaying       = room.ScoreTracker.IsTracked(m.Session),
-                                IsAdministrator = m.Actor.IsAdministrator
+                                Nickname     = m.Actor.Nickname,
+                                Level        = m.Actor.Level,
+                                Gender       = m.Actor.Gender,
+                                Gem          = m.Actor.Gem,
+                                IsRoomMaster = m.IsMaster,
+                                Team         = m.Team,
+                                Ready        = m.IsReady,
+                                MusicState   = m.MusicState,
+                                Equipments   = m.Actor.Equipments,
+                                MusicIds     = m.Actor.InstalledMusicIds,
+                                CashPoint    = m.Actor.CashPoint
                             }
                         },
                         _ => throw new UnreachableException()
@@ -379,13 +375,6 @@ public class MainRoomController(
             request.Title
         );
 
-        int type = 0;
-        if (Session.Actor.IsAdministrator)
-        {
-            type = Session.Actor.Gender == Gender.Male ? Random.Shared.Next(5, 7)
-                                                       : Random.Shared.Next(3, 5);
-        }
-
         try
         {
             var room = roomService.CreateRoom(
@@ -395,8 +384,7 @@ public class MainRoomController(
                 password:      request.HasPassword ? request.Password : string.Empty,
                 minLevelLimit: request.MinLevelLimit,
                 maxLevelLimit: request.MaxLevelLimit,
-                premium:       request.Premium,
-                type:          type
+                premium:       request.Premium
             );
             publisher.Monitor(room);
 

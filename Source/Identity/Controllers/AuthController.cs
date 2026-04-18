@@ -18,6 +18,7 @@ public class AuthController(
     IAuthService authService,
     IChannelService channelService,
     IUserRepository userRepository,
+    IMetadataResolver resolver,
     IOptions<GameOptions> gameOptions,
     ILogger<AuthController> logger
 ) : CommandController<Session>(session)
@@ -51,8 +52,16 @@ public class AuthController(
                 }
             }
 
-            // TODO: Also check the request.UserId when authorizing
-            var authSession = await authService.Authorize(request.Token, cancellationToken);
+            var token = new string(
+                request.Token
+                    .SkipWhile(c => !char.IsLetterOrDigit(c))
+                    .Reverse()
+                    .SkipWhile(c => !char.IsLetterOrDigit(c))
+                    .Reverse()
+                    .ToArray()
+            );
+
+            var authSession = await authService.Authorize(token, cancellationToken);
             var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
 
             if (characterInfo == null)
@@ -81,6 +90,14 @@ public class AuthController(
         var actor = Session.Actor;
         bool freeMusic = gameOptions.Value.FreeMusic;
 
+        // TODO: Limit to 100?
+        actor.Top100 = resolver.GetMusicList().Values
+                .OrderByDescending(m => m.ReleaseDate)
+                .ThenByDescending(m => m.Id)
+                .Where(m => m.PriceO2Cash != 0)
+                .Select(m => m.Id)
+                .ToList();
+
         manager.CancelExpiry(Session);
         return new AuthResponse
         {
@@ -99,7 +116,7 @@ public class AuthController(
                     ? actor.StarterPassExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
                     : TimeSpan.Zero
             },
-            AcquiredMusicIds = actor.AcquiredMusicIds.Select(i => (int)i).ToList()
+            AcquiredMusicIds = actor.Top100
         };
     }
 

@@ -1,7 +1,6 @@
 using Identity.Messages.Events;
 using Identity.Messages.Responses;
 using Microsoft.Extensions.Logging;
-using Mozart.Data.Entities;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
@@ -17,7 +16,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         room.UserLeft                += OnUserLeft;
         room.UserDisconnected        += OnUserDisconnected;
         room.UserTeamChanged         += OnUserTeamChanged;
-        room.UserMusicStateChanged   += OnUserMusicStateChanged;
+        room.UserMusicStateChanged += OnUserMusicStateChanged;
         room.UserReadyStateChanged   += OnUserReadyStateChanged;
 
         room.TitleChanged += OnTitleChanged;
@@ -36,20 +35,17 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
             await room.Broadcast(sender: e.Member.Session, new UserJoinWaitingEventData
             {
-                MemberId        = (byte)e.MemberId,
-                Nickname        = e.Member.Actor.Nickname,
-                Level           = e.Member.Actor.Level,
-                Gender          = e.Member.Actor.Gender,
-                Gem             = e.Member.Actor.Gem,
-                Team            = e.Member.Team,
-                Ready           = e.Member.IsReady,
-                MusicState      = e.Member.MusicState,
-                Equipments      = e.Member.Actor.Equipments,
-                MusicIds        = e.Member.Actor.InstalledMusicIds.ToList(),
-                CashPoint       = e.Member.Actor.CashPoint,
-                FreePass        = e.Member.Actor.FreePass.Type,
-                IsPlaying       = room.ScoreTracker.IsTracked(e.Member.Session),
-                IsAdministrator = e.Member.Actor.IsAdministrator
+                MemberId     = (byte)e.MemberId,
+                Nickname     = e.Member.Actor.Nickname,
+                Level        = e.Member.Actor.Level,
+                Gender       = e.Member.Actor.Gender,
+                Gem          = e.Member.Actor.Gem,
+                Team         = e.Member.Team,
+                Ready        = e.Member.IsReady,
+                MusicState   = e.Member.MusicState,
+                Equipments   = e.Member.Actor.Equipments,
+                MusicIds     = e.Member.Actor.InstalledMusicIds,
+                CashPoint    = e.Member.Actor.CashPoint
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -126,7 +122,6 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
             await room.Broadcast(new MusicStateChangedEventData
             {
                 MemberId = (byte)e.MemberId,
-                Playing  = room.ScoreTracker.IsTracked(e.Member.Session),
                 State    = e.State
             }, CancellationToken.None);
         }
@@ -311,8 +306,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Number    = room.Id,
                 Capacity  = (byte)e.Capacity,
                 UserCount = (byte)e.UserCount,
-                Premium   = room.Premium,
-                Type      = (byte)room.Metadata.Type
+                Premium   = room.Premium
             }, CancellationToken.None);
         }
         catch (Exception ex)

@@ -29,11 +29,11 @@ public interface IRoom : IBroadcastable
 
     void Register(Session session);
     void Remove(Session session);
-    void SaveMetadataChanges(bool refresh = false);
+    void SaveMetadataChanges();
 
     void UpdateReadyState(Session session);
     void UpdateTeam(Session session, RoomTeam team);
-    void UpdateMusicState(Session session, MusicState state);
+    void UpdateMusicState(Session session, int memberId);
     void UpdateSlot(Session session, int slotId);
 
     void StartGame();

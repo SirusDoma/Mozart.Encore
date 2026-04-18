@@ -9,6 +9,7 @@ public static class WorkerExtensions
     public static void ValidateMetadata(this IHostedService service, IChannelService channelService,
         IMetadataResolver resolver, ILogger logger)
     {
+
         foreach (var channel in channelService.GetChannels())
         {
             try

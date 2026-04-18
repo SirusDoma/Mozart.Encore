@@ -2,6 +2,7 @@ using Identity.Messages.Requests;
 using Identity.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
+using Mozart.Data.Contexts;
 using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
 using Mozart.Metadata;
@@ -210,80 +211,6 @@ public class MyRoomController(
         return new PenaltyResetResponse
         {
             Invalid = true
-        };
-    }
-
-    [CommandHandler]
-    public async Task<BagExpansionResponse> UseBagExpansion(BagExpansionRequest request,
-        CancellationToken cancellationToken)
-    {
-        var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.BagExpansion, "Use bag expansion {a1} {a2}",
-            request.BagSlotIndex, request.ItemId);
-
-        var user = (await repository.Find(actor.UserId, cancellationToken))!;
-        for (int i = 0; i < user.Inventory.Capacity; i++)
-        {
-            var bagItem = user.Inventory[i];
-            if (bagItem.Id == 0)
-                continue;
-
-            if (!Session.Channel!.GetItemData().TryGetValue(bagItem.Id, out var item))
-                continue;
-
-            if (item.ItemKind != ItemKind.BagExpansion)
-                continue;
-
-            if (bagItem.Count > 1)
-            {
-                user.Inventory[i] = new Inventory.BagItem
-                {
-                    Id    = bagItem.Id,
-                    Count = bagItem.Count - 1
-                };
-            }
-            else
-                user.Inventory[i] = Inventory.BagItem.Empty;
-
-            // TODO: Expand bag
-
-            await repository.Update(user, cancellationToken);
-            await repository.Commit(cancellationToken);
-
-            actor.Sync(user);
-
-            return new BagExpansionResponse
-            {
-                Invalid       = false,
-                ExpansionSize = 30
-            };
-        }
-
-        return new BagExpansionResponse
-        {
-            Invalid = true
-        };
-    }
-
-    [CommandHandler(RequestCommand.RefershBag)]
-    public async Task<BagRefreshResponse> RefreshBag(CancellationToken cancellationToken)
-    {
-        var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.RefershBag, "Refresh bag");
-
-        var user = (await repository.Find(actor.UserId, cancellationToken))!;
-        actor.Sync(user);
-
-        return new BagRefreshResponse
-        {
-            Invalid          = false,
-            Inventory        = actor.Inventory.Select(i => (int)i.Id).ToList(),
-            AttributiveItems = actor.Inventory.Where(i => i.Count > 0)
-                .Select(i => new BagRefreshResponse.AttributiveItemInfo
-                {
-                    AttributiveItemId = i.Id,
-                    ItemCount         = i.Count
-                }).ToList()
         };
     }
 }
