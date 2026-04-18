@@ -80,18 +80,6 @@ public class Channel : Broadcastable, IChannel
         }
     }
 
-    public IReadOnlyDictionary<int, AlbumHeader> GetAlbumList()
-    {
-        try
-        {
-            return _metadataResolver.GetAlbumList(this);
-        }
-        catch (Exception)
-        {
-            return new Dictionary<int, AlbumHeader>();
-        }
-    }
-
     public IReadOnlyDictionary<int, ItemData> GetItemData()
     {
         try
