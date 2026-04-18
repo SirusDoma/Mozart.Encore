@@ -3,8 +3,8 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.82\* (O2Jam NX)**  
-<sub>* v3.73 and older might work but not fully tested.</sub>
+Supported client version: **v5.89\* (O2JamO2 Final)**  
+<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, v0.5 and v0.6</sub>
 
 ### Other Builds
 
