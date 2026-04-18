@@ -136,7 +136,6 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 Metadata files act as source of truth of particular game data outside the database.  
 
 They are optional for running the server; however, missing certain files may disable one or more features such as play rewards, ranking, and equipment.
-**Note that `MusicList`is specifically required for core gameplay to function.**
 
 Metadata can usually be overridden per channel.
 
