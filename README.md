@@ -3,20 +3,8 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Beta)**  
-<sub>* Beta client that has Easy and SuperEasy planet. 3K Mode is not supported yet.</sub>
-
-> [!NOTE]
-> **Penalty is not enforced**
->
-> The server tracks players who leave a game before it finishes.
-> Abandoning the game increments the player's penalty count and accumulates their penalty level.
->
-> However, the current implementation does not impose any restrictions based on penalty level.
-> This is because penalty enforcement is handled server-side, and the original penalty logic has never been fully figured out.
->
-> Keep in mind that the penalties are still properly tracked and reflected in the user status page,
-> and penalty reset items will still work correctly.
+Supported client version: **v5.89\* (O2JamO2 Final)**  
+<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, v0.5 and v0.6</sub>
 
 ### Other Builds
 
