@@ -33,7 +33,8 @@ Supported client version: **v5.89\* (O2JamO2 Beta)**
 > This project is free from copyrighted materials. All codes are original work written from scratch.  
 > No copyrighted game assets, binaries, or master data are distributed in this repository.
 >
-> You will have to provide metadata files in order to enable all functionalities. See [Metadata files](#metadata) to learn more.
+> You will have to obtain and provide the metadata files in order to enable all functionalities.  
+> See [Metadata files](#metadata) to learn more.
 
 - Zero-Configuration for quick start.
 - Full online and local network multiplayer support.
@@ -147,13 +148,18 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 Beta). Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
-Metadata files that act as source of truth of particular game data outside the database.
-They are optional for running the server, but features such as play reward, ranking and the equipment system will not function without them.
+Metadata files act as source of truth of particular game data outside the database.  
 
-Metadata can be usually overriden per channel.
+They are optional for running the server; however, missing certain files may disable one or more features such as play rewards, ranking, and equipment.
+**Note that `MusicList`is specifically required for core gameplay to function.**
+
+Metadata can usually be overridden per channel.
 
 > [!IMPORTANT]
-> You must supply the metadata files that are compatible with the client version supported by this build.
+> Metadata files must be compatible with the client version supported by this build.  
+> Older format versions may work, but are not officially supported and may affect game features.  
+> 
+> The server will continue to run even if one or more Metadata files are invalid or use an incompatible format, though the affected features will behave as if the file were not present.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
