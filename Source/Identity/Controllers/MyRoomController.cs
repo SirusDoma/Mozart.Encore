@@ -218,34 +218,36 @@ public class MyRoomController(
         CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.BagExpansion, "Use bag expansion {a1} {a2}",
+        logger.LogInformation((int)RequestCommand.BagExpansion, "Use bag expansion: [{Slot}:{Item}]",
             request.BagSlotIndex, request.ItemId);
 
-        var user = (await repository.Find(actor.UserId, cancellationToken))!;
-        for (int i = 0; i < user.Inventory.Capacity; i++)
+        try
         {
-            var bagItem = user.Inventory[i];
-            if (bagItem.Id == 0)
-                continue;
+            var user      = (await repository.Find(actor.UserId, cancellationToken))!;
+            var inventory = user.Inventory;
+            var bagItem   = inventory[request.BagSlotIndex];
 
-            if (!Session.Channel!.GetItemData().TryGetValue(bagItem.Id, out var item))
-                continue;
+            if (bagItem.Id != request.ItemId)
+                throw new ArgumentOutOfRangeException(nameof(request));
+
+            if (!Session.Channel!.GetItemData().TryGetValue(request.ItemId, out var item))
+                throw new ArgumentOutOfRangeException(nameof(request));
 
             if (item.ItemKind != ItemKind.BagExpansion)
-                continue;
+                throw new ArgumentOutOfRangeException(nameof(request));
+
+            inventory.Expand();
 
             if (bagItem.Count > 1)
             {
-                user.Inventory[i] = new Inventory.BagItem
+                inventory[request.BagSlotIndex] = new Inventory.BagItem
                 {
                     Id    = bagItem.Id,
                     Count = bagItem.Count - 1
                 };
             }
             else
-                user.Inventory[i] = Inventory.BagItem.Empty;
-
-            // TODO: Expand bag
+                inventory[request.BagSlotIndex] = Inventory.BagItem.Empty;
 
             await repository.Update(user, cancellationToken);
             await repository.Commit(cancellationToken);
@@ -255,14 +257,17 @@ public class MyRoomController(
             return new BagExpansionResponse
             {
                 Invalid       = false,
-                ExpansionSize = 30
+                ExpansionSize = Inventory.SlotsPerExpansion
             };
         }
-
-        return new BagExpansionResponse
+        catch (Exception ex) when (ex is ArgumentOutOfRangeException or InvalidOperationException)
         {
-            Invalid = true
-        };
+            return new BagExpansionResponse
+            {
+                Invalid       = true,
+                ExpansionSize = 0
+            };
+        }
     }
 
     [CommandHandler(RequestCommand.RefershBag)]

@@ -1,4 +1,5 @@
 using Encore.Messaging;
+using Mozart.Data.Entities;
 
 namespace Identity.Messages.Responses;
 
@@ -10,5 +11,5 @@ public class BagExpansionResponse : IMessage
     public bool Invalid { get; init; } = false;
 
     [MessageField(order: 1)]
-    public int ExpansionSize { get; init; } = 30;
+    public int ExpansionSize { get; init; } = Inventory.SlotsPerExpansion;
 }

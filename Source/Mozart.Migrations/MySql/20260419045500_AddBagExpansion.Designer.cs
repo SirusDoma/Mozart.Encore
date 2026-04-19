@@ -2,34 +2,34 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mozart.Data.Contexts;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mozart.Migrations.Postgres.Migrations
+namespace Mozart.Migrations.MySql.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419045500_AddBagExpansion")]
+    partial class AddBagExpansion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Mozart.Data.Entities.AcquiredMusic", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<int>("MusicId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("MUSIC_ID");
 
                     b.HasKey("UserId");
@@ -41,33 +41,31 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("INDEX_ID");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AcquiredAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("REG_DATE")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("Count")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USED_COUNT");
 
                     b.Property<int>("ItemId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ITEM_INDEX_ID");
 
                     b.Property<int>("PreviousCount")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("OLD_USED_COUNT");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.HasKey("Id");
@@ -80,42 +78,42 @@ namespace Mozart.Migrations.Postgres.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.AuthSession", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ADDR_IP");
 
                     b.Property<int>("ChannelId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SUB_CH");
 
                     b.Property<string>("GatewayId")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("GATEWAY_ID");
 
                     b.Property<DateTime>("LoginTime")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("LOGIN_TIME");
 
                     b.Property<int>("ServerId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("MAIN_CH");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("TUSER_ID");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("USER_ID");
 
                     b.HasKey("UserId");
@@ -127,33 +125,31 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Seq");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("ItemId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ItemID");
 
                     b.Property<DateTime>("SendDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("SendDate")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("SenderId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Sender_Index_ID");
 
                     b.Property<string>("SenderNickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("SenderNickname");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("User_Index_ID");
 
                     b.HasKey("Id");
@@ -167,33 +163,31 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Seq");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("MusicId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Music_ID");
 
                     b.Property<DateTime>("SendDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("SendDate")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("SenderId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Sender_Index_ID");
 
                     b.Property<string>("SenderNickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("SenderNickname");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("User_Index_ID");
 
                     b.HasKey("Id");
@@ -206,7 +200,7 @@ namespace Mozart.Migrations.Postgres.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.Loadout", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<short>("Bag1")
@@ -751,7 +745,7 @@ namespace Mozart.Migrations.Postgres.Migrations
 
                     b.Property<int>("BagExpansionCount")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("BAG_EXT_COUNT");
 
@@ -815,17 +809,15 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("bytea")
+                        .HasColumnType("longblob")
                         .HasColumnName("passwd");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("userid");
 
                     b.Property<short>("Vip")
@@ -835,12 +827,12 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnName("vip");
 
                     b.Property<DateTime>("VipDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("vipdate");
 
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
@@ -854,23 +846,23 @@ namespace Mozart.Migrations.Postgres.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.MusicScoreRecord", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<int>("MusicId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("MUSIC_INDEX_ID");
 
                     b.Property<byte>("Difficulty")
-                        .HasColumnType("smallint")
+                        .HasColumnType("tinyint unsigned")
                         .HasColumnName("DIFFICULTY");
 
                     b.Property<byte>("ClearType")
-                        .HasColumnType("smallint")
+                        .HasColumnType("tinyint unsigned")
                         .HasColumnName("FLAG");
 
-                    b.Property<long>("Score")
-                        .HasColumnType("bigint")
+                    b.Property<uint>("Score")
+                        .HasColumnType("int unsigned")
                         .HasColumnName("USER_SCORE");
 
                     b.HasKey("UserId", "MusicId", "Difficulty");
@@ -881,15 +873,15 @@ namespace Mozart.Migrations.Postgres.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.Penalty", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<int>("Count")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("COUNT");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("LEVEL");
 
                     b.HasKey("UserId");
@@ -901,48 +893,46 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("Battle")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Draw")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Experience")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<bool>("Gender")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("Sex");
 
                     b.Property<int>("IsAdministrator")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("AdminLevel");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Lose")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("USER_NICKNAME");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("USER_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -959,69 +949,69 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Seq");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("character varying(400)");
+                        .HasColumnType("varchar(400)");
 
-                    b.Property<char>("GiftType")
+                    b.Property<string>("GiftType")
+                        .IsRequired()
                         .HasColumnType("char(1)")
                         .HasColumnName("TypeFlag");
 
-                    b.Property<char>("IsRead")
+                    b.Property<string>("IsRead")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(1)")
-                        .HasDefaultValue('0')
+                        .HasDefaultValue("0")
                         .HasColumnName("ReadFlag");
 
                     b.Property<DateTime?>("ReadDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("ReceiverId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ReceiverIndexID");
 
                     b.Property<string>("ReceiverNickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("ReceiverNickName");
 
                     b.Property<string>("ReceiverUsername")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("ReceiverID");
 
                     b.Property<int>("SenderId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SenderIndexID");
 
                     b.Property<string>("SenderNickname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("SenderNickName");
 
                     b.Property<string>("SenderUsername")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("SenderID");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
+                        .HasColumnType("varchar(40)");
 
                     b.Property<DateTime>("WriteDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
@@ -1035,13 +1025,11 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Ranking")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Ranking");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Ranking"));
-
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("User_Index_ID");
 
                     b.HasKey("Ranking");
@@ -1056,72 +1044,70 @@ namespace Mozart.Migrations.Postgres.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Seq");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("Battle")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Battle");
 
                     b.Property<int>("ChangeRanking")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ChangeRanking");
 
                     b.Property<int>("ChangeType")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ChangeType");
 
                     b.Property<int>("Draw")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Draw");
 
                     b.Property<int>("Experience")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Experience");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Level");
 
                     b.Property<int>("Lose")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Lose");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
+                        .HasColumnType("varchar(40)")
                         .HasColumnName("User_NickName");
 
                     b.Property<int>("Ranking")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("Ranking");
 
                     b.Property<bool>("Sex")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("Sex");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("User_Index_ID");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
+                        .HasColumnType("varchar(40)")
                         .HasColumnName("User_ID");
 
                     b.Property<int>("Win")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Win");
 
                     b.Property<DateTime>("WriteDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("WriteDate")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
@@ -1136,26 +1122,26 @@ namespace Mozart.Migrations.Postgres.Migrations
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("USER_INDEX_ID");
 
                     b.Property<int>("CashPoint")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Gem")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ItemCash")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("MusicCash")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("O2Cash")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Point")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
