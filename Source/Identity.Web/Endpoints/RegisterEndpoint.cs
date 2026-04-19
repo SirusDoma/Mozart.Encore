@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 using Mozart.Data.Contexts;
@@ -44,6 +45,17 @@ public static class RegisterEndpoint
             }
 
             logger.LogInformation("Registering user '{User}'...", request.Username);
+
+            bool usernameTaken = await context.Members
+                .AnyAsync(m => EF.Functions.Like(m.Username, request.Username), cancellationToken);
+            if (usernameTaken)
+            {
+                logger.LogWarning("Registration rejected: username '{User}' is already taken.", request.Username);
+                return Results.Conflict(new {
+                    success = false,
+                    error = "username already taken",
+                });
+            }
 
             var user = new User
             {

@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Contexts;
 using Mozart.Data.Entities;
@@ -60,6 +61,14 @@ public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions
 
     private async Task<int> ExecuteAsync(string username, string password, Gender gender, bool admin, CancellationToken cancellationToken)
     {
+        bool usernameTaken = await context.Members
+            .AnyAsync(m => EF.Functions.Like(m.Username, username), cancellationToken);
+        if (usernameTaken)
+        {
+            Console.WriteLine($"Registration failed: username '{username}' is already taken.");
+            return 1;
+        }
+
         var user = new User
         {
             Username        = username,
