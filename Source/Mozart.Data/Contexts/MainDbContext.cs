@@ -291,10 +291,6 @@ public sealed class MainDbContext(
             entity.Property(e => e.UserId)
                 .HasColumnName("USER_INDEX_ID")
                 .ValueGeneratedNever();
-
-            entity.Property(e => e.BagExpansionCount)
-                .HasColumnName("BAG_EXT_COUNT")
-                .HasDefaultValue(0);
         });
     }
 
