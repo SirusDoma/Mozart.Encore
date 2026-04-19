@@ -103,30 +103,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.Property<short>("Bag1")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag2")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag3")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag4")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag5")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag6")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag7")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag8")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag9")
-                        .HasColumnType("INTEGER");
-
                     b.Property<short>("Bag10")
                         .HasColumnType("INTEGER");
 
@@ -155,6 +131,9 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<short>("Bag19")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Bag2")
                         .HasColumnType("INTEGER");
 
                     b.Property<short>("Bag20")
@@ -187,466 +166,52 @@ namespace Mozart.Migrations.Sqlite.Migrations
                     b.Property<short>("Bag29")
                         .HasColumnType("INTEGER");
 
+                    b.Property<short>("Bag3")
+                        .HasColumnType("INTEGER");
+
                     b.Property<short>("Bag30")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag31")
+                    b.Property<short>("Bag4")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag32")
+                    b.Property<short>("Bag5")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag33")
+                    b.Property<short>("Bag6")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag34")
+                    b.Property<short>("Bag7")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag35")
+                    b.Property<short>("Bag8")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("Bag36")
+                    b.Property<short>("Bag9")
                         .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag37")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag38")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag39")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag40")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag41")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag42")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag43")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag44")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag45")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag46")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag47")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag48")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag49")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag50")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag51")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag52")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag53")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag54")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag55")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag56")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag57")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag58")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag59")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag60")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag61")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag62")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag63")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag64")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag65")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag66")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag67")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag68")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag69")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag70")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag71")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag72")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag73")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag74")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag75")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag76")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag77")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag78")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag79")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag80")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag81")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag82")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag83")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag84")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag85")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag86")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag87")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag88")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag89")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag90")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag91")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag92")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag93")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag94")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag95")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag96")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag97")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag98")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag99")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag100")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag101")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag102")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag103")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag104")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag105")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag106")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag107")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag108")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag109")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag110")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag111")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag112")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag113")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag114")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag115")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag116")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag117")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag118")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag119")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag120")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag121")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag122")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag123")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag124")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag125")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag126")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag127")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag128")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag129")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag130")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag131")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag132")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag133")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag134")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag135")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag136")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag137")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag138")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag139")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag140")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag141")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag142")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag143")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag144")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag145")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag146")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag147")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag148")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag149")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag150")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag151")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag152")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag153")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag154")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag155")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag156")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag157")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag158")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag159")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag160")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag161")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag162")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag163")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag164")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag165")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag166")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag167")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag168")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag169")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag170")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag171")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag172")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag173")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag174")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag175")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag176")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag177")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag178")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag179")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Bag180")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BagExpansionCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0)
-                        .HasColumnName("BAG_EXT_COUNT");
 
                     b.Property<short>("Equip1")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip10")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip11")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip12")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip13")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip14")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip15")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Equip16")
                         .HasColumnType("INTEGER");
 
                     b.Property<short>("Equip2")
@@ -671,27 +236,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<short>("Equip9")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip10")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip11")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip12")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip13")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip14")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip15")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Equip16")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("UserId");

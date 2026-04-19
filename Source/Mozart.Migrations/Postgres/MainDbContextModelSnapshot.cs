@@ -110,30 +110,6 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.Property<short>("Bag1")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag2")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag3")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag4")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag5")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag6")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag7")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag8")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag9")
-                        .HasColumnType("smallint");
-
                     b.Property<short>("Bag10")
                         .HasColumnType("smallint");
 
@@ -162,6 +138,9 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<short>("Bag19")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Bag2")
                         .HasColumnType("smallint");
 
                     b.Property<short>("Bag20")
@@ -194,466 +173,52 @@ namespace Mozart.Migrations.Postgres.Migrations
                     b.Property<short>("Bag29")
                         .HasColumnType("smallint");
 
+                    b.Property<short>("Bag3")
+                        .HasColumnType("smallint");
+
                     b.Property<short>("Bag30")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag31")
+                    b.Property<short>("Bag4")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag32")
+                    b.Property<short>("Bag5")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag33")
+                    b.Property<short>("Bag6")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag34")
+                    b.Property<short>("Bag7")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag35")
+                    b.Property<short>("Bag8")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("Bag36")
+                    b.Property<short>("Bag9")
                         .HasColumnType("smallint");
-
-                    b.Property<short>("Bag37")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag38")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag39")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag40")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag41")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag42")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag43")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag44")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag45")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag46")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag47")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag48")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag49")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag50")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag51")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag52")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag53")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag54")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag55")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag56")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag57")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag58")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag59")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag60")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag61")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag62")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag63")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag64")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag65")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag66")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag67")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag68")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag69")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag70")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag71")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag72")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag73")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag74")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag75")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag76")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag77")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag78")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag79")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag80")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag81")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag82")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag83")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag84")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag85")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag86")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag87")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag88")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag89")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag90")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag91")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag92")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag93")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag94")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag95")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag96")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag97")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag98")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag99")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag100")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag101")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag102")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag103")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag104")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag105")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag106")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag107")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag108")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag109")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag110")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag111")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag112")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag113")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag114")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag115")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag116")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag117")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag118")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag119")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag120")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag121")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag122")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag123")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag124")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag125")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag126")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag127")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag128")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag129")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag130")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag131")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag132")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag133")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag134")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag135")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag136")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag137")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag138")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag139")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag140")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag141")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag142")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag143")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag144")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag145")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag146")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag147")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag148")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag149")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag150")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag151")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag152")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag153")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag154")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag155")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag156")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag157")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag158")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag159")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag160")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag161")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag162")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag163")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag164")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag165")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag166")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag167")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag168")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag169")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag170")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag171")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag172")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag173")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag174")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag175")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag176")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag177")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag178")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag179")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Bag180")
-                        .HasColumnType("smallint");
-
-                    b.Property<int>("BagExpansionCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("BAG_EXT_COUNT");
 
                     b.Property<short>("Equip1")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip10")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip11")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip12")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip13")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip14")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip15")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Equip16")
                         .HasColumnType("smallint");
 
                     b.Property<short>("Equip2")
@@ -678,27 +243,6 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<short>("Equip9")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip10")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip11")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip12")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip13")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip14")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip15")
-                        .HasColumnType("smallint");
-
-                    b.Property<short>("Equip16")
                         .HasColumnType("smallint");
 
                     b.HasKey("UserId");
