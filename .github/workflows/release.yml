@@ -38,11 +38,14 @@ jobs:
           else
             BRANCHES='["${{ github.ref_name }}"]'
           fi
-          echo "matrix={\"branch\":$BRANCHES,\"rid\":[\"win-x86\",\"linux-x64\"]}" >> "$GITHUB_OUTPUT"
+          # Each rid runs on its matching host OS so the published binary can be
+          # executed later (to resolve the per-branch Version via `<exe> version`).
+          INCLUDE='[{"rid":"win-x86","os":"windows-latest"},{"rid":"linux-x64","os":"ubuntu-latest"}]'
+          echo "matrix={\"branch\":$BRANCHES,\"rid\":[\"win-x86\",\"linux-x64\"],\"include\":$INCLUDE}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
       fail-fast: false
@@ -57,6 +60,7 @@ jobs:
 
       - name: Detect project
         id: project
+        shell: bash
         run: |
           PROJECT=$(grep -rl '<OutputType>Exe</OutputType>' Source/*/*.csproj | head -1)
           if [ -z "$PROJECT" ]; then
@@ -69,26 +73,15 @@ jobs:
 
       - name: Resolve platform
         id: platform
+        shell: bash
         run: |
           case "${{ matrix.rid }}" in
             win-x86)   echo "value=x86" >> "$GITHUB_OUTPUT" ;;
             linux-x64) echo "value=x64" >> "$GITHUB_OUTPUT" ;;
           esac
 
-      - name: Resolve version suffix
-        id: suffix
-        run: |
-          TAG="${{ inputs.tag }}"
-          # Strip a leading 'v' only if the tag follows the v<digit> convention.
-          # Arbitrary tags (e.g. "nightly") are kept verbatim.
-          if [[ "$TAG" =~ ^v[0-9] ]]; then
-            VERSION="${TAG#v}"
-          else
-            VERSION="$TAG"
-          fi
-          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Publish
+        shell: bash
         run: |
           dotnet publish "${{ steps.project.outputs.path }}" \
             -c Release \
@@ -100,13 +93,39 @@ jobs:
             -p:DebugType=none \
             -o publish
 
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          ASSEMBLY="${{ steps.project.outputs.assembly }}"
+          RID="${{ matrix.rid }}"
+          if [[ "$RID" == win-* ]]; then
+            EXE="publish/${ASSEMBLY}.exe"
+          else
+            EXE="publish/${ASSEMBLY}"
+            chmod +x "$EXE"
+          fi
+
+          # Invoke VersionCommandTask (registered as subcommand "version") to
+          # obtain the per-branch Program.Version — not the release input tag.
+          OUTPUT=$("$EXE" version)
+          echo "$OUTPUT"
+
+          VERSION=$(echo "$OUTPUT" | awk '$1 == "[v]" && $2 == "Version:" {print $3; exit}')
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to parse Version from '$EXE version' output"
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Verify and package
+        shell: bash
         run: |
           PROJECT="${{ steps.project.outputs.path }}"
           PROJECT_DIR=$(dirname "$PROJECT")
           ASSEMBLY="${{ steps.project.outputs.assembly }}"
           RID="${{ matrix.rid }}"
-          VERSION="${{ steps.suffix.outputs.value }}"
+          VERSION="${{ steps.version.outputs.value }}"
 
           # Determine executable name
           if [[ "$RID" == win-* ]]; then
@@ -146,12 +165,12 @@ jobs:
 
           # Create zip
           cd staging
-          zip -r "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}-${VERSION}.zip" .
+          7z a -tzip "$GITHUB_WORKSPACE/${ASSEMBLY}-${RID}-${VERSION}.zip" .
 
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}-${{ steps.suffix.outputs.value }}
-          path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}-${{ steps.suffix.outputs.value }}.zip
+          name: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}-${{ steps.version.outputs.value }}
+          path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}-${{ steps.version.outputs.value }}.zip
 
   release:
     needs: build
