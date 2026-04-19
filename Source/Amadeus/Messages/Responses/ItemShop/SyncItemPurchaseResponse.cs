@@ -24,7 +24,10 @@ public class SyncItemPurchaseResponse : IMessage
     [MessageField(order: 2)]
     public int O2Cash { get; init; }
 
-    [CollectionMessageField(order: 3, minCount: 30, maxCount:30)]
+    [MessageField(order: 3)]
+    public int CashPoint { get; init; }
+
+    [CollectionMessageField(order: 4, prefixSizeType: TypeCode.Int32)]
     public IReadOnlyList<int> Inventory { get; init; } = [];
 
     [MessageField(order: 4)]
