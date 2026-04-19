@@ -31,8 +31,8 @@ namespace Mozart;
 
 public class Program
 {
-    public static Version Version        => new(1, 15, 0);
-    public static Version NetworkVersion => new(3, 10);
+    public static Version Version        => new(5, 2, 0);
+    public static Version NetworkVersion => new(5, 89, 9);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
