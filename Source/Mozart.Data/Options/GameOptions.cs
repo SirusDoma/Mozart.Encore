@@ -8,4 +8,5 @@ public class GameOptions
     public int SingleModeRewardLevelLimit { get; init; } = 10;
     public int MusicLoadTimeout { get; init; } = 60;
     public bool FreeMusic { get; init; } = true;
+    public bool InfinityRing { get; init; } = true;
 }

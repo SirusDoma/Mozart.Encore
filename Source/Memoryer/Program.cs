@@ -1,0 +1,379 @@
+﻿using System.Net.Sockets;
+using Encore.Hosting.Extensions;
+using Encore.Hosting.Logging;
+using Encore.Messaging;
+using Encore.Server;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Mozart.Contexts;
+using Mozart.Data.Contexts;
+using Mozart.Data.Repositories;
+using Mozart.Entities;
+using Mozart.Events;
+using Mozart.Options;
+using Mozart.Services;
+using Mozart.Sessions;
+using Memoryer.CLI;
+using Memoryer.Controllers;
+using Memoryer.Controllers.Filters;
+using Memoryer.Controllers.Internal;
+using Memoryer.Events;
+using Memoryer.Relay;
+using Memoryer.Relay.Controllers;
+using Memoryer.Relay.Controllers.Filters;
+using Memoryer.Relay.Hosting;
+using Memoryer.Services;
+using Memoryer.Web;
+using Memoryer.Workers.Channels;
+using Memoryer.Workers.Gateway;
+
+namespace Memoryer;
+
+public class Program
+{
+    public static Version Version        => new(6, 0, 0);
+    public static Version NetworkVersion => new(8, 0, 2);
+    public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
+
+    private static async Task<int> Main(string[] args)
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Server:Mode"]                     = "Full",
+                ["Server:Address"]                  = "127.0.0.1",
+                ["Server:Port"]                     = "15010",
+                ["Server:MaxConnections"]           = ((int)SocketOptionName.MaxConnections).ToString(),
+                ["Server:PacketBufferSize"]         = "4096",
+                ["Http:Enabled"]                    = "true",
+                ["Http:Address"]                    = "127.0.0.1",
+                ["Http:Port"]                       = "15000",
+                ["Db:Driver"]                       = "Sqlite",
+                ["Db:Name"]                         = "O2JAM",
+                ["Db:Url"]                          = "Data Source=O2JAM.db",
+                ["Game:AllowSoloInVersus"]          = "true",
+                ["Game:SingleModeRewardLevelLimit"] = "10",
+                ["Metadata:MusicList"]              = "OJNList.dat",
+                ["Metadata:AlbumList"]              = "AlbumList.ojs",
+                ["Metadata:ItemData"]               = "Itemdata.dat",
+                ["Gateway:Channels:0:Id"]           = "0",
+                ["Auth:Mode"]                       = "Default",
+                ["Auth:RevokeOnStartp"]             = "true",
+                ["Relay:Enabled"]                   = "false",
+                ["Score:Gem"]                       = "1.0",
+                ["Score:Exp"]                       = "1.0"
+            })
+            .AddIniFile("config.ini", true, true)
+            // TODO: Use EnvironmentVariable instead
+            // .AddIniFile($"config.{context.HostingEnvironment}.ini", true, true)
+            .AddIniFile("mozart.ini", true, true)
+            .AddCommandLine(args)
+            .Build();
+
+        var hostBuilder = CreateHostBuilder(args, config);
+
+        // Execute custom command if any
+        int? code = await ExecuteCommandLine(hostBuilder, args);
+        if (code != null)
+            return code.Value;
+
+        // Otherwise configure the rest of server and start it
+        hostBuilder = hostBuilder
+            .ConfigureTcpFramer((context, builder) =>
+            {
+                builder.AddFramerFactory<SizePrefixedMessageFramer<short>>();
+            })
+            .ConfigureTcpSessions((context, provider) =>
+            {
+                provider.UseTcpSession<Session>()
+                    .AddFactory<ISessionFactory>(svc => new SessionFactory(svc))
+                    .AddManager<ISessionManager>(_ => new SessionManager());
+            })
+            .ConfigureFilters((context, builder) =>
+            {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                var relay = context.Configuration
+                    .GetSection(RelayOptions.Section)
+                    .Get<RelayOptions>() ?? new RelayOptions();
+
+                builder.AddExceptionHandler<DefaultExceptionHandler>()
+                    .AddExceptionLogger<DefaultExceptionLogger>()
+                    .AddFilter<SessionScopeLoggerFilter>();
+
+                if (options.Mode == DeploymentMode.Gateway)
+                    builder.AddFilter<GatewayFilter>();
+
+                if (options.Mode == DeploymentMode.Relay || relay.Enabled)
+                    builder.AddFilter<RelayLoggerFilter>();
+
+            })
+            .ConfigureRoutes((context, provider) =>
+            {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                var relay = context.Configuration
+                    .GetSection(RelayOptions.Section)
+                    .Get<RelayOptions>() ?? new RelayOptions();
+
+                // Controller-based routing: Not safe with AOT
+                var routes = provider.UseCodec<DefaultMessageCodec>();
+
+                if (options.Mode != DeploymentMode.Relay)
+                {
+                    routes
+                        .Map<AuthController>()
+                        .Map<PlanetController>()
+                        .Map<ChargeController>()
+                        .Map<MessagingController>()
+                        .Map<MainRoomController>()
+                        .Map<RankingController>()
+                        .Map<MyRoomController>()
+                        .Map<ItemShopController>()
+                        .Map<MusicShopController>()
+                        .Map<WaitingController>()
+                        .Map<PlayingController>();
+                }
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Gateway:
+                        routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                    case DeploymentMode.Channel:
+                        routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                }
+
+                if (options.Mode == DeploymentMode.Relay || relay.Enabled)
+                {
+                    routes.Map<RelayController>();
+                }
+            })
+            .ConfigureServices((context, services) =>
+            {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                var relay = context.Configuration
+                    .GetSection(RelayOptions.Section)
+                    .Get<RelayOptions>() ?? new RelayOptions();
+
+                if (options.Mode != DeploymentMode.Relay)
+                    services.AddSingleton<GameServer>();
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Channel:
+                        services.AddSingleton<IGatewayClient, GatewayClient>()
+                            .AddSingleton<IUserSessionFactory, UserSessionFactory>()
+                            .AddHostedService<ChannelWorker>();
+
+                        break;
+                    case DeploymentMode.Gateway:
+                        services.AddSingleton<IClientServer, ClientServer>()
+                            .AddSingleton<IGatewayServer, GatewayServer>()
+                            .AddSingleton<IChannelAggregator, ChannelAggregator>()
+                            .AddSingleton<IClientSessionFactory, ClientSessionFactory>()
+                            .AddSingleton<IChannelSessionFactory, ChannelSessionFactory>()
+                            .AddSingleton<IChannelSessionManager, ChannelSessionManager>()
+                            .AddHostedService<GatewayWorker>();
+
+                        break;
+                    case DeploymentMode.Full:
+                        services.AddHostedService<DefaultWorker>();
+
+                        break;
+                    case DeploymentMode.Relay:
+                        services.AddTcpRelayServices();
+                        if (relay.P2PEnabled)
+                            services.AddUdpRelayServices();
+
+                        break;
+                }
+
+                if (options.Mode != DeploymentMode.Relay && relay.Enabled)
+                {
+                    services.AddTcpRelayServices();
+                    if (relay.P2PEnabled)
+                        services.AddUdpRelayServices();
+                }
+
+                if (options.Mode != DeploymentMode.Relay)
+                    services.AddSingleton<IRelayService, RelayService>();
+            });
+
+        IHost host;
+        if (config.GetSection(HttpOptions.Section).Get<HttpOptions>()?.Enabled ?? false)
+        {
+            host = hostBuilder
+                .ConfigureWebHost(WebServer.Build)
+                .Build();
+        }
+        else
+        {
+            host = hostBuilder.Build();
+        }
+
+        await host.RunAsync();
+        return 0;
+    }
+
+    private static async Task<int?> ExecuteCommandLine(IHostBuilder hostBuilder, string[] args)
+    {
+        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder)
+            .ConfigureCommandTasks(builder =>
+            {
+                builder.AddCommandLineTask<DatabaseInitCommandTask>()
+                    .AddCommandLineTask<RegisterUserCommandTask>()
+                    .AddCommandLineTask<AuthorizeUserCommandTask>()
+                    .AddCommandLineTask<UpsertUserRankingCommandTask>()
+                    .AddCommandLineTask<EncDecCommandTask>()
+                    .AddCommandLineTask<VersionCommandTask>();
+            })
+            .ExecuteAsync(args);
+    }
+
+    public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration config)
+    {
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, builder) =>
+            {
+                builder
+                    .AddConfiguration(config)
+                    .AddIniFile($"config.{context.HostingEnvironment}.ini", true, true);
+            })
+            .ConfigureLogging((context, builder) =>
+            {
+                builder.ClearProviders()
+                    .AddConsole(options => options.FormatterName = "EncoreLoggerFormatter")
+                    .AddConsoleFormatter<EncoreConsoleFormatter, EncoreConsoleFormatterOptions>()
+                    .AddFilter("Microsoft.*", LogLevel.None)
+                    .SetMinimumLevel(LogLevel.Debug);
+            })
+            .ConfigureServices((context, services) =>
+            {
+                // Configurations
+                services.AddOptions<MetadataOptions>()
+                    .BindConfiguration(MetadataOptions.Section);
+                services.AddOptions<DatabaseOptions>()
+                    .BindConfiguration(DatabaseOptions.Section);
+                services.AddOptions<TcpOptions>()
+                    .BindConfiguration(TcpOptions.Section);
+                services.AddOptions<ServerOptions>()
+                    .BindConfiguration(ServerOptions.Section);
+                services.AddOptions<HttpOptions>()
+                    .BindConfiguration(HttpOptions.Section);
+                services.AddOptions<GatewayOptions>()
+                    .BindConfiguration(GatewayOptions.Section);
+                services.AddOptions<AuthOptions>()
+                    .BindConfiguration(AuthOptions.Section);
+                services.AddOptions<GameOptions>()
+                    .BindConfiguration(GameOptions.Section);
+                services.AddOptions<RelayOptions>()
+                    .BindConfiguration(RelayOptions.Section);
+
+                // Database contexts
+                services.AddDbContextFactory<MainDbContext>((provider, builder) =>
+                {
+                    var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+                    _ = options.Driver switch
+                    {
+                        DatabaseDriver.Memory =>
+                            builder.UseInMemoryDatabase(options.Name),
+
+                        DatabaseDriver.Sqlite =>
+                            builder.UseSqlite(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("Mozart.Migrations.Sqlite");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.SqlServer =>
+                            builder.UseSqlServer(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("Mozart.Migrations.SqlServer");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.MySql =>
+                            builder.UseMySQL(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("Mozart.Migrations.MySql");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.Postgres =>
+                            builder.UseNpgsql(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("Mozart.Migrations.Postgres");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.MongoDb =>
+                            builder.UseMongoDB(options.Url, options.Name),
+
+                        _ => throw new ArgumentOutOfRangeException(nameof(options), options.Driver, "Invalid driver")
+                    };
+                });
+
+                // Repositories
+                services.AddScoped<IUserRepository, UserRepository>()
+                    .AddScoped<IMemberRepository, MemberRepository>()
+                    .AddScoped<ISessionRepository, SessionRepository>();
+
+                // Application contexts
+                services.AddScoped<IAuthContext, AuthContext>();
+
+                // Event subscribers
+                // Note: The subscriber lifetime is mostly tied to the object that it's subscribing
+                //       (e.g, Use singleton when subscribing events from singleton service)
+                services.AddScoped<IEventPublisher<Room>, RoomEventPublisher>();
+                services.AddScoped<IEventPublisher<ScoreTracker>, ScoreTrackerEventPublisher>();
+                services.AddSingleton<IEventPublisher<RoomService>, RoomServiceEventPublisher>();
+
+                // Services
+                services.AddSingleton<IMetadataResolver, MetadataResolver>()
+                    .AddSingleton<IChannelService, ChannelService>()
+                    .AddSingleton<IRoomService, RoomService>()
+                    .AddScoped<IAuthService, AuthService>();
+            });
+    }
+}

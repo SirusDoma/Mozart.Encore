@@ -29,7 +29,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
     ICommandDispatcher ICommandDispatcher.Map<TSession, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TRequest>(Func<TSession, TRequest, Task> handler)
     {
-        MapRoute((Session session, TRequest request, CancellationToken _) => handler((TSession)session, request));
+        MapRoute((ISession session, TRequest request, CancellationToken _) => handler((TSession)session, request));
         return this;
     }
 
@@ -51,7 +51,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse
     >(Func<TSession, TRequest, Task<TResponse>> handler)
     {
-        MapRoute((Session session, TRequest request, CancellationToken _) => handler((TSession)session, request));
+        MapRoute((ISession session, TRequest request, CancellationToken _) => handler((TSession)session, request));
         return this;
     }
 
@@ -60,7 +60,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse
     >(Func<TSession, TRequest, CancellationToken, Task<TResponse>> handler)
     {
-        MapRoute((Session session, TRequest request, CancellationToken token) =>
+        MapRoute((ISession session, TRequest request, CancellationToken token) =>
             handler((TSession)session, request, token));
 
         return this;
@@ -145,7 +145,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         }
     }
 
-    private void MapRoute<TCommand>(TCommand command, Func<Session, CancellationToken, Task> handler)
+    private void MapRoute<TCommand>(TCommand command, Func<ISession, CancellationToken, Task> handler)
         where TCommand  : Enum
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -166,7 +166,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
     }
 
     private void MapRoute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]  TRequest>(
-        Func<Session, TRequest, CancellationToken, Task> handler
+        Func<ISession, TRequest, CancellationToken, Task> handler
     )
         where TRequest  : class, IMessage
     {
@@ -195,7 +195,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
 
     private void MapRoute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse>(
-        Func<Session, TRequest, CancellationToken, Task<TResponse>> handler
+        Func<ISession, TRequest, CancellationToken, Task<TResponse>> handler
     )
         where TRequest  : class, IMessage
         where TResponse : class, IMessage
@@ -224,7 +224,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
     private void MapRoute<TSession, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TController>(
         Func<TSession, TController> factory, params IEnumerable<ICommandFilter> filters
     )
-        where TSession    : Session
+        where TSession    : ISession
         where TController : CommandController
     {
         var type = typeof(TController);
@@ -335,7 +335,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         }
     }
 
-    private async Task<CommandResponse> Execute(CommandHandler handler, Session session, Enum command,
+    private async Task<CommandResponse> Execute(CommandHandler handler, ISession session, Enum command,
         IMessage? request, CancellationToken cancellationToken)
     {
         var context = new CommandExecutionContext(session, command, request, handler.Descriptor);
@@ -466,15 +466,12 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         return CommandResponse.Empty;
     }
 
-    public async Task Dispatch(Session session, byte[] payload, CancellationToken cancellationToken)
+    public async Task Dispatch(ISession session, byte[] payload, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(session, nameof(session));
         ArgumentNullException.ThrowIfNull(payload, nameof(payload));
 
         IMessage? request;
-        Enum? command = null;
-        List<CommandHandler>? handlers = null;
-
         try
         {
             request = _codec.Decode(payload);
@@ -489,9 +486,47 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return;
         }
 
+        Enum command;
         try
         {
             command = _codec.DecodeCommand(payload);
+        }
+        catch (Exception ex)
+        {
+            var context = new CommandExceptionContext(ex, session, null, request);
+            var response = await FilterException(context, cancellationToken)
+                .ConfigureAwait(false);
+
+            await WriteFrame(session, response, cancellationToken);
+            return;
+        }
+
+        await Dispatch(session, command, request, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task Dispatch<TMessage>(ISession session, TMessage message, CancellationToken cancellationToken)
+        where TMessage : class, IMessage
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(message);
+
+        return Dispatch(session, TMessage.Command, message, cancellationToken);
+    }
+
+    public Task Dispatch(ISession session, Enum command, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(command);
+
+        return Dispatch(session, command, null, cancellationToken);
+    }
+
+    private async Task Dispatch(ISession session, Enum command, IMessage? request,
+        CancellationToken cancellationToken)
+    {
+        List<CommandHandler>? handlers;
+        try
+        {
             if (!_handlers.TryGetValue(command, out handlers))
                 throw new NotSupportedException($"Command '0x{command:X4}' is not recognized");
         }
@@ -528,7 +563,7 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         await Task.WhenAll(tasks);
     }
 
-    private static async Task WriteFrame(Session session, CommandResponse response, CancellationToken cancellationToken)
+    private static async Task WriteFrame(ISession session, CommandResponse response, CancellationToken cancellationToken)
     {
         await Task.WhenAll(
             response.Frames.Select(frame => session.WriteFrame(frame.Payload, cancellationToken))

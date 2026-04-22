@@ -23,6 +23,7 @@ public class Loadout
     public short Equip14 { get; set; }
     public short Equip15 { get; set; }
     public short Equip16 { get; set; }
+    public short Equip17 { get; set; }
 
     public short Bag1   { get; set; }
     public short Bag2   { get; set; }
@@ -469,6 +470,7 @@ public class Loadout
             ItemType.MusicalAccessories => Equip14,
             ItemType.Pet                => Equip15,
             ItemType.HairAccessories    => Equip16,
+            ItemType.Costume            => Equip17,
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }
@@ -493,6 +495,7 @@ public class Loadout
             case ItemType.MusicalAccessories : Equip14 = itemId; break;
             case ItemType.Pet                : Equip15 = itemId; break;
             case ItemType.HairAccessories    : Equip16 = itemId; break;
+            case ItemType.Costume            : Equip17 = itemId; break;
             default: throw new ArgumentOutOfRangeException(nameof(type), "Index must be between 1 and 30");
         }
     }

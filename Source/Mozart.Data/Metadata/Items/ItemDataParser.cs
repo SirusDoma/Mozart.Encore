@@ -10,7 +10,7 @@ public enum ItemDataFormat
 
 public static class ItemDataParser
 {
-    public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data, ItemDataFormat format = ItemDataFormat.Nx)
+    public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data, ItemDataFormat format = ItemDataFormat.Classic)
     {
         var items = new Dictionary<int, ItemData>();
 

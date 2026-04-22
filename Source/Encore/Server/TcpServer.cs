@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Encore.Server;
 
 public interface ITcpServer<TSession> : IDisposable
-    where TSession : Session
+    where TSession : ITcpSession
 {
     public Socket Socket { get; }
 
@@ -20,11 +20,11 @@ public interface ITcpServer<TSession> : IDisposable
     Task<TSession> AcceptSession(CancellationToken cancellationToken);
 }
 
-public interface ITcpServer : ITcpServer<Session>
+public interface ITcpServer : ITcpServer<TcpSession>
 {
 }
 
-public class TcpServer : TcpServer<Session>, ITcpServer
+public class TcpServer : TcpServer<TcpSession>, ITcpServer
 {
     public TcpServer(
         IOptions<TcpOptions>   options,
@@ -38,7 +38,7 @@ public class TcpServer : TcpServer<Session>, ITcpServer
 }
 
 public class TcpServer<TSession> : ITcpServer<TSession>
-    where TSession : Session
+    where TSession : ITcpSession
 {
     private readonly TcpListener _listener;
     private readonly ISessionFactory<TSession> _factory;
@@ -96,6 +96,7 @@ public class TcpServer<TSession> : ITcpServer<TSession>
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         Stop();
         _listener.Dispose();
     }

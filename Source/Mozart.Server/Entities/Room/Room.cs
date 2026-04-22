@@ -28,22 +28,48 @@ public class Room : Broadcastable, IRoom
         _previous = (RoomMetadata)metadata.Clone();
         _metadata = metadata;
         _options  = options;
-        _slots = [
-            new MemberSlot
-            {
-                Session  = master,
-                Team     = RoomTeam.A,
-                IsMaster = true,
-                IsReady  = true
-            },
-            new VacantSlot(),
-            new VacantSlot(),
-            new VacantSlot(),
-            new VacantSlot(),
-            new VacantSlot(),
-            new VacantSlot(),
-            new VacantSlot(),
-        ];
+
+        if (GameMode == GameMode.Live)
+        {
+            _slots =
+            [
+                new MemberSlot
+                {
+                    Session  = master,
+                    Team     = RoomTeam.A,
+                    LiveRole = RoomLiveRole.Champion,
+                    IsMaster = true,
+                    IsReady  = true
+                },
+                new LockedSlot(),
+                new LockedSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+            ];
+        }
+        else
+        {
+            _slots =
+            [
+                new MemberSlot
+                {
+                    Session  = master,
+                    Team     = RoomTeam.A,
+                    IsMaster = true,
+                    IsReady  = true
+                },
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+                new VacantSlot(),
+            ];
+        }
 
         Channel = master.Channel!;
         ScoreTracker = new ScoreTracker(this);
@@ -61,11 +87,17 @@ public class Room : Broadcastable, IRoom
 
         public required RoomTeam Team { get; set; }
 
+        public RoomLiveRole LiveRole { get; set; }
+
+        public int WinStreak { get; set; }
+
         public bool IsMaster { get; set; }
 
         public bool IsReady { get; set; }
 
         public MusicState MusicState { get; set; } = MusicState.Ready;
+
+        public PlayingState PlayingState { get; set; } = PlayingState.None;
 
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
@@ -76,24 +108,36 @@ public class Room : Broadcastable, IRoom
 
     public RoomState State => _metadata.State;
 
-    public GameMode Mode => _metadata.Mode;
-
-    public string Password => _metadata.Password;
-
-    public int MinLevelLimit => _metadata.MinLevelLimit;
-
-    public int MaxLevelLimit => _metadata.MaxLevelLimit;
-
     public RoomMetadata Metadata => _metadata;
 
     public int Capacity => Slots.Count(s => s is not LockedSlot);
 
     public int UserCount => Slots.Count(s => s is MemberSlot);
 
+    public int PlayingUserCount => Slots.Count(s => s is MemberSlot { PlayingState: PlayingState.Playing });
+
     public string Title
     {
         get => _metadata.Title;
         set => _metadata.Title = value;
+    }
+
+    public string Password
+    {
+        get => _metadata.Password;
+        set => _metadata.Password = value;
+    }
+
+    public KeyMode KeyMode
+    {
+        get => _metadata.KeyMode;
+        set => _metadata.KeyMode = value;
+    }
+
+    public GameMode GameMode
+    {
+        get => _metadata.GameMode;
+        set => _metadata.GameMode = value;
     }
 
     public int MusicId
@@ -112,6 +156,18 @@ public class Room : Broadcastable, IRoom
     {
         get => _metadata.Speed;
         set => _metadata.Speed = value;
+    }
+
+    public int MinLevelLimit
+    {
+        get => _metadata.MinLevelLimit;
+        set => _metadata.MinLevelLimit = value;
+    }
+
+    public int MaxLevelLimit
+    {
+        get => _metadata.MaxLevelLimit;
+        set => _metadata.MaxLevelLimit = value;
     }
 
     public Arena Arena
@@ -140,6 +196,9 @@ public class Room : Broadcastable, IRoom
 
     public bool Premium => _metadata.Premium;
 
+    public bool IsSelectingMusic { get; set; }
+    public bool IsRelaySessionCreated { get; set; }
+
     public Session Master => _slots.OfType<MemberSlot>().Single(s => s.IsMaster).Session;
 
     public IReadOnlyList<ISlot> Slots => _slots;
@@ -164,7 +223,7 @@ public class Room : Broadcastable, IRoom
     public override IReadOnlyList<Session> Sessions
         => _slots.OfType<MemberSlot>().Select(m => m.Session).ToList();
 
-    public event EventHandler<SessionEventArgs>? SessionDisconnected;
+    public event EventHandler<SessionEventArgs<TcpSession>>? SessionDisconnected;
 
     void IRoom.Register(Session session)
     {
@@ -181,10 +240,11 @@ public class Room : Broadcastable, IRoom
 
         var member = new MemberSlot
         {
-            Session  = session,
-            Team     = Enum.GetValues<RoomTeam>().Except(_slots.OfType<MemberSlot>().Select(m => m.Team)).First(),
-            IsMaster = false,
-            IsReady  = false
+            Session      = session,
+            Team         = Enum.GetValues<RoomTeam>().Except(_slots.OfType<MemberSlot>().Select(m => m.Team)).First(),
+            IsMaster     = false,
+            IsReady      = false,
+            PlayingState = State == RoomState.Playing ? PlayingState.Waiting : PlayingState.None
         };
 
         for (int i = 0; i < _slots.Count; i++)
@@ -193,6 +253,8 @@ public class Room : Broadcastable, IRoom
                 continue;
 
             _slots[i] = member;
+            if (i == 3)
+                member.LiveRole = RoomLiveRole.Challenger;
 
             UserJoined?.Invoke(this, new RoomUserJoinedEventArgs
             {
@@ -238,6 +300,34 @@ public class Room : Broadcastable, IRoom
             }
         }
 
+        if (GameMode == GameMode.Live)
+        {
+            // DO NOT update master id after the re-arrangement
+
+            var queueMembers = new List<MemberSlot>();
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                if (_slots[i] is not MemberSlot m)
+                    continue;
+
+                if (index is 0 or 3 && _slots[index] is not MemberSlot)
+                    _slots[index] = m;
+                else if (i >= 4)
+                    queueMembers.Add(m);
+
+                _slots[i] = new VacantSlot();
+            }
+
+            int placed = 0;
+            for (int i = 4; i < _slots.Count && placed < queueMembers.Count; i++)
+            {
+                if (_slots[i] is LockedSlot)
+                    continue;
+
+                _slots[i] = queueMembers[placed++];
+            }
+        }
+
         if (State == RoomState.Playing)
             ScoreTracker.Untrack(session);
 
@@ -264,11 +354,12 @@ public class Room : Broadcastable, IRoom
 
     public void SaveMetadataChanges(bool refresh = false)
     {
-        if (_previous.Title != _metadata.Title)
+        if (_previous.Title != _metadata.Title || _previous.Password != _metadata.Password)
         {
             TitleChanged?.Invoke(this, new RoomTitleChangedEventArgs
             {
-                Title = _metadata.Title
+                Title    = _metadata.Title,
+                Password = _metadata.Password
             });
         }
 
@@ -277,7 +368,7 @@ public class Room : Broadcastable, IRoom
             _previous.Difficulty != _metadata.Difficulty ||
             _previous.Speed != _metadata.Speed)
         {
-            if (_metadata.Mode == GameMode.Jam)
+            if (_metadata.GameMode == GameMode.Jam)
             {
                 AlbumChanged?.Invoke(this, new RoomAlbumChangedEventArgs
                 {
@@ -405,25 +496,33 @@ public class Room : Broadcastable, IRoom
             throw new ArgumentOutOfRangeException(nameof(slotId));
 
         var target = _slots[slotId];
+
         var result = RoomSlotActionType.PlayerKicked;
-
-        switch (target)
+        if (GameMode == GameMode.Live && (slotId == 1 || slotId == 2))
         {
-            case MemberSlot:
-                _slots[slotId] = new VacantSlot();
-                result = RoomSlotActionType.PlayerKicked;
+            _slots[slotId] = new LockedSlot();
+            result = RoomSlotActionType.SlotLocked;
+        }
+        else
+        {
+            switch (target)
+            {
+                case MemberSlot:
+                    _slots[slotId] = new VacantSlot();
+                    result = RoomSlotActionType.PlayerKicked;
 
-                break;
-            case LockedSlot:
-                _slots[slotId] = new VacantSlot();
-                result = RoomSlotActionType.SlotUnlocked;
+                    break;
+                case LockedSlot:
+                    _slots[slotId] = new VacantSlot();
+                    result = RoomSlotActionType.SlotUnlocked;
 
-                break;
-            case VacantSlot:
-                _slots[slotId] = new LockedSlot();
-                result = RoomSlotActionType.SlotLocked;
+                    break;
+                case VacantSlot:
+                    _slots[slotId] = new LockedSlot();
+                    result = RoomSlotActionType.SlotLocked;
 
-                break;
+                    break;
+            }
         }
 
         SlotChanged?.Invoke(this, new RoomSlotChangedEventArgs
@@ -440,9 +539,90 @@ public class Room : Broadcastable, IRoom
             member.Session.Exit(this);
     }
 
+    public void UpdateSlotPositions(bool newChampion)
+    {
+        if (GameMode != GameMode.Live || _slots[0] is not MemberSlot champion || _slots[3] is not MemberSlot challenger)
+            return;
+
+        if (newChampion)
+        {
+            foreach (var member in _slots.OfType<MemberSlot>())
+            {
+                member.IsMaster = false;
+                member.IsReady  = false;
+            }
+
+            champion.WinStreak   = 0;
+            challenger.LiveRole  = RoomLiveRole.Champion;
+            challenger.WinStreak = 0;
+            _slots[0]            = challenger;
+
+            challenger.IsMaster = true;
+            challenger.IsReady  = false;
+        }
+        else
+            champion.WinStreak++;
+
+        var loser = !newChampion ? challenger : champion;
+        _slots[3]  = new VacantSlot();
+
+        bool challengerPromoted = false;
+        for (int i = 4; i < _slots.Count; i++)
+        {
+            if (_slots[i] is not MemberSlot queued)
+                continue;
+
+            queued.LiveRole     = RoomLiveRole.Challenger;
+            _slots[3]           = queued;
+            _slots[i]           = new VacantSlot();
+            challengerPromoted  = true;
+            break;
+        }
+
+        if (!challengerPromoted)
+        {
+            loser.LiveRole = RoomLiveRole.Challenger;
+            _slots[3]      = loser;
+            return;
+        }
+
+        loser.LiveRole = RoomLiveRole.Spectator;
+        for (int i = _slots.Count - 1; i >= 4; i--)
+        {
+            if (_slots[i] is not VacantSlot)
+                continue;
+
+            _slots[i] = loser;
+            break;
+        }
+
+        var queueMembers = new List<MemberSlot>();
+        for (int i = 4; i < _slots.Count; i++)
+        {
+            if (_slots[i] is not MemberSlot member)
+                continue;
+
+            queueMembers.Add(member);
+            _slots[i] = new VacantSlot();
+        }
+
+        int placed = 0;
+        for (int i = 4; i < _slots.Count && placed < queueMembers.Count; i++)
+        {
+            if (_slots[i] is LockedSlot)
+                continue;
+
+            _slots[i] = queueMembers[placed++];
+        }
+    }
+
     public void StartGame()
     {
         ScoreTracker = new ScoreTracker(this);
+        IsRelaySessionCreated = false;
+
+        foreach (var member in _slots.OfType<MemberSlot>())
+            member.PlayingState = PlayingState.Playing;
 
         _metadata.State = RoomState.Playing;
         SaveMetadataChanges();
@@ -456,9 +636,16 @@ public class Room : Broadcastable, IRoom
             return;
 
         foreach (var member in _slots.OfType<MemberSlot>())
+        {
             member.IsReady = member.IsMaster;
+            member.PlayingState = PlayingState.None;
+
+            if (member.IsMaster)
+                _metadata.Title = $"{member.WinStreak} Wins : {member.Actor.Nickname}";
+        }
 
         _metadata.State = RoomState.Waiting;
+
         SaveMetadataChanges();
     }
 
@@ -467,7 +654,7 @@ public class Room : Broadcastable, IRoom
         IRoom room = this;
         room.Remove(session);
 
-        SessionDisconnected?.Invoke(this, new SessionEventArgs { Session = session });
+        SessionDisconnected?.Invoke(this, new SessionEventArgs<TcpSession> { Session = session });
     }
 
     public override void Invalidate()
@@ -488,13 +675,16 @@ public class Room : Broadcastable, IRoom
 
         await Task.Delay(TimeSpan.FromSeconds(_options.MusicLoadTimeout));
 
-        if (State != RoomState.Playing || ScoreTracker.Count == UserCount)
+        if (State != RoomState.Playing || ScoreTracker.Count == PlayingUserCount)
             return;
 
         for (int i = 0; i < _slots.Count; i++)
         {
             var slot = _slots[i];
             if (slot is not MemberSlot member)
+                continue;
+
+            if (member.PlayingState == PlayingState.Waiting)
                 continue;
 
             if (ScoreTracker.IsTracked(member.Session))
