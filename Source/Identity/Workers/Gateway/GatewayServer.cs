@@ -2,7 +2,7 @@ using Encore.Server;
 using Microsoft.Extensions.Options;
 using Mozart.Options;
 
-namespace Identity.Workers.Gateway;
+namespace Memoryer.Workers.Gateway;
 
 public interface IGatewayServer : ITcpServer<ChannelSession>;
 

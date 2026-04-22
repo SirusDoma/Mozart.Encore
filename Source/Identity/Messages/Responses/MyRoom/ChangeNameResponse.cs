@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class ChangeNameResponse : IMessage
 {

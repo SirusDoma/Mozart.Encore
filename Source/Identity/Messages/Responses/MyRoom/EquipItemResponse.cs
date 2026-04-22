@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class EquipItemResponse : IMessage
 {

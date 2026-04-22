@@ -1,7 +1,6 @@
 using Encore.Messaging;
-using Mozart.Metadata;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class MusicPremiumTimeEventData : IMessage
 {

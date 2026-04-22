@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata.Room;
 
-namespace Identity.Messages.Events
+namespace Memoryer.Messages.Events
 {
     public class RoomSlotUpdateEventData : IMessage
     {

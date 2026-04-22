@@ -1,13 +1,13 @@
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
 using Encore.Server;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [Authorize]
 public class PlanetController(

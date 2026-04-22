@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86;x64</Platforms>
+        <RootNamespace>Memoryer.Relay</RootNamespace>
+        <AssemblyName>Memoryer.Relay</AssemblyName>
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug' ">
+        <OutputPath>..\..\Build\Debug\</OutputPath>
+        <IntermediateOutputPath>..\..\Temp\Memoryer.Relay\</IntermediateOutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release' ">
+        <OutputPath>..\..\Build\Release\</OutputPath>
+        <IntermediateOutputPath>..\..\Temp\Memoryer.Relay\</IntermediateOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Mozart.Server\Mozart.Server.csproj" />
+        <ProjectReference Include="..\Mozart.Data\Mozart.Data.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Messages\Responses\" />
+    </ItemGroup>
+
+</Project>

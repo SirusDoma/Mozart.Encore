@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class MusicListResponse : IMessage
 {
@@ -19,20 +19,11 @@ public class MusicListResponse : IMessage
 
         [MessageField(order: 3)]
         public ushort NoteCountHx { get; init; }
-
-        [MessageField(order: 4)]
-        public MusicPrice Price { get; init; } = new();
-    }
-
-    public class MusicPrice : SubMessage
-    {
-        [MessageField(order: 0)]
-        public int O2Cash { get; init; } = 0;
-
-        [MessageField(order: 1)]
-        public int Gem { get; init; } = 0;
     }
 
     [CollectionMessageField(order: 0, prefixSizeType: TypeCode.Int16)]
     public required IReadOnlyList<MusicInfo> MusicList { get; init; }
+
+    [MessageField(order: 1)]
+    public bool FreeMusic { get; init; }
 }

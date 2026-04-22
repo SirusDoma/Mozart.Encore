@@ -1,14 +1,14 @@
 using System.Text;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
-using Identity.Messages.Events;
 using Encore.Server;
+using Memoryer.Messages.Events;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Mozart.Entities;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [Authorize]
 public class MessagingController(

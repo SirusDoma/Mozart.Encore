@@ -2,16 +2,16 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Identity.Internal.Requests;
 using Encore;
 using Encore.Messaging;
 using Encore.Server;
+using Memoryer.Internal.Requests;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Options;
 using Mozart.Sessions;
 
-namespace Identity.Workers.Channels;
+namespace Memoryer.Workers.Channels;
 
 public interface IGatewayClient : IDisposable
 {

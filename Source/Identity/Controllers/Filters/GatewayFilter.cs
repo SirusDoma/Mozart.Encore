@@ -1,13 +1,13 @@
-using Identity.Internal.Requests;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
-using Identity.Workers.Gateway;
 using Encore.Messaging;
 using Encore.Server;
+using Memoryer.Internal.Requests;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
+using Memoryer.Workers.Gateway;
 using Microsoft.Extensions.Options;
 using Mozart.Options;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class GatewayFilter(IOptions<GatewayOptions> options, IChannelAggregator aggregator,
     IChannelSessionManager channelManager, IMessageCodec codec) : CommandFilter

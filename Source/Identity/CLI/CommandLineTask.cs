@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 
 public interface ICommandLineTask

@@ -1,5 +1,5 @@
 using System.Net.Sockets;
-using Identity.Workers.Channels;
+using Memoryer.Workers.Channels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,7 +10,7 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity;
+namespace Memoryer;
 
 public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime lifetime, IGatewayClient gatewayClient,
     ISessionManager manager, IMetadataResolver resolver, IChannelService channelService, MainDbContext context,
@@ -28,7 +28,7 @@ public class ChannelWorker(IServiceProvider provider, IHostApplicationLifetime l
 
             try
             {
-                logger.LogInformation($"IdentityP2.Encore (Channel Mode): Version {Program.Version}");
+                logger.LogInformation($"Memoryer.Encore (Channel Mode): Version {Program.Version}");
 
                 // Validate config
                 if (gatewayOptions.Value.Channels.Count != 1)

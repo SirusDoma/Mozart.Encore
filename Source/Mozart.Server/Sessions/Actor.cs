@@ -8,36 +8,38 @@ public class Actor
 {
     public Actor(User user)
     {
-        UserId                = user.Id;
-        Username              = user.Username;
-        Nickname              = user.Nickname;
-        Gender                = user.Gender;
-        Gem                   = user.Gem;
-        Point                 = user.Point;
-        O2Cash                = user.O2Cash;
-        MusicCash             = user.MusicCash;
-        ItemCash              = user.ItemCash;
-        CashPoint             = user.CashPoint;
-        Level                 = user.Level;
-        Battle                = user.Battle;
-        Win                   = user.Win;
-        Lose                  = user.Lose;
-        Draw                  = user.Draw;
-        Experience            = user.Experience;
-        IsAdministrator       = user.IsAdministrator;
-        Ranking               = user.Ranking;
-        RankDeltaType         = user.RankDeltaType;
-        RankDelta             = user.RankDelta;
-        PenaltyLevel          = user.PenaltyLevel;
-        PenaltyCount          = user.PenaltyCount;
-        FreePass              = user.FreePass;
-        StarterPass           = user.StarterPass;
-        StarterPassExpiryDate = user.StarterPassExpiryDate;
-        Equipments            = user.Equipments.ToDictionary(
+        UserId                 = user.Id;
+        Username               = user.Username;
+        Nickname               = user.Nickname;
+        Gender                 = user.Gender;
+        Gem                    = user.Gem;
+        Point                  = user.Point;
+        O2Cash                 = user.O2Cash;
+        MusicCash              = user.MusicCash;
+        ItemCash               = user.ItemCash;
+        CashPoint              = user.CashPoint;
+        Level                  = user.Level;
+        Battle                 = user.Battle;
+        Win                    = user.Win;
+        Lose                   = user.Lose;
+        Draw                   = user.Draw;
+        Experience             = user.Experience;
+        IsAdministrator        = user.IsAdministrator;
+        Ranking                = user.Ranking;
+        RankDeltaType          = user.RankDeltaType;
+        RankDelta              = user.RankDelta;
+        PenaltyLevel           = user.PenaltyLevel;
+        PenaltyCount           = user.PenaltyCount;
+        FreePass               = user.FreePass;
+        StarterPass            = user.StarterPass;
+        StarterPassExpiryDate  = user.StarterPassExpiryDate;
+        InfinityRingPass       = user.InfinityRing;
+        InfinityRingExpiryDate = user.InfinityRingExpiryDate;
+        Equipments             = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
-        Inventory        = user.Inventory.ToList();
+        Inventory         = user.Inventory.ToList();
         AcquiredMusicIds  = user.AcquiredMusicList.Select(m => (ushort)m.MusicId).ToList();
         MusicScoreRecords = user.MusicScoreRecords;
         GiftItems         = user.GiftBox.Items;
@@ -47,28 +49,30 @@ public class Actor
 
     public void Sync(User user)
     {
-        Nickname              = user.Nickname;
-        Gem                   = user.Gem;
-        Point                 = user.Point;
-        O2Cash                = user.O2Cash;
-        MusicCash             = user.MusicCash;
-        ItemCash              = user.ItemCash;
-        CashPoint             = user.CashPoint;
-        Level                 = user.Level;
-        Battle                = user.Battle;
-        Win                   = user.Win;
-        Lose                  = user.Lose;
-        Draw                  = user.Draw;
-        Experience            = user.Experience;
-        Ranking               = user.Ranking;
-        RankDeltaType         = user.RankDeltaType;
-        RankDelta             = user.RankDelta;
-        PenaltyLevel          = user.PenaltyLevel;
-        PenaltyCount          = user.PenaltyCount;
-        FreePass              = user.FreePass;
-        StarterPass           = user.StarterPass;
-        StarterPassExpiryDate = user.StarterPassExpiryDate;
-        Equipments            = user.Equipments.ToDictionary(
+        Nickname               = user.Nickname;
+        Gem                    = user.Gem;
+        Point                  = user.Point;
+        O2Cash                 = user.O2Cash;
+        MusicCash              = user.MusicCash;
+        ItemCash               = user.ItemCash;
+        CashPoint              = user.CashPoint;
+        Level                  = user.Level;
+        Battle                 = user.Battle;
+        Win                    = user.Win;
+        Lose                   = user.Lose;
+        Draw                   = user.Draw;
+        Experience             = user.Experience;
+        Ranking                = user.Ranking;
+        RankDeltaType          = user.RankDeltaType;
+        RankDelta              = user.RankDelta;
+        PenaltyLevel           = user.PenaltyLevel;
+        PenaltyCount           = user.PenaltyCount;
+        FreePass               = user.FreePass;
+        StarterPass            = user.StarterPass;
+        StarterPassExpiryDate  = user.StarterPassExpiryDate;
+        InfinityRingPass       = user.InfinityRing;
+        InfinityRingExpiryDate = user.InfinityRingExpiryDate;
+        Equipments             = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
         );
@@ -83,6 +87,8 @@ public class Actor
     public required string Token { get; init; }
 
     public required string ClientId { get; init; }
+
+    public RelaySessionInfo? RelaySessionInfo { get; init; } = null;
 
     public int UserId { get; init; }
 
@@ -131,8 +137,10 @@ public class Actor
     public FreePass FreePass { get; set; }
 
     public bool StarterPass { get; set; }
+    public bool InfinityRingPass { get; set; }
 
     public DateTime? StarterPassExpiryDate { get; set; }
+    public DateTime? InfinityRingExpiryDate { get; set; }
 
     public Dictionary<ItemType, int> Equipments { get; set; }
 

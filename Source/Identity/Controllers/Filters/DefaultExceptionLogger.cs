@@ -1,7 +1,7 @@
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class DefaultExceptionLogger(ILogger<DefaultExceptionLogger> logger) : CommandExceptionLogger
 {

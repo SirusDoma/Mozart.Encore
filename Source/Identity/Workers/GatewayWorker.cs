@@ -1,7 +1,7 @@
 using System.Net.Sockets;
-using Identity.Internal.Requests;
-using Identity.Workers.Gateway;
 using Encore.Messaging;
+using Memoryer.Internal.Requests;
+using Memoryer.Workers.Gateway;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,7 +12,7 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity;
+namespace Memoryer;
 
 public class GatewayWorker(IServiceProvider provider, IClientServer clientServer, IGatewayServer gatewayServer,
     ISessionManager clientManager, IChannelService channelService, IChannelSessionManager channelManager, IChannelAggregator aggregator,
@@ -26,7 +26,7 @@ public class GatewayWorker(IServiceProvider provider, IClientServer clientServer
         {
             try
             {
-                logger.LogInformation($"IdentityP2.Encore (Gateway Mode): Version {Program.Version}");
+                logger.LogInformation($"Memoryer.Encore (Gateway Mode): Version {Program.Version}");
 
                 try
                 {

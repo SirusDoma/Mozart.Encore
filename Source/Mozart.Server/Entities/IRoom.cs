@@ -16,15 +16,18 @@ public interface IRoom : IBroadcastable
     string Title { get; set; }
     string Password { get; }
     int MusicId { get; set; }
-    GameMode Mode { get; }
+    KeyMode KeyMode { get; }
+    GameMode GameMode { get; }
     Difficulty Difficulty { get; set; }
     GameSpeed Speed { get; set; }
     Arena Arena { get; set; }
     byte ArenaRandomSeed { get; set; }
     IList<int> Skills { get; set; }
     int SkillsSeed { get; set; }
+    bool IsSelectingMusic { get; set; }
+    bool IsRelaySessionCreated { get; set; }
     Session Master { get; }
-    IReadOnlyList<Room.ISlot> Slots { get; }
+    IList<Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }
 
     void Register(Session session);

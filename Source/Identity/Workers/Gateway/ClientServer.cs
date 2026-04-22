@@ -1,7 +1,7 @@
 using Encore.Server;
 using Microsoft.Extensions.Options;
 
-namespace Identity.Workers.Gateway;
+namespace Memoryer.Workers.Gateway;
 
 public interface IClientServer : ITcpServer<ClientSession>;
 

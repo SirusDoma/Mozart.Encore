@@ -5,7 +5,7 @@ using Mozart.Data.Entities;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.Web;
+namespace Memoryer.Web;
 
 public static class AuthenticateEndpoint
 {

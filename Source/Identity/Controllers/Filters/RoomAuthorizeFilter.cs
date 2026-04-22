@@ -1,7 +1,7 @@
 using Encore.Server;
 using Mozart.Sessions;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class RoomAuthorizeAttribute: CommandFilterAttribute
 {

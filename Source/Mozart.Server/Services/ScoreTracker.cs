@@ -13,11 +13,15 @@ public interface IScoreTracker
     void UpdateJamCombo(Session session, int sequence, int combo, uint score, int lnScore = 0);
 
     bool IsTracked(Session session);
-    void Track(Session session);
+    void Track(Session session, GameSpeed speed);
     void Untrack(Session session);
 
+    void SyncTick(Session session);
+    GameSpeed GetSpeed(Session session);
+    GameSpeed GetSpeed(int memberId);
+
     void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo, int maxJamCombo,
-        uint score, int life, GameSpeed speed, int penalty = 0);
+        uint score, int life, GameSpeed speed, int longNoteScore = 0);
 
     void CompleteGame();
 }
@@ -48,7 +52,8 @@ public class ScoreTrackedEventArgs : EventArgs
     public int MusicId { get; init; }
     public Difficulty Difficulty { get; init; }
     public required IReadOnlyList<ScoreTracker.UserScore> States { get; init; }
-    public required GameMode Mode { get; init; }
+    public required KeyMode KeyMode { get; init; }
+    public required GameMode GameMode { get; init; }
 }
 
 public class ScoreTracker : IScoreTracker
@@ -58,6 +63,7 @@ public class ScoreTracker : IScoreTracker
         public required Session Session { get; init; }
         public required int MemberId    { get; init; }
 
+        public bool TickSynced { get; set; } = false;
         public GameSpeed Speed { get; set; }
 
         public int Life          { get; set; } = 1000;
@@ -78,11 +84,13 @@ public class ScoreTracker : IScoreTracker
     }
 
     private readonly Lock _mutex = new();
+    private bool _started = false;
 
     private readonly List<UserScore> _states = [];
     private readonly Dictionary<int, List<UserScore>> _scores = [];
 
     public EventHandler<ScoreTrackEventArgs>? UserTracked;
+    public EventHandler AllUserSynced;
     public EventHandler<ScoreTrackEventArgs>? UserUntracked;
 
     public EventHandler<ScoreUpdateEventArgs>?  UserLifeUpdated;
@@ -155,7 +163,7 @@ public class ScoreTracker : IScoreTracker
         return _states.Any(s => s.Session == session);
     }
 
-    public void Track(Session session)
+    public void Track(Session session, GameSpeed speed)
     {
         if (_states.Count >= Room.Capacity)
             throw new InvalidOperationException("All members are already tracked");
@@ -175,7 +183,7 @@ public class ScoreTracker : IScoreTracker
                 {
                     Session     = member.Session,
                     MemberId    = i,
-                    Speed       = Room.Speed,
+                    Speed       = speed,
                     Life        = 1000,
                     JamCombo    = 0,
                     Cool        = 0,
@@ -205,34 +213,63 @@ public class ScoreTracker : IScoreTracker
     public void Untrack(Session session)
     {
         var state = _states.SingleOrDefault(s => s.Session == session);
-        if (state == null)
-            return;
-
-        lock (_mutex)
+        if (state != null)
         {
-            state.Session.Disconnected -= OnSessionDisconnected;
-            _states.Remove(state);
+            lock (_mutex)
+            {
+                state.Session.Disconnected -= OnSessionDisconnected;
+                _states.Remove(state);
+            }
+
+            UserUntracked?.Invoke(this, new ScoreTrackEventArgs
+            {
+                MemberId = state.MemberId,
+                Session = session
+            });
+
+            if (Room.State == RoomState.Playing)
+            {
+                // Client no longer exit the room when manual exit initiated.
+
+                if (Completed)
+                    Room.CompleteGame();
+            }
         }
 
-        UserUntracked?.Invoke(this, new ScoreTrackEventArgs
+        if (!_started && Room.Slots.OfType<Room.MemberSlot>().Count() == _states.Count)
         {
-            MemberId = state.MemberId,
-            Session  = session
-        });
-
-        if (Room.State == RoomState.Playing)
-        {
-            // Client no longer exit the room when manual exit initiated.
-
-            // TODO: Broadcast MusicState + Playing for each members
-
-            if (Completed)
-                Room.CompleteGame();
+            _started = true;
+            AllUserSynced?.Invoke(this, EventArgs.Empty);
         }
     }
 
+    public bool IsTickSynced()
+    {
+        return _states.All(s => s.TickSynced);
+    }
+
+    public void SyncTick(Session session)
+    {
+        _states.Single(s => s.Session == session).TickSynced = true;
+        if (!_started && Room.Slots.OfType<Room.MemberSlot>().Count() == _states.Count && _states.All(s => s.TickSynced))
+        {
+            _started = true;
+            AllUserSynced?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public GameSpeed GetSpeed(Session session)
+    {
+        return _states.Single(s => s.Session == session).Speed;
+    }
+
+    public GameSpeed GetSpeed(int memberId)
+    {
+        return _states.SingleOrDefault(s => s.MemberId == memberId)?.Speed ?? Room.Speed;
+    }
+
     public void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
-        int maxJamCombo, uint score, int life, GameSpeed speed, int penalty = 0)
+        int maxJamCombo, uint score, int life, GameSpeed speed, int longNoteScore = 0)
     {
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -243,18 +280,18 @@ public class ScoreTracker : IScoreTracker
             if (Completed)
                 return;
 
-            state.Cool        = cool;
-            state.Good        = good;
-            state.Bad         = bad;
-            state.Miss        = miss;
-            state.MaxCombo    = maxCombo;
-            state.MaxJamCombo = maxJamCombo;
-            state.Score       = score;
-            state.LongNoteScore     = penalty;
-            state.Life        = life;
-            state.Speed       = speed;
-            state.Clear       = state.Life > 0;
-            state.Completed   = true;
+            state.Cool          = cool;
+            state.Good          = good;
+            state.Bad           = bad;
+            state.Miss          = miss;
+            state.MaxCombo      = maxCombo;
+            state.MaxJamCombo   = maxJamCombo;
+            state.Score         = score;
+            state.LongNoteScore = longNoteScore;
+            state.Life          = life;
+            state.Speed         = speed;
+            state.Clear         = state.Life > 0;
+            state.Completed     = true;
         }
 
         state.Session.Disconnected -= OnSessionDisconnected;
@@ -281,7 +318,8 @@ public class ScoreTracker : IScoreTracker
             MusicId    = Room.MusicId,
             Difficulty = Room.Difficulty,
             States     = completedStates,
-            Mode       = Room.Mode
+            KeyMode    = Room.KeyMode,
+            GameMode   = Room.GameMode
         });
 
         // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.

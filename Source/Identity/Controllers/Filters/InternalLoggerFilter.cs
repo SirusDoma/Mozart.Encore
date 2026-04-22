@@ -2,7 +2,7 @@ using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Mozart.Sessions;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class InternalLoggerFilter(ILogger<InternalLoggerFilter> logger) : CommandFilter
 {

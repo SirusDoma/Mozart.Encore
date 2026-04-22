@@ -1,15 +1,16 @@
+using Memoryer.Messages.Events;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 using Mozart.Metadata.Music;
 using Mozart.Services;
 
-using static Identity.Messages.Events.ScoreCompletedEventData;
+using static Memoryer.Messages.Events.ScoreCompletedEventData;
 
-namespace Identity;
+namespace Memoryer;
 
 public static class MissionEvaluator
 {
-    public static MissionResult Evaluate(
+    public static ScoreCompletedEventData.MissionResult Evaluate(
         MusicHeader? header,
         Difficulty difficulty,
         IReadOnlyList<ItemData> items,
@@ -18,14 +19,14 @@ public static class MissionEvaluator
     {
         int playerLevel = score.Session.Actor.Level;
         if (playerLevel <= 0 || playerLevel >= 100 || (playerLevel + 1) % 4 != 0)
-            return MissionResult.None;
+            return ScoreCompletedEventData.MissionResult.None;
 
         if (header == null)
-            return MissionResult.Failed;
+            return ScoreCompletedEventData.MissionResult.Failed;
 
         int mission = (playerLevel + 1) / 4;
         if (mission == 0)
-            return MissionResult.Failed;
+            return ScoreCompletedEventData.MissionResult.Failed;
 
         short level = difficulty switch
         {
@@ -44,7 +45,7 @@ public static class MissionEvaluator
         };
 
         if (noteCount == 0)
-            return MissionResult.Failed;
+            return ScoreCompletedEventData.MissionResult.Failed;
 
         bool HasModifier(GameModifier modifier) =>
             items.Any(i => i.GameModifier == modifier);
@@ -79,6 +80,6 @@ public static class MissionEvaluator
             _ => throw new ArgumentOutOfRangeException(nameof(score), mission, null)
         };
 
-        return passed ? MissionResult.Completed : MissionResult.Failed;
+        return passed ? ScoreCompletedEventData.MissionResult.Completed : ScoreCompletedEventData.MissionResult.Failed;
     }
 }

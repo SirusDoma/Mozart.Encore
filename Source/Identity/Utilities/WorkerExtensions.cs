@@ -2,7 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mozart.Services;
 
-namespace Identity;
+namespace Memoryer;
 
 public static class WorkerExtensions
 {

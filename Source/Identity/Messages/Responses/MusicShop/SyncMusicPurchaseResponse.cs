@@ -1,7 +1,7 @@
 using Encore.Messaging;
-using Identity.Messages.Events;
+using Memoryer.Messages.Events;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class SyncMusicPurchaseResponse : IMessage
 {

@@ -1,8 +1,9 @@
+using System.Net;
 using System.Security.Cryptography;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
 using Mozart.Data.Entities;
 using Encore.Server;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Repositories;
@@ -11,7 +12,7 @@ using Mozart.Services;
 using Mozart.Sessions;
 using Session = Mozart.Sessions.Session;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 public class AuthController(
     Session session, ISessionManager manager,
@@ -28,7 +29,8 @@ public class AuthController(
         try
         {
             logger.LogInformation((int)RequestCommand.Authorize,
-                "Authorize session (ClientID: {ClientId})", request.ClientId);
+                "Authorize session (ClientID: {ClientId}): {Key1}/{Key2} - {EP1} ({EP2})",
+                request.ClientId, request.RelaySessionKey1, request.RelaySessionKey2, request.PublicEndpoint, request.LocalEndpoint);
 
             const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
             var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(request.Token, comparison));
@@ -65,8 +67,15 @@ public class AuthController(
 
             Session.Authorize(new Actor(characterInfo)
             {
-                Token = authSession.Token,
-                ClientId = request.ClientId
+                Token            = authSession.Token,
+                ClientId         = request.ClientId,
+                RelaySessionInfo = new RelaySessionInfo
+                {
+                    RelaySessionKey1 = request.RelaySessionKey1,
+                    RelaySessionKey2 = request.RelaySessionKey2,
+                    PublicEndpoint   = request.PublicEndpoint,
+                    LocalEndpoint    = request.LocalEndpoint
+                }
             });
         }
         catch (ArgumentException ex)
@@ -80,6 +89,7 @@ public class AuthController(
 
         var actor = Session.Actor;
         bool freeMusic = gameOptions.Value.FreeMusic;
+        bool infinityRing = gameOptions.Value.InfinityRing;
 
         manager.CancelExpiry(Session);
         return new AuthResponse
@@ -99,7 +109,13 @@ public class AuthController(
                     ? actor.StarterPassExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
                     : TimeSpan.Zero
             },
-            AcquiredMusicIds = actor.AcquiredMusicIds.Select(i => (int)i).ToList()
+            InfiniteRing = new AuthResponse.InfiniteRingInfo
+            {
+                Active = infinityRing || actor.InfinityRingPass,
+                Expiry = actor.InfinityRingExpiryDate.HasValue
+                    ? actor.InfinityRingExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
+                    : infinityRing ? TimeSpan.FromDays(31) : TimeSpan.Zero
+            }
         };
     }
 

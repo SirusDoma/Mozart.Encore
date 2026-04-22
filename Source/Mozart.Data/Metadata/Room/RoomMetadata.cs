@@ -6,7 +6,9 @@ public class RoomMetadata : ICloneable
 
     public required string Title { get; set; }
 
-    public required GameMode Mode { get; set; }
+    public required KeyMode KeyMode { get; set; }
+
+    public required GameMode GameMode { get; set; }
 
     public required int MusicId { get; set; }
 

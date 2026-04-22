@@ -1,11 +1,4 @@
 ﻿using System.Net.Sockets;
-using Identity.CLI;
-using Identity.Controllers;
-using Identity.Controllers.Filters;
-using Identity.Controllers.Internal;
-using Identity.Events;
-using Identity.Workers.Channels;
-using Identity.Workers.Gateway;
 using Encore.Hosting.Extensions;
 using Encore.Hosting.Logging;
 using Encore.Messaging;
@@ -24,14 +17,25 @@ using Mozart.Events;
 using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
-using Identity.Web;
+using Memoryer.CLI;
+using Memoryer.Controllers;
+using Memoryer.Controllers.Filters;
+using Memoryer.Controllers.Internal;
+using Memoryer.Events;
+using Memoryer.Relay;
+using Memoryer.Relay.Controllers;
+using Memoryer.Relay.Hosting;
+using Memoryer.Services;
+using Memoryer.Web;
+using Memoryer.Workers.Channels;
+using Memoryer.Workers.Gateway;
 
-namespace Identity;
+namespace Memoryer;
 
 public class Program
 {
-    public static Version Version        => new(5, 2, 0);
-    public static Version NetworkVersion => new(5, 89, 9);
+    public static Version Version        => new(6, 0, 0);
+    public static Version NetworkVersion => new(8, 0, 2);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)
@@ -58,6 +62,7 @@ public class Program
                 ["Gateway:Channels:0:Id"]           = "0",
                 ["Auth:Mode"]                       = "Default",
                 ["Auth:RevokeOnStartp"]             = "true",
+                ["Relay:Enabled"]                   = "false",
                 ["Score:Gem"]                       = "1.0",
                 ["Score:Exp"]                       = "1.0"
             })
@@ -106,19 +111,28 @@ public class Program
                     .GetSection(ServerOptions.Section)
                     .Get<ServerOptions>() ?? new ServerOptions();
 
+                var relay = context.Configuration
+                    .GetSection(RelayOptions.Section)
+                    .Get<RelayOptions>() ?? new RelayOptions();
+
                 // Controller-based routing: Not safe with AOT
-                var routes = provider.UseCodec<DefaultMessageCodec>()
-                    .Map<AuthController>()
-                    .Map<PlanetController>()
-                    .Map<ChargeController>()
-                    .Map<MessagingController>()
-                    .Map<MainRoomController>()
-                    .Map<RankingController>()
-                    .Map<MyRoomController>()
-                    .Map<ItemShopController>()
-                    .Map<MusicShopController>()
-                    .Map<WaitingController>()
-                    .Map<PlayingController>();
+                var routes = provider.UseCodec<DefaultMessageCodec>();
+
+                if (options.Mode != DeploymentMode.Relay)
+                {
+                    routes
+                        .Map<AuthController>()
+                        .Map<PlanetController>()
+                        .Map<ChargeController>()
+                        .Map<MessagingController>()
+                        .Map<MainRoomController>()
+                        .Map<RankingController>()
+                        .Map<MyRoomController>()
+                        .Map<ItemShopController>()
+                        .Map<MusicShopController>()
+                        .Map<WaitingController>()
+                        .Map<PlayingController>();
+                }
 
                 switch (options.Mode)
                 {
@@ -129,14 +143,24 @@ public class Program
                         routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
                         break;
                 }
+
+                if (options.Mode == DeploymentMode.Relay || relay.Enabled)
+                {
+                    routes.Map<RelayController>();
+                }
             })
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IMozartServer, MozartServer>();
-
                 var options = context.Configuration
                     .GetSection(ServerOptions.Section)
                     .Get<ServerOptions>() ?? new ServerOptions();
+
+                var relay = context.Configuration
+                    .GetSection(RelayOptions.Section)
+                    .Get<RelayOptions>() ?? new RelayOptions();
+
+                if (options.Mode != DeploymentMode.Relay)
+                    services.AddSingleton<GameServer>();
 
                 switch (options.Mode)
                 {
@@ -160,7 +184,17 @@ public class Program
                         services.AddHostedService<DefaultWorker>();
 
                         break;
+                    case DeploymentMode.Relay:
+                        services.AddRelayServices();
+
+                        break;
                 }
+
+                if (options.Mode != DeploymentMode.Relay && relay.Enabled)
+                    services.AddRelayServices();
+
+                if (options.Mode != DeploymentMode.Relay)
+                    services.AddSingleton<IRelayService, RelayService>();
             });
 
         IHost host;
@@ -188,6 +222,7 @@ public class Program
                     .AddCommandLineTask<RegisterUserCommandTask>()
                     .AddCommandLineTask<AuthorizeUserCommandTask>()
                     .AddCommandLineTask<UpsertUserRankingCommandTask>()
+                    .AddCommandLineTask<EncDecCommandTask>()
                     .AddCommandLineTask<VersionCommandTask>();
             })
             .ExecuteAsync(args);
@@ -229,6 +264,8 @@ public class Program
                     .BindConfiguration(AuthOptions.Section);
                 services.AddOptions<GameOptions>()
                     .BindConfiguration(GameOptions.Section);
+                services.AddOptions<RelayOptions>()
+                    .BindConfiguration(RelayOptions.Section);
 
                 // Database contexts
                 services.AddDbContextFactory<MainDbContext>((provider, builder) =>

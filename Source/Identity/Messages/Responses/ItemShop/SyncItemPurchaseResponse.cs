@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class SyncItemPurchaseResponse : IMessage
 {
@@ -27,14 +27,14 @@ public class SyncItemPurchaseResponse : IMessage
     [MessageField(order: 3)]
     public int CashPoint { get; init; }
 
-    [CollectionMessageField(order: 4, prefixSizeType: TypeCode.Int32)]
+    [CollectionMessageField(order: 4, prefixSizeType: TypeCode.Empty)]
     public IReadOnlyList<int> Inventory { get; init; } = [];
 
     [MessageField(order: 5)]
-    public int ItemCash { get; init; }
+    public int MusicCash { get; init; }
 
     [MessageField(order: 6)]
-    public int MusicCash { get; init; }
+    public int ItemCash { get; init; }
 
     [CollectionMessageField(order: 7, prefixSizeType: TypeCode.Int32)]
     public IList<AttributiveItemInfo> AttributiveItems { get; init; } = [];

@@ -1,8 +1,11 @@
-using Identity.Controllers.Filters;
-using Identity.Messages.Events;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
+using System.Net;
 using Encore.Server;
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages.Events;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
+using Memoryer.Relay.Messages.Requests;
+using Memoryer.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
@@ -14,7 +17,7 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [RoomAuthorize]
 public class WaitingController(
@@ -22,10 +25,37 @@ public class WaitingController(
     IUserRepository repository,
     IEventPublisher<ScoreTracker> publisher,
     IOptions<GameOptions> options,
+    IRelayService relayService,
     ILogger<WaitingController> logger
 ) : CommandController<Session>(session)
 {
     private IRoom Room => Session.Room!;
+
+    [RoomMasterAuthorize]
+    [CommandHandler(RequestCommand.StartSelectMusic)]
+    public async Task StartSelectMusic(CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.StartSelectMusic,
+            "Start select music [{RoomId:000}]", Room.Id
+        );
+
+        Room.IsSelectingMusic = true;
+        await Room.Broadcast(new SelectMusicStartedEventData(), cancellationToken);
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler(RequestCommand.CancelSelectMusic)]
+    public async Task CancelSelectMusic(CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.CancelSelectMusic,
+            "Cancel select music [{RoomId:000}]", Room.Id
+        );
+
+        Room.IsSelectingMusic = false;
+        await Room.Broadcast(new SelectMusicCancelledEventData(), cancellationToken);
+    }
 
     [RoomMasterAuthorize]
     [CommandHandler]
@@ -37,6 +67,7 @@ public class WaitingController(
             Room.Id, request.Difficulty, request.Speed, request.MusicId
         );
 
+        Room.IsSelectingMusic = false;
         Room.MusicId = request.MusicId;
         Room.Difficulty = request.Difficulty;
         Room.Speed = request.Speed;
@@ -53,9 +84,64 @@ public class WaitingController(
             Room.Id, request.Speed, request.AlbumId
         );
 
+        Room.IsSelectingMusic = false;
         Room.MusicId = request.AlbumId;
         Room.Speed = request.Speed;
         Room.SaveMetadataChanges();
+    }
+
+    [CommandHandler(RequestCommand.GetLiveState)]
+    public LiveStateResponse GetLiveState()
+    {
+        logger.LogInformation(
+            (int)RequestCommand.GetLiveState,
+            "Get live state [{RoomId:000}]",
+            Room.Id
+        );
+
+        var slots    = Room.Slots.ToList();
+        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+
+        return new LiveStateResponse
+        {
+            MemberId  = (byte)memberId,
+            UserCount = Room.UserCount,
+            WinStreak = ((Room.MemberSlot)slots[memberId]).WinStreak,
+            Members   = slots.Select((slot, i) =>
+            {
+                return slot switch
+                {
+                    Room.MemberSlot member => new LiveStateResponse.MemberLiveState
+                    {
+                        Active     = true,
+                        MemberInfo = new LiveStateResponse.MemberInfo
+                        {
+                            MemberId        = (byte)i,
+                            Nickname        = member.Actor.Nickname,
+                            Level           = member.Actor.Level,
+                            Gender          = member.Actor.Gender,
+                            Gem             = member.Actor.Gem,
+                            Team            = member.Team,
+                            Ready           = member.IsReady,
+                            MusicState      = member.MusicState,
+                            Equipments      = member.Actor.Equipments,
+                            MusicIds        = member.Actor.InstalledMusicIds.ToList(),
+                            CashPoint       = member.Actor.CashPoint,
+                            FreePass        = member.Actor.FreePass.Type,
+                            IsPlaying       = Room.ScoreTracker.IsTracked(member.Session),
+                            IsAdministrator = member.Actor.IsAdministrator,
+                            IsRoomMaster    = member.IsMaster,
+                            WinStreak       = member.WinStreak,
+                        }
+                    },
+                    _ => new LiveStateResponse.MemberLiveState
+                    {
+                        Active     = false,
+                        MemberInfo = null
+                    }
+                };
+            }).ToList()
+        };
     }
 
     [CommandHandler]
@@ -135,6 +221,12 @@ public class WaitingController(
             var member = (Room.MemberSlot)Room.Slots[request.MemberId];
             member.MusicState = MusicState.Ready;
             member.Actor.InstalledMusicIds.Add((ushort)(Room.MusicId | 0x8000));
+
+            await Room.Broadcast(new SyncMemberMusicListEventData
+            {
+                MemberId = request.MemberId,
+                MusicIds = member.Actor.InstalledMusicIds.ToList(),
+            }, cancellationToken);
         }
 
         await Room.Broadcast(new DownloadProgressChangedEventData
@@ -188,6 +280,29 @@ public class WaitingController(
         Room.SaveMetadataChanges();
     }
 
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public async Task SetRoomSkillEx(SetRoomSkillExRequest request, CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomSkill,
+            "Update room [{RoomId:000}] skill ex settings: {Status} ({count}: {skillId})",
+            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active", request.Skills.Count, request.Skills.FirstOrDefault()
+        );
+
+        Room.Skills = request.Skills.Where(s => s > 0).ToList();
+        Room.SkillsSeed = Room.Skills.Count > 0
+            ? Random.Shared.Next(0, int.MaxValue)
+            : 0;
+
+        await Room.Broadcast(new WaitingSkillExChangedEventData
+        {
+            Skills                   = Room.Skills,
+            HasSuperRoomManager      = false,
+            SuperRoomManagerMemberId = 0
+        }, CancellationToken.None);
+    }
+
     [CommandHandler]
     public void SetRoomPlayerTeam(SetTeamRequest request)
     {
@@ -209,6 +324,38 @@ public class WaitingController(
         // };
     }
 
+    [CommandHandler(RequestCommand.GetP2PList)]
+    public P2PListResponse GetPeerList()
+    {
+        logger.LogInformation(
+            (int)RequestCommand.GetLiveState,
+            "Get peer list [{RoomId:000}]",
+            Room.Id
+        );
+
+        var slots = Room.Slots.ToList();
+        return new P2PListResponse
+        {
+            Peers = slots.Select((s, i) => s switch
+            {
+                Room.MemberSlot member => new P2PListResponse.PeerInfo
+                {
+                    MemberId       = (byte)i,
+                    PublicEndpoint = member.Actor.RelaySessionInfo?.PublicEndpoint ?? new IPEndPoint(IPAddress.None, 0),
+                    LocalEndpoint  = member.Actor.RelaySessionInfo?.LocalEndpoint  ?? new IPEndPoint(IPAddress.None, 0),
+                },
+                _ => new P2PListResponse.PeerInfo
+                {
+                    MemberId       = byte.MaxValue,
+                    PublicEndpoint = new IPEndPoint(IPAddress.Any, 0),
+                    LocalEndpoint  = new IPEndPoint(IPAddress.Any, 0)
+                },
+            })
+            .Where(p => p.MemberId != byte.MaxValue)
+            .ToList(),
+        };
+    }
+
     [RoomMasterAuthorize]
     [CommandHandler]
     public void UpdateSlot(UpdateSlotRequest request)
@@ -226,7 +373,7 @@ public class WaitingController(
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
 
-        if (Room.Metadata.Mode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
+        if (Room.Metadata.GameMode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
         {
             await Session.WriteMessage(new StartGameEventData
             {

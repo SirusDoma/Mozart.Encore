@@ -1,10 +1,10 @@
-using Identity.Messages.Codecs;
 using Encore.Messaging;
+using Memoryer.Messages.Codecs;
 using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class UserJoinWaitingEventData : IMessage
 {

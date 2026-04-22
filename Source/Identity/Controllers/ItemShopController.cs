@@ -1,14 +1,14 @@
-using Identity.Controllers.Filters;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
 using Encore.Server;
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [ChannelAuthorize]
 public class ItemShopController(
@@ -55,8 +55,8 @@ public class ItemShopController(
             Point                   = user.Point,
             O2Cash                  = user.O2Cash,
             Inventory               = inventory.Take(inventory.Capacity).Select(item => (int)item.Id).ToList(),
-            ItemCash                = user.ItemCash,
             MusicCash               = user.MusicCash,
+            ItemCash                = user.ItemCash,
             AttributiveItems        = user.Inventory
                 .Where(i => i.Count > 0)
                 .Select(i => new SyncItemPurchaseResponse.AttributiveItemInfo
@@ -74,7 +74,7 @@ public class ItemShopController(
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.SellItem,
-            "[{User}] Sell item slot: {Item}", actor.Nickname, request.InventorySlotIndex);
+            "Sell item slot: {Slot} ({Item})", request.InventorySlotIndex, request.ItemId);
 
         var user      = (await repository.Find(actor.UserId, cancellationToken))!;
         var inventory = user.Inventory;

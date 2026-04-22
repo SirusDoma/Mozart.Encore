@@ -1,13 +1,13 @@
-using Identity.Internal.Requests;
-using Identity.Messages.Responses;
-using Identity.Workers.Gateway;
 using Encore.Messaging;
 using Encore.Server;
+using Memoryer.Internal.Requests;
+using Memoryer.Messages.Responses;
+using Memoryer.Workers.Gateway;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Options;
 
-namespace Identity.Controllers.Internal;
+namespace Memoryer.Controllers.Internal;
 
 public class GatewayController(ChannelSession session, IChannelAggregator aggregator, IOptions<GatewayOptions> options,
      IMessageCodec codec, ILogger<GatewayController> logger) : CommandController<ChannelSession>(session)

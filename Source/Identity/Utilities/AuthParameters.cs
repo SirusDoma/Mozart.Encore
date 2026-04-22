@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Identity;
+namespace Memoryer;
 
 public class AuthParameters
 {

@@ -9,13 +9,13 @@ using Mozart.Options;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity;
+namespace Memoryer;
 
-public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISessionManager manager,
+public class DefaultWorker(IServiceProvider provider, GameServer server, ISessionManager manager,
     IMetadataResolver resolver, IChannelService channelService, MainDbContext context, IOptions<DatabaseOptions> dbOptions,
     IOptions<AuthOptions> authOptions, ILogger<DefaultWorker> logger, IHostEnvironment env) : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    public override async Task StartAsync(CancellationToken cancellationToken)
     {
         // Scope in background service
         // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services#consuming-a-scoped-service-in-a-background-task
@@ -26,7 +26,7 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
 
             try
             {
-                logger.LogInformation("IdentityP2.Encore: Version {Version}", Program.Version);
+                logger.LogInformation("Memoryer.Encore: Version {Version}", Program.Version);
 
                 // Validate by loading metadata files
                 this.ValidateMetadata(channelService, resolver, logger);
@@ -110,6 +110,11 @@ public class DefaultWorker(IServiceProvider provider, IMozartServer server, ISes
             };
         }
 
+        await base.StartAsync(cancellationToken);
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
         while (!cancellationToken.IsCancellationRequested)
         {
             Session session;

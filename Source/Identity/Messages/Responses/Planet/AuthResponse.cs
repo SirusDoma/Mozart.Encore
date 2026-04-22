@@ -1,8 +1,8 @@
 using Encore.Messaging;
-using Identity.Messages.Codecs;
+using Memoryer.Messages.Codecs;
 using Mozart.Data.Entities;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public enum AuthResult : uint
 {
@@ -43,6 +43,17 @@ public class AuthResponse : IMessage
         private string? FormattedDuration => !Active || Expiry == TimeSpan.Zero ? null : Expiry.ToString();
     }
 
+    public class InfiniteRingInfo : SubMessage
+    {
+        [MessageField<MessageFieldCodec<short>>(order: 0)]
+        public bool Active { get; init; }
+
+        public TimeSpan Expiry { get; init; } = TimeSpan.Zero;
+
+        [StringMessageField(order: 2)]
+        private string? FormattedDuration => !Active || Expiry == TimeSpan.Zero ? null : Expiry.ToString();
+    }
+
     [MessageField(order: 0)]
     public AuthResult Result { get; init; }
 
@@ -52,6 +63,6 @@ public class AuthResponse : IMessage
     [MessageField(order: 2)]
     public StarterPassInfo? StarterPass { get; init; }
 
-    [CollectionMessageField(order: 3, prefixSizeType: TypeCode.Int32)]
-    public IReadOnlyList<int> AcquiredMusicIds { get; init; } = [];
+    [MessageField(order: 3)]
+    public InfiniteRingInfo? InfiniteRing { get; init; }
 }

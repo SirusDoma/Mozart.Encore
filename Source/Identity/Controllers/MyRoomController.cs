@@ -1,6 +1,6 @@
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
 using Encore.Server;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
@@ -8,7 +8,7 @@ using Mozart.Metadata;
 using Mozart.Metadata.Items;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [Authorize]
 public class MyRoomController(
@@ -163,35 +163,36 @@ public class MyRoomController(
         };
     }
 
-    [CommandHandler(RequestCommand.PenaltyReset)]
-    public async Task<PenaltyResetResponse> ResetPenalty(CancellationToken cancellationToken)
+    [CommandHandler]
+    public async Task<PenaltyResetResponse> ResetPenalty(PenaltyResetRequest request, CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.PenaltyReset, "Penalty reset");
 
-        var user = (await repository.Find(actor.UserId, cancellationToken))!;
-        for (int i = 0; i < user.Inventory.Capacity; i++)
+        try
         {
-            var bagItem = user.Inventory[i];
-            if (bagItem.Id == 0)
-                continue;
+            var user = (await repository.Find(actor.UserId, cancellationToken))!;
+            var bagItem = user.Inventory[request.InventorySlotIndex];
+
+            if (bagItem.Id != request.ItemId)
+                throw new ArgumentOutOfRangeException(nameof(request));
 
             if (!Session.Channel!.GetItemData().TryGetValue(bagItem.Id, out var item))
-                continue;
+                throw new ArgumentOutOfRangeException(nameof(request));
 
             if (item.ItemKind != ItemKind.PenaltyReset)
-                continue;
+                throw new ArgumentOutOfRangeException(nameof(request));
 
             if (bagItem.Count > 1)
             {
-                user.Inventory[i] = new Inventory.BagItem
+                user.Inventory[request.InventorySlotIndex] = new Inventory.BagItem
                 {
                     Id = bagItem.Id,
                     Count = bagItem.Count - 1
                 };
             }
             else
-                user.Inventory[i] = Inventory.BagItem.Empty;
+                user.Inventory[request.InventorySlotIndex] = Inventory.BagItem.Empty;
 
             user.PenaltyCount = 0;
             user.PenaltyLevel = 0;
@@ -206,11 +207,13 @@ public class MyRoomController(
                 Invalid = false
             };
         }
-
-        return new PenaltyResetResponse
+        catch (ArgumentOutOfRangeException)
         {
-            Invalid = true
-        };
+            return new PenaltyResetResponse
+            {
+                Invalid = true
+            };
+        }
     }
 
     [CommandHandler]

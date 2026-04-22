@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class MusicScoreListResponse : IMessage
 {
@@ -12,19 +12,13 @@ public class MusicScoreListResponse : IMessage
         [MessageField(order: 0)]
         public ushort MusicId { get; init; }
 
-        [MessageField(order: 1)]
-        private short Unused1 => 0;
-
-        [CollectionMessageField(order: 2, prefixSizeType: TypeCode.Empty)]
-        public required Dictionary<Difficulty, int> Scores { get; init; }
-
-        [CollectionMessageField(order: 3, prefixSizeType: TypeCode.Empty)]
+        [CollectionMessageField(order: 1, prefixSizeType: TypeCode.Empty)]
         public required Dictionary<Difficulty, Rank> Ranks { get; init; }
-
-        [MessageField(order: 4)]
-        private byte Unused2 => 0;
     }
 
-    [CollectionMessageField(order: 0, prefixSizeType: TypeCode.Empty)]
+    [MessageField(order: 0)]
+    private int Result { get; init; } = 0; // Treated as success when value >= 0
+
+    [CollectionMessageField(order: 1, prefixSizeType: TypeCode.Int16)]
     public required IReadOnlyList<MusicScoreEntry> MaxScores { get; init; }
 }

@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class CreateRoomResponse : IMessage
 {
@@ -20,4 +20,16 @@ public class CreateRoomResponse : IMessage
 
     [MessageField<MessageFieldCodec<short>>(order: 2)]
     public bool Premium { get; init; }
+
+    [StringMessageField(order: 3)]
+    public string Title { get; init; } = string.Empty;
+
+    [MessageField(order: 4)]
+    public bool HasPassword { get; init; }
+
+    [MessageField(order: 5)]
+    public byte MinLevelLimit { get; set; }
+
+    [MessageField(order: 6)]
+    public byte MaxLevelLimit { get; set; }
 }

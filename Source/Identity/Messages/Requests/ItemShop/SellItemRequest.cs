@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Requests;
+namespace Memoryer.Messages.Requests;
 
 public class SellItemRequest : IMessage
 {
@@ -8,4 +8,7 @@ public class SellItemRequest : IMessage
 
     [MessageField(order: 0)]
     public int InventorySlotIndex { get; init; }
+
+    [MessageField(order: 1)]
+    public int ItemId { get; init; }
 }

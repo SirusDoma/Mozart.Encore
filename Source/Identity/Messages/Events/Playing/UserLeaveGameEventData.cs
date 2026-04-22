@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Data.Entities;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class UserLeaveGameEventData : IMessage
 {

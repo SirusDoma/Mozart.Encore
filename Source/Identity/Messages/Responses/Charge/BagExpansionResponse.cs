@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Data.Entities;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class BagExpansionResponse : IMessage
 {

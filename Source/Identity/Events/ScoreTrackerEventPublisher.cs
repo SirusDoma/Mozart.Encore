@@ -1,4 +1,4 @@
-using Identity.Messages.Events;
+using Memoryer.Messages.Events;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
@@ -9,7 +9,7 @@ using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.Events;
+namespace Memoryer.Events;
 
 public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<GameOptions> gameOptions,
     ILogger<ScoreTrackerEventPublisher> logger) : IEventPublisher<ScoreTracker>
@@ -30,6 +30,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
     public void Monitor(ScoreTracker tracker)
     {
+        tracker.AllUserSynced      += OnAllUserSynced;
         tracker.UserTracked        += OnUserTracked;
         tracker.UserUntracked      += OnUserUntracked;
         tracker.UserLifeUpdated    += OnUserLifeUpdated;
@@ -37,7 +38,6 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         tracker.UserScoreSubmitted += OnUserScoreSubmitted;
         tracker.ScoreCompleted     += OnScoreCompleted;
     }
-
     private IReadOnlyList<byte> ComputeMemberRanks(IReadOnlyList<ScoreTracker.UserScore> states)
     {
         return states
@@ -47,6 +47,39 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             .Take(Room.MaxCapacity)
             .ToList();
     }
+
+    private async void OnAllUserSynced(object? sender, EventArgs e)
+    {
+        try
+        {
+            var tracker = (ScoreTracker)sender!;
+            if (tracker.Room.GameMode == GameMode.Live)
+            {
+                await tracker.Room.Broadcast(new RoomMembersLatencySyncedEventData
+                {
+                    ChampionSpeed = tracker.GetSpeed(0),
+                    ChallengerSpeed = tracker.GetSpeed(3)
+                }, CancellationToken.None);
+            }
+            else
+            {
+                foreach (var session in tracker.Room.Slots.OfType<Room.MemberSlot>().Select(s => s.Session))
+                {
+                    await session.WriteMessage(new RoomMembersLatencySyncedEventData
+                    {
+                        ChampionSpeed = tracker.GetSpeed(session),
+                        ChallengerSpeed = tracker.GetSpeed(session)
+                    }, CancellationToken.None);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Failed to broadcast [ScoreTracker::OnAllUserSynced] event to one or more subscribers");
+        }
+    }
+
 
     private async void OnUserTracked(object? sender, ScoreTrackEventArgs e)
     {
@@ -172,7 +205,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 _             => music?.LevelHx,
             } ?? 0;
 
-            int totalNotes = e.Difficulty switch
+            int noteCount = e.Difficulty switch
             {
                 Difficulty.EX => music?.NoteCountEx,
                 Difficulty.NX => music?.NoteCountNx,
@@ -183,9 +216,9 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 => score.Cool + score.Good + score.Bad + score.Miss;
 
             var scores = e.States;
-            if (e.Mode != GameMode.Jam)
+            if (e.GameMode != GameMode.Jam)
             {
-                if (scores.Where(s => s.Clear).Any(score => CountTotalNotes(score) > totalNotes))
+                if (scores.Where(s => s.Clear).Any(score => CountTotalNotes(score) > noteCount))
                     throw new InvalidOperationException("Unbalance total notes"); // someone probably cheating?
             }
 
@@ -196,6 +229,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             var channel = e.Room.Channel;
             var options = gameOptions.Value;
 
+            bool championWon = false;
             for (int id = 0; id < Room.MaxCapacity; id++)
             {
                 var state = scores.SingleOrDefault(m => m.MemberId == id);
@@ -212,13 +246,13 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
                 // Compute reward only when it is safe
                 int reward = 0;
-                if (safe && (room.Metadata.Mode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
+                if (safe && (room.Metadata.GameMode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
                 {
-                    int maxJams   = (totalNotes - 26) / 25;
-                    int remainder = (totalNotes - 26) % 25;
-                    int maxScore  = 200 * totalNotes
-                                    + 25 * 10 * maxJams * (maxJams + 1)
-                                    + (remainder > 0 ? 10 * remainder * (maxJams + 1) : 0);
+                    int maxJams   = (noteCount - 26) / 25;
+                    int remainder = (noteCount - 26) % 25;
+                    int maxScore  = 200 * noteCount
+                                    + 125 * maxJams * (maxJams + 1)
+                                    + 10  * remainder * (maxJams + 1);
 
                     reward = (int)((((user.Level - 1f) / 5f) * 38f + 87f) * Math.Sqrt((float)state.Score / maxScore));
                     if (state is { Clear: true })
@@ -233,7 +267,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     reward = (int)(reward * channel.GemRates);
 
                     int xpNext = user.Level >= 0 && user.Level < NextLevelXp.Length ? NextLevelXp[user.Level] : 0;
-                    int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes);
+                    int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / noteCount);
 
                     user.Gem        += reward;
                     user.Experience += (int)(xpGain * channel.ExpRates);
@@ -241,7 +275,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     if (user.Experience > xpNext)
                         mission = MissionEvaluator.Evaluate(music, e.Difficulty, skills, state);
 
-                    if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                    if (e.GameMode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
                         mission = ScoreCompletedEventData.MissionResult.Failed;
 
                     if (xpNext != 0 && user.Experience > xpNext)
@@ -277,50 +311,148 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     record.Score = safe ? state.Score : 0;
                     record.ClearType = ClearType.None;
 
-                    if (state.Cool == totalNotes)
+                    if (state.Cool == noteCount)
                         record.ClearType = ClearType.AllCool;
-                    else if (state.Cool + state.Good == totalNotes && state is { Bad: 0, Miss: 0 })
+                    else if (state.Cool + state.Good == noteCount && state is { Bad: 0, Miss: 0 })
                         record.ClearType = ClearType.AllCombo;
                 }
 
                 await repository.Commit();
                 state.Session.Actor.Sync(user);
 
+                if (e.GameMode == GameMode.Live)
+                {
+                    if (room.Slots[state.MemberId] is Room.MemberSlot { LiveRole: RoomLiveRole.Champion })
+                    {
+                        championWon = win;
+                    }
+                }
+
                 entries.Add(new ScoreCompletedEventData.ScoreEntry
                 {
-                    MemberId   = (byte)id,
-                    Active     = true,
-                    Cool       = (ushort)state.Cool,
-                    Good       = (ushort)state.Good,
-                    Bad        = (ushort)state.Bad,
-                    Miss       = (ushort)state.Miss,
-                    MaxCombo   = (ushort)state.MaxCombo,
-                    JamCombo   = (ushort)state.MaxJamCombo,
-                    Score      = state.Score,
-                    Reward     = (ushort)Math.Max(0, reward),
-                    Level      = state.Session.Actor.Level,
-                    Experience = state.Session.Actor.Experience,
-                    Result     = draw ? ScoreCompletedEventData.MatchResult.Draw :
-                                 win  ? ScoreCompletedEventData.MatchResult.Win  :
-                                        ScoreCompletedEventData.MatchResult.Lose,
-                    Gem        = state.Session.Actor.Gem,
-                    CashPoint  = state.Session.Actor.CashPoint,
-                    Speed      = state.Speed,
-                    Penalty    = state.LongNoteScore
+                    MemberId      = (byte)id,
+                    Active        = true,
+                    Cool          = (ushort)state.Cool,
+                    Good          = (ushort)state.Good,
+                    Bad           = (ushort)state.Bad,
+                    Miss          = (ushort)state.Miss,
+                    MaxCombo      = (ushort)state.MaxCombo,
+                    JamCombo      = (ushort)state.MaxJamCombo,
+                    Score         = state.Score,
+                    Reward        = (ushort)Math.Max(0, reward),
+                    Level         = state.Session.Actor.Level,
+                    Experience    = state.Session.Actor.Experience,
+                    Result        = draw ? ScoreCompletedEventData.MatchResult.Draw :
+                                    win  ? ScoreCompletedEventData.MatchResult.Win  :
+                                           ScoreCompletedEventData.MatchResult.Lose,
+                    Gem           = state.Session.Actor.Gem,
+                    CashPoint     = state.Session.Actor.CashPoint,
+                    Speed         = state.Speed,
+                    LongNoteScore = state.LongNoteScore
                 });
             }
 
+
             entries = entries.OrderByDescending(s => s.Score).ToList();
-            switch (e.Mode)
+            switch (e.GameMode)
             {
-                case GameMode.Jam: await room.Broadcast(new AlbumScoreCompletedEventData { Scores = entries }, CancellationToken.None); break;
-                default:           await room.Broadcast(new ScoreCompletedEventData { Scores = entries }, CancellationToken.None);      break;
+                case GameMode.Jam:  await room.Broadcast(new AlbumScoreCompletedEventData { Scores = entries }, CancellationToken.None); break;
+                case GameMode.Live: await room.Broadcast(new ScoreCompletedEventData
+                                    {
+                                       RoomMasterMemberId = (byte)room.Slots.ToList().FindIndex(s => s is Room.MemberSlot { IsMaster: true }),
+                                       Scores             = entries
+                                    }, CancellationToken.None);
+
+                                    RearrangeMemberSlots(room, championWon);
+                                    break;
+
+                default:            await room.Broadcast(new ScoreCompletedEventData
+                                    {
+                                        RoomMasterMemberId = (byte)room.Slots.ToList().FindIndex(s => s is Room.MemberSlot { IsMaster: true }),
+                                       Scores              = entries
+                                    }, CancellationToken.None);
+
+                                    break;
             }
+
+
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex,
                 "Failed to broadcast [ScoreTracker::OnGameCompleted] event to one or more subscribers");
+        }
+    }
+
+    private static void RearrangeMemberSlots(IRoom room, bool championWon)
+    {
+        var slots = room.Slots;
+
+        if (room.GameMode != GameMode.Live || slots[0] is not Room.MemberSlot champion || slots[3] is not Room.MemberSlot challenger)
+            return;
+
+        if (championWon)
+        {
+            champion.WinStreak++;
+        }
+        else
+        {
+            champion.WinStreak   = 0;
+            challenger.LiveRole  = RoomLiveRole.Champion;
+            challenger.WinStreak = 0;
+            slots[0]             = challenger;
+        }
+
+        var loser = championWon ? challenger : champion;
+        slots[3]  = new Room.VacantSlot();
+
+        bool challengerPromoted = false;
+        for (int i = 4; i < slots.Count; i++)
+        {
+            if (slots[i] is not Room.MemberSlot queued)
+                continue;
+
+            queued.LiveRole     = RoomLiveRole.Challenger;
+            slots[3]            = queued;
+            slots[i]            = new Room.VacantSlot();
+            challengerPromoted  = true;
+            break;
+        }
+
+        if (!challengerPromoted)
+        {
+            loser.LiveRole = RoomLiveRole.Challenger;
+            slots[3]       = loser;
+            return;
+        }
+
+        loser.LiveRole = RoomLiveRole.Spectator;
+        for (int i = slots.Count - 1; i >= 4; i--)
+        {
+            if (slots[i] is not Room.VacantSlot)
+                continue;
+
+            slots[i] = loser;
+            break;
+        }
+
+        var queueMembers = new List<Room.MemberSlot>();
+        for (int i = 4; i < slots.Count; i++)
+        {
+            if (slots[i] is not Room.MemberSlot member)
+                continue;
+
+            queueMembers.Add(member);
+            slots[i] = new Room.VacantSlot();
+        }
+
+        int placed = 0;
+        for (int i = 4; i < slots.Count && placed < queueMembers.Count; i++)
+        {
+            if (slots[i] is Room.LockedSlot)
+                continue;
+
+            slots[i] = queueMembers[placed++];
         }
     }
 }

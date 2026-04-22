@@ -1,19 +1,19 @@
-# IdentityP2.Encore
+# Memoryer.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Final)**  
-<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, v0.5 and v0.6</sub>
+Supported client version: **v8.02 (O2Jam Classic)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                       | Supported client version |
+|---------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)          | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)        | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](../../tree/cross-time)   | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)      | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](../../tree/identity-p2) | v5.89 (O2JamO2 Final)    |
 
 ## Features
 

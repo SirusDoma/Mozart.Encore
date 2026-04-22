@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Requests;
+namespace Memoryer.Messages.Requests;
 
 public class AcquireMusicRequest : IMessage
 {
