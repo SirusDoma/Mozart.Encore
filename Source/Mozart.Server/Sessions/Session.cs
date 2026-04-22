@@ -6,7 +6,7 @@ using Mozart.Entities;
 
 namespace Mozart.Sessions;
 
-public class Session : Encore.Sessions.Session
+public class Session : Encore.Sessions.TcpSession
 {
     private readonly IMessageCodec _codec;
 

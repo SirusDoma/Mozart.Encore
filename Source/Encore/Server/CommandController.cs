@@ -4,16 +4,16 @@ namespace Encore.Server;
 
 public abstract class CommandController
 {
-    protected CommandController(Session session)
+    protected CommandController(ISession session)
     {
         Session = session;
     }
 
-    protected virtual Session Session { get; }
+    protected virtual ISession Session { get; }
 }
 
 public abstract class CommandController<TSession> : CommandController
-    where TSession : Session
+    where TSession : ISession
 {
     protected CommandController(TSession session) :
         base(session)
@@ -21,5 +21,5 @@ public abstract class CommandController<TSession> : CommandController
         Session = session;
     }
 
-    protected override TSession Session { get; }
+    protected new TSession Session { get; }
 }

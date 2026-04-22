@@ -5,7 +5,7 @@ namespace Encore.Server;
 
 public class CommandExecutionContext
 {
-    public CommandExecutionContext(Session session, Enum command, IMessage? request, CommandHandlerDescriptor descriptor)
+    public CommandExecutionContext(ISession session, Enum command, IMessage? request, CommandHandlerDescriptor descriptor)
     {
         Session    = session ?? throw new ArgumentNullException(nameof(session));
         Command    = command;
@@ -13,7 +13,7 @@ public class CommandExecutionContext
         Descriptor = descriptor;
     }
 
-    public Session Session { get; }
+    public ISession Session { get; }
 
     public Enum Command { get; }
 

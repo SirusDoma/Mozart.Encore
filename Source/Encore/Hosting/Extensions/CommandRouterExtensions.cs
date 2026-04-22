@@ -104,7 +104,7 @@ public static partial class CommandHostExtensions
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse
     >(this ICommandRouteBuilder builder, Func<TSession, TRequest, CancellationToken, Task<TResponse>> handler)
-        where TSession  : Session
+        where TSession  : ISession
         where TRequest  : class, IMessage
         where TResponse : class, IMessage
     {
@@ -123,7 +123,7 @@ public static partial class CommandHostExtensions
 
     public static ICommandRouteBuilder Map<TSession,[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TRequest>(this ICommandRouteBuilder builder, Func<TSession, TRequest, Task> handler)
-        where TSession : Session
+        where TSession : ISession
         where TRequest : class, IMessage
     {
         EnsureDefaultServicesRegistered(builder.Services);
@@ -141,7 +141,7 @@ public static partial class CommandHostExtensions
 
     public static ICommandRouteBuilder Map<TSession, TCommand>(this ICommandRouteBuilder builder,
         TCommand command, Func<TSession, Task> handler)
-        where TSession : Session
+        where TSession : ISession
         where TCommand : Enum
     {
         EnsureDefaultServicesRegistered(builder.Services);
@@ -159,7 +159,7 @@ public static partial class CommandHostExtensions
 
     public static ICommandRouteBuilder Map<TSession, TCommand>(this ICommandRouteBuilder builder,
         TCommand command, Func<TSession, CancellationToken, Task> handler)
-        where TSession : Session
+        where TSession : ISession
         where TCommand : Enum
     {
         EnsureDefaultServicesRegistered(builder.Services);
@@ -179,7 +179,7 @@ public static partial class CommandHostExtensions
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse
     >(this ICommandRouteBuilder builder, Func<TSession, TRequest, Task<TResponse>> handler)
-        where TSession  : Session
+        where TSession  : ISession
         where TRequest  : class, IMessage
         where TResponse : class, IMessage
     {
@@ -206,7 +206,7 @@ public static partial class CommandHostExtensions
         RebuildSingleton(builder.Services, (provider, factory) =>
         {
             var router = (ICommandDispatcher)factory(provider);
-            router.Map<Session, TController>(session =>
+            router.Map<ISession, TController>(session =>
             {
                 using var scope = provider.CreateScope();
                 return ActivatorUtilities.CreateInstance<TController>(scope.ServiceProvider, session);
@@ -221,7 +221,7 @@ public static partial class CommandHostExtensions
     [RequiresUnreferencedCode("Controller registration require reflection to scan available handlers")]
     public static ICommandRouteBuilder Map<TSession, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TController>(this ICommandRouteBuilder builder)
-        where TSession    : Session
+        where TSession    : ISession
         where TController : CommandController
     {
         EnsureDefaultServicesRegistered(builder.Services);
@@ -254,7 +254,7 @@ public static partial class CommandHostExtensions
                 var options = new ControllerMappingOptions(provider);
                 configurer(options);
 
-                router.Map<Session, TController>(session =>
+                router.Map<ISession, TController>(session =>
                 {
                     using var scope = provider.CreateScope();
                     return ActivatorUtilities.CreateInstance<TController>(scope.ServiceProvider, session);
@@ -269,7 +269,7 @@ public static partial class CommandHostExtensions
     [RequiresUnreferencedCode("Controller registration require reflection to scan available handlers")]
     public static ICommandRouteBuilder Map<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TController>(this ICommandRouteBuilder builder,
-        Func<IServiceProvider, Session, TController> implementationFactory)
+        Func<IServiceProvider, ISession, TController> implementationFactory)
         where TController : CommandController
     {
         EnsureDefaultServicesRegistered(builder.Services);
@@ -277,7 +277,7 @@ public static partial class CommandHostExtensions
         RebuildSingleton(builder.Services, (provider, factory) =>
         {
             var router = (ICommandDispatcher)factory(provider);
-            router.Map<Session, TController>(session =>
+            router.Map<ISession, TController>(session =>
             {
                 using var scope = provider.CreateScope();
                 return implementationFactory(scope.ServiceProvider, session);

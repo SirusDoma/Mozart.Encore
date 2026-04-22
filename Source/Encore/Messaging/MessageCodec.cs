@@ -129,7 +129,7 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
                 memberType = GetEnumerableElementType(member.MemberType);
 
             if (memberType.IsAssignableTo(typeof(IMessage)))
-                _typeSet.Add(memberType);
+                RegisterType(memberType);
         }
     }
 
@@ -416,10 +416,11 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
             return enumerableType.GetElementType() ?? throw ex;
 
         var enumerableInterface = enumerableType.GetInterfaces()
-            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            .FirstOrDefault(i => i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                                                      ||  i.GetGenericTypeDefinition() == typeof(IDictionary<,>)));
 
         if (enumerableInterface != null)
-            return enumerableInterface.GetGenericArguments()[0] ?? throw ex;
+            return enumerableInterface.GetGenericArguments().Last() ?? throw ex;
 
         if (enumerableType.IsGenericType &&
             typeof(IEnumerable).IsAssignableFrom(enumerableType.GetGenericTypeDefinition()))

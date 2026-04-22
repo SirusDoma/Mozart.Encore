@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 namespace Encore.Sessions;
 
 public interface ISessionFactory<out TSession>
-    where TSession : Session
+    where TSession : ITcpSession
 {
     public TSession CreateSession(TcpClient client, params object[] parameters);
 }
 
-public interface ISessionFactory : ISessionFactory<Session>
+public interface ISessionFactory : ISessionFactory<TcpSession>
 {
 }
 
@@ -39,8 +39,8 @@ public sealed class SessionFactory : ISessionFactory
         _dispatcher    = dispatcher    ?? new CommandDispatcher();
     }
 
-    public Session CreateSession(TcpClient client, params object[] parameters)
+    public TcpSession CreateSession(TcpClient client, params object[] parameters)
     {
-        return new Session(client, _options, _framerFactory, _dispatcher);
+        return new TcpSession(client, _options, _framerFactory, _dispatcher);
     }
 }

@@ -1,0 +1,164 @@
+using System.Security.Cryptography;
+using Mozart.Data.Entities;
+using Encore.Server;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Mozart.Data.Repositories;
+using Mozart.Options;
+using Mozart.Services;
+using Mozart.Sessions;
+using Session = Mozart.Sessions.Session;
+
+namespace Memoryer.Controllers;
+
+public class AuthController(
+    Session session,
+    ISessionManager manager,
+    IAuthService authService,
+    IChannelService channelService,
+    IUserRepository userRepository,
+    IOptions<GameOptions> gameOptions,
+    ILogger<AuthController> logger
+) : CommandController<Session>(session)
+{
+    [CommandHandler]
+    public async Task<AuthResponse> Authorize(AuthRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation((int)RequestCommand.Authorize,
+                "Authorize session (ClientID: {ClientId}): {Key1}/{Key2} - {EP1} ({EP2})",
+                request.ClientId, request.RelaySessionKey1, request.RelaySessionKey2, request.PublicEndpoint, request.LocalEndpoint);
+
+            const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
+            var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(request.Token, comparison));
+            if (existingSession != null)
+            {
+                if (!manager.Validate(existingSession))
+                {
+                    if (existingSession.Channel != null)
+                        existingSession.Exit(existingSession.Channel!);
+
+                    if (existingSession.Room != null)
+                        existingSession.Exit(existingSession.Room!);
+                }
+                else
+                {
+                    return new AuthResponse
+                    {
+                        Result = AuthResult.AlreadyConnected
+                    };
+                }
+            }
+
+            // TODO: Also check the request.UserId when authorizing
+            var authSession = await authService.Authorize(request.Token, cancellationToken);
+            var characterInfo = await userRepository.Find(authSession.UserId, cancellationToken);
+
+            if (characterInfo == null)
+            {
+                return new AuthResponse
+                {
+                    Result = AuthResult.DatabaseError
+                };
+            }
+
+            Session.Authorize(new Actor(characterInfo)
+            {
+                Token            = authSession.Token,
+                ClientId         = request.ClientId,
+                RelaySessionInfo = new RelaySessionInfo
+                {
+                    RelaySessionKey1 = request.RelaySessionKey1,
+                    RelaySessionKey2 = request.RelaySessionKey2,
+                    PublicEndpoint   = request.PublicEndpoint,
+                    LocalEndpoint    = request.LocalEndpoint
+                }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            logger.LogWarning((int)RequestCommand.Authorize, ex, "Failed to authorize [{token}]", request.Token);
+            return new AuthResponse
+            {
+                Result = AuthResult.InvalidLogin
+            };
+        }
+
+        var actor = Session.Actor;
+        bool freeMusic = gameOptions.Value.FreeMusic;
+        bool infinityRing = gameOptions.Value.InfinityRing;
+
+        manager.CancelExpiry(Session);
+        return new AuthResponse
+        {
+            Result = AuthResult.Success,
+            FreePass = new AuthResponse.FreePassInfo
+            {
+                Type   = freeMusic ? FreePassType.AllMusic : actor.FreePass.Type,
+                Expiry = !freeMusic && actor.FreePass.Type != FreePassType.None
+                    ? actor.FreePass.ExpiryDate.ToUniversalTime() - DateTime.UtcNow
+                    : TimeSpan.Zero
+            },
+            StarterPass = new AuthResponse.StarterPassInfo
+            {
+                Active = actor.StarterPass,
+                Expiry = actor.StarterPassExpiryDate.HasValue
+                    ? actor.StarterPassExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
+                    : TimeSpan.Zero
+            },
+            InfiniteRing = new AuthResponse.InfiniteRingInfo
+            {
+                Active = infinityRing || actor.InfinityRingPass,
+                Expiry = actor.InfinityRingExpiryDate.HasValue
+                    ? actor.InfinityRingExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
+                    : infinityRing ? TimeSpan.FromDays(31) : TimeSpan.Zero
+            }
+        };
+    }
+
+    [CommandHandler(RequestCommand.SessionKeys)]
+    public SessionKeysResponse GenerateSessionKeys()
+    {
+        Session.Properties["SessionKeys.Primary"]   = RandomNumberGenerator.GetBytes(32);
+        Session.Properties["SessionKeys.Secondary"] = RandomNumberGenerator.GetBytes(16);
+
+        return new SessionKeysResponse
+        {
+            Seed         = 0,
+            Prefix       = 0,
+            PrimaryKey   = (byte[])Session.Properties["SessionKeys.Primary"],
+            SecondaryKey = (byte[])Session.Properties["SessionKeys.Secondary"]
+        };
+    }
+
+    [CommandHandler(RequestCommand.Terminate)]
+    public async Task Terminate(CancellationToken cancellationToken)
+    {
+        if (Session.Authorized)
+        {
+            logger.LogInformation((int)RequestCommand.Terminate, "Session stop requested");
+
+            if (Session.Room != null)
+                Session.Exit(Session.Room);
+
+            if (Session.Channel != null)
+                Session.Exit(Session.Channel);
+        }
+
+        await manager.StopSession(Session);
+    }
+
+    [CommandHandler(GenericCommand.LegacyPing, GenericCommand.LegacyPing)]
+    public void LegacyPing()
+    {
+    }
+
+    [Authorize]
+    [CommandHandler(GenericCommand.Ping, GenericCommand.Ping)]
+    public void Ping()
+    {
+    }
+}

@@ -4,7 +4,8 @@ public enum DeploymentMode
 {
     Full,
     Gateway,
-    Channel
+    Channel,
+    Relay
 }
 
 public class ServerOptions

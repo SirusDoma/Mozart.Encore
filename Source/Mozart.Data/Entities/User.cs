@@ -91,21 +91,23 @@ public class User
         set => Penalty.Count = value;
     }
 
-    private const int StarterPassFlag = 0x1000; // 4096 — bit 12, above max FreePassType (1056)
+    private const int StarterPassFlag  = 0x1000; // 4096 — bit 12, above max FreePassType (1056)
+    private const int InfinityRingFlag = 0x2000; // 8192 — bit 13
+    private const int VipFlagMask      = StarterPassFlag | InfinityRingFlag;
 
     [NotMapped]
     public FreePass FreePass
     {
         get
         {
-            var type = (FreePassType)(Member.Vip & ~StarterPassFlag);
+            var type = (FreePassType)(Member.Vip & ~VipFlagMask);
             return type != FreePassType.None && Member.VipDate > DateTime.UtcNow
                 ? new FreePass(type, Member.VipDate)
                 : new FreePass(FreePassType.None, DateTime.UtcNow);
         }
         set
         {
-            Member.Vip = (short)((Member.Vip & StarterPassFlag) | (int)(uint)value.Type);
+            Member.Vip = (short)((Member.Vip & VipFlagMask) | (int)(uint)value.Type);
             Member.VipDate = value.ExpiryDate;
         }
     }
@@ -135,6 +137,32 @@ public class User
 
     [NotMapped]
     public bool StarterPass => StarterPassExpiryDate != null;
+
+    [NotMapped]
+    public DateTime? InfinityRingExpiryDate
+    {
+        get
+        {
+            return (Member.Vip & InfinityRingFlag) != 0 && Member.VipDate > DateTime.UtcNow
+                ? Member.VipDate
+                : null;
+        }
+        set
+        {
+            if (value.HasValue)
+            {
+                Member.Vip = (short)(Member.Vip | InfinityRingFlag);
+                Member.VipDate = value.Value;
+            }
+            else
+            {
+                Member.Vip = (short)(Member.Vip & ~InfinityRingFlag);
+            }
+        }
+    }
+
+    [NotMapped]
+    public bool InfinityRing => InfinityRingExpiryDate != null;
 
     [NotMapped]
     public Inventory Inventory => new(Loadout, AttributiveItems);
