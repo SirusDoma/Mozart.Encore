@@ -7,7 +7,7 @@ using Encore.Server;
 using Encore.Sessions;
 using Microsoft.Extensions.Options;
 
-namespace Identity.Workers.Gateway;
+namespace Memoryer.Workers.Gateway;
 
 public class ChannelStats
 {

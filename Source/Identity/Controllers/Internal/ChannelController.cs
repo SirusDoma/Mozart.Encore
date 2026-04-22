@@ -1,13 +1,13 @@
-using Identity.Internal.Requests;
-using Identity.Workers.Channels;
 using Encore.Server;
+using Memoryer.Internal.Requests;
+using Memoryer.Workers.Channels;
 using Microsoft.Extensions.Logging;
 using Mozart.Data.Repositories;
 using Mozart.Entities;
 using Mozart.Services;
 using Mozart.Sessions;
 
-namespace Identity.Controllers.Internal;
+namespace Memoryer.Controllers.Internal;
 
 public class ChannelController(
     UserSession session,

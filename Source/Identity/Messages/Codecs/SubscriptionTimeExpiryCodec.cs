@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Encore.Messaging;
 
-namespace Identity.Messages.Codecs;
+namespace Memoryer.Messages.Codecs;
 
 public class SubscriptionTimeExpiryCodec: MessageFieldCodec
 {

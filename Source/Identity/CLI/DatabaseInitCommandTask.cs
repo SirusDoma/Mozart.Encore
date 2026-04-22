@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mozart.Data.Contexts;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 public class DatabaseInitCommandTask(MainDbContext context) : ICommandLineTask
 {

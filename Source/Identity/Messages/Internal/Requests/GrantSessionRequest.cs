@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Internal.Requests;
+namespace Memoryer.Internal.Requests;
 
 public class GrantSessionRequest : IMessage
 {

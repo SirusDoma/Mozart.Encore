@@ -472,9 +472,6 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
         ArgumentNullException.ThrowIfNull(payload, nameof(payload));
 
         IMessage? request;
-        Enum? command = null;
-        List<CommandHandler>? handlers = null;
-
         try
         {
             request = _codec.Decode(payload);
@@ -489,9 +486,47 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
             return;
         }
 
+        Enum command;
         try
         {
             command = _codec.DecodeCommand(payload);
+        }
+        catch (Exception ex)
+        {
+            var context = new CommandExceptionContext(ex, session, null, request);
+            var response = await FilterException(context, cancellationToken)
+                .ConfigureAwait(false);
+
+            await WriteFrame(session, response, cancellationToken);
+            return;
+        }
+
+        await Dispatch(session, command, request, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task Dispatch<TMessage>(Session session, TMessage message, CancellationToken cancellationToken)
+        where TMessage : class, IMessage
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(message);
+
+        return Dispatch(session, TMessage.Command, message, cancellationToken);
+    }
+
+    public Task Dispatch(Session session, Enum command, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(command);
+
+        return Dispatch(session, command, null, cancellationToken);
+    }
+
+    private async Task Dispatch(Session session, Enum command, IMessage? request,
+        CancellationToken cancellationToken)
+    {
+        List<CommandHandler>? handlers;
+        try
+        {
             if (!_handlers.TryGetValue(command, out handlers))
                 throw new NotSupportedException($"Command '0x{command:X4}' is not recognized");
         }

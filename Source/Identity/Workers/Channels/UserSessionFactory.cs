@@ -2,7 +2,7 @@ using System.Net.Sockets;
 using Encore.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Identity.Workers.Channels;
+namespace Memoryer.Workers.Channels;
 
 public interface IUserSessionFactory : ISessionFactory<UserSession>;
 

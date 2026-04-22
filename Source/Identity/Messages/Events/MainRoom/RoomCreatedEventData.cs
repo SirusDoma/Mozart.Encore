@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class RoomCreatedEventData : IMessage
 {
@@ -14,20 +14,23 @@ public class RoomCreatedEventData : IMessage
     public required string Title { get; init; }
 
     [MessageField(order: 2)]
-    public GameMode Mode { get; init; } = GameMode.Single;
+    public KeyMode KeyMode { get; init; } = KeyMode.SevenKeys;
 
     [MessageField(order: 3)]
-    public bool HasPassword { get; init; } = false;
+    public GameMode GameMode { get; init; } = GameMode.Normal;
 
     [MessageField(order: 4)]
-    public byte MinLevelLimit { get; set; } = 0;
+    public bool HasPassword { get; init; } = false;
 
     [MessageField(order: 5)]
+    public byte MinLevelLimit { get; set; } = 0;
+
+    [MessageField(order: 6)]
     public byte MaxLevelLimit { get; set; } = 0;
 
-    [MessageField<MessageFieldCodec<short>>(order: 6)]
+    [MessageField<MessageFieldCodec<short>>(order: 7)]
     public bool Premium { get; set; }
 
-    [MessageField(order: 7)]
+    [MessageField(order: 8)]
     public byte Type { get; set; } = 0;
 }

@@ -1,7 +1,7 @@
-using Identity.Controllers.Filters;
-using Identity.Messages.Responses;
-using Identity.Messages.Requests;
 using Encore.Server;
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
@@ -9,7 +9,7 @@ using Mozart.Data.Repositories;
 using Mozart.Options;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [ChannelAuthorize]
 public class ChargeController(
@@ -19,8 +19,6 @@ public class ChargeController(
     ILogger<ChargeController> logger
 ) : CommandController<Session>(session)
 {
-    private const int FreePassPrice = 9900;
-
     [CommandHandler(RequestCommand.SyncCashPoint)]
     public async Task<SyncCashPointResponse> ChargeCashPoint(CancellationToken cancellationToken)
     {

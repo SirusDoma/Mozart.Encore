@@ -4,7 +4,7 @@ using Encore;
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Codecs;
+namespace Memoryer.Messages.Codecs;
 
 public class AuthGenderCodec : MessageFieldCodec
 {

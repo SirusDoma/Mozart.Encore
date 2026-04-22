@@ -2,7 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Mozart.Options;
 
-namespace Identity.Web;
+namespace Memoryer.Web;
 
 public class WebServer
 {

@@ -4,7 +4,7 @@ using Encore.Server;
 using Microsoft.Extensions.Options;
 using Mozart.Sessions;
 
-namespace Identity.Workers.Channels;
+namespace Memoryer.Workers.Channels;
 
 public sealed class UserSession : Session
 {

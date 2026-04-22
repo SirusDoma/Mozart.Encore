@@ -1,9 +1,9 @@
-using Identity.Messages.Codecs;
 using Encore.Messaging;
+using Memoryer.Messages.Codecs;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class CharacterInfoResponse : IMessage
 {

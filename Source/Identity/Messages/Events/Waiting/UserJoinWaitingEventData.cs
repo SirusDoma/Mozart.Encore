@@ -1,10 +1,10 @@
-using Identity.Messages.Codecs;
 using Encore.Messaging;
+using Memoryer.Messages.Codecs;
 using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class UserJoinWaitingEventData : IMessage
 {
@@ -47,7 +47,7 @@ public class UserJoinWaitingEventData : IMessage
     public FreePassType FreePass { get; init; }
 
     [MessageField(order: 12)]
-    public bool IsPlaying { get; init; }
+    public PlayingState PlayingState { get; init; }
 
     [MessageField(order: 13)]
     public bool IsAdministrator { get; init; }

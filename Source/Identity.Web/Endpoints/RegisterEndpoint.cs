@@ -10,7 +10,7 @@ using Mozart.Metadata.Items;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.Web;
+namespace Memoryer.Web;
 
 public static class RegisterEndpoint
 {

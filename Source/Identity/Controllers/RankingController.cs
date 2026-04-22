@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Mozart.Data.Contexts;
 using Mozart.Entities;
 using Mozart.Sessions;
-using Identity.Controllers.Filters;
-using Identity.Messages.Responses;
-
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
+using Mozart.Data.Entities;
 using Mozart.Metadata;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [ChannelAuthorize]
 public class RankingController(
@@ -74,14 +75,45 @@ public class RankingController(
                 .Select(g =>
                 {
                     Session.Channel!.GetMusicList().TryGetValue(g.Key, out var music);
+                    var scores = g.ToDictionary(r => r.Difficulty);
                     return new MusicScoreListResponse.MusicScoreEntry
                     {
                         MusicId = (ushort)g.Key,
-                        Scores  = g.ToDictionary(r => r.Difficulty, r => (int)r.Score),
-                        Ranks   = g.ToDictionary(r => r.Difficulty, r => RankEvaluator.Evaluate(r.Score, r.Difficulty, music, r.ClearType))
+                        Ranks   = Enum.GetValues<Difficulty>().ToDictionary(d => d, d =>
+                            scores.TryGetValue(d, out var r)
+                                ? RankEvaluator.Evaluate(r.Score, r.Difficulty, music, r.ClearType)
+                                : Rank.None
+                        )
                     };
                 })
                 .ToList()
+        };
+    }
+
+    [CommandHandler]
+    public MusicMaxScoreResponse GetMusicMaxScore(MusicMaxScoreRequest request)
+    {
+        var actor = Session.GetAuthorizedToken<Actor>();
+        logger.LogInformation(
+            (int)RequestCommand.GetMusicMaxScore,
+            "Get music max score"
+        );
+
+        var diff = Difficulty.EX;
+        if (Channel.GetMusicList().TryGetValue(request.MusicId, out var music))
+        {
+            if (music.NoteCountEx == request.NoteCount)
+                diff = Difficulty.EX;
+            else if (music.NoteCountNx == request.NoteCount)
+                diff = Difficulty.NX;
+            else if (music.NoteCountHx == request.NoteCount)
+                diff = Difficulty.HX;
+        }
+
+        return new MusicMaxScoreResponse
+        {
+            MaxScore = actor.MusicScoreRecords
+                .FirstOrDefault(s => s.MusicId == request.MusicId && s.Difficulty == diff)?.Score ?? 0
         };
     }
 }

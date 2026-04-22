@@ -4,7 +4,7 @@ using Mozart.Data.Contexts;
 using Mozart.Data.Entities;
 using Mozart.Metadata;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 public class UpsertUserRankingCommandTask(MainDbContext context) : ICommandLineTask
 {

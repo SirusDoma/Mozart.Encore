@@ -2,7 +2,7 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 public class CommandLineTaskProcessor
 {

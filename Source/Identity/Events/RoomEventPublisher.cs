@@ -1,15 +1,15 @@
-using Identity.Messages.Events;
-using Identity.Messages.Responses;
+using Memoryer.Messages.Events;
+using Memoryer.Relay.Messages.Requests;
+using Memoryer.Services;
 using Microsoft.Extensions.Logging;
-using Mozart.Data.Entities;
 using Mozart.Entities;
 using Mozart.Events;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 
-namespace Identity.Events;
+namespace Memoryer.Events;
 
-public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPublisher<Room>
+public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPublisher> logger) : IEventPublisher<Room>
 {
     public void Monitor(Room room)
     {
@@ -48,9 +48,18 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 MusicIds        = e.Member.Actor.InstalledMusicIds.ToList(),
                 CashPoint       = e.Member.Actor.CashPoint,
                 FreePass        = e.Member.Actor.FreePass.Type,
-                IsPlaying       = room.ScoreTracker.IsTracked(e.Member.Session),
+                PlayingState    = e.Member.PlayingState,
                 IsAdministrator = e.Member.Actor.IsAdministrator
             }, CancellationToken.None);
+
+            if (e.Member.PlayingState == PlayingState.Waiting)
+            {
+                await room.Broadcast(new MusicLoadedEventData
+                {
+                    MemberId     = (byte)e.MemberId,
+                    PlayingState = PlayingState.Waiting
+                }, CancellationToken.None);
+            }
         }
         catch (Exception ex)
         {
@@ -63,12 +72,56 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
-
             await room.Broadcast(sender: e.Member.Session, new UserLeaveWaitingEventData
             {
                 MemberId              = (byte)e.MemberId,
                 NewRoomMasterMemberId = (byte)e.RoomMasterMemberId,
-                Premium               = room.Premium
+                Premium               = room.Premium,
+                HasSuperRoomManager   = room.Slots.OfType<Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
+                LiveMode              = room.GameMode != GameMode.Live ? null : new UserLeaveWaitingEventData.LiveState
+                {
+                    Invalid   = false,
+                    UserCount = room.UserCount,
+                    Members   = room.Slots.Select((slot, i) =>
+                    {
+                        return slot switch
+                        {
+                            Room.MemberSlot member => new UserLeaveWaitingEventData.MemberLiveState
+                            {
+                                State      = UserLeaveWaitingEventData.RoomSlotState.Occupied,
+                                MemberInfo = new UserLeaveWaitingEventData.MemberInfo
+                                {
+                                    MemberId        = (byte)i,
+                                    Nickname        = member.Actor.Nickname,
+                                    Level           = member.Actor.Level,
+                                    Gender          = member.Actor.Gender,
+                                    Gem             = member.Actor.Gem,
+                                    Team            = member.Team,
+                                    Ready           = member.IsReady,
+                                    MusicState      = member.MusicState,
+                                    Equipments      = member.Actor.Equipments,
+                                    MusicIds        = member.Actor.InstalledMusicIds.ToList(),
+                                    CashPoint       = member.Actor.CashPoint,
+                                    FreePass        = member.Actor.FreePass.Type,
+                                    PlayingState    = member.PlayingState,
+                                    IsAdministrator = member.Actor.IsAdministrator,
+                                    IsRoomMaster    = member.IsMaster,
+                                    WinStreak       = member.WinStreak,
+                                }
+                            },
+                            Room.LockedSlot => new UserLeaveWaitingEventData.MemberLiveState
+                            {
+                                State      = UserLeaveWaitingEventData.RoomSlotState.Locked,
+                                MemberInfo = null
+                            },
+                            _ => new UserLeaveWaitingEventData.MemberLiveState
+                            {
+                                State      = UserLeaveWaitingEventData.RoomSlotState.Unoccupied,
+                                MemberInfo = null
+                            }
+                        };
+                    }).ToList()
+                }
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -125,9 +178,9 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
 
             await room.Broadcast(new MusicStateChangedEventData
             {
-                MemberId = (byte)e.MemberId,
-                Playing  = room.ScoreTracker.IsTracked(e.Member.Session),
-                State    = e.State
+                MemberId     = (byte)e.MemberId,
+                PlayingState = e.Member.PlayingState,
+                State        = e.State
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -164,13 +217,26 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
 
             await room.Broadcast(new WaitingRoomTitleEventData
             {
-                Title  = room.Title
+                Title         = e.Title,
+                Password      = e.Password,
+                HasPassword   = !string.IsNullOrEmpty(e.Password),
+                MinLevelLimit = (byte)room.MinLevelLimit,
+                MaxLevelLimit = (byte)room.MaxLevelLimit,
+                KeyMode       = room.KeyMode,
+                GameMode      = room.GameMode,
+                MusicId       = (ushort)room.MusicId,
+
             }, CancellationToken.None);
 
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
             {
-                Number = room.Id,
-                Title  = room.Title
+                Number        = room.Id,
+                Title         = room.Title,
+                KeyMode       = room.KeyMode,
+                GameMode      = room.GameMode,
+                HasPassword   = !string.IsNullOrEmpty(room.Password),
+                MinLevelLimit = (byte)room.MinLevelLimit,
+                MaxLevelLimit = (byte)room.MaxLevelLimit
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -272,6 +338,58 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                     Result = StartGameEventData.StartResult.Success,
                     SkillsSeed = room.SkillsSeed
                 }, CancellationToken.None);
+
+                if (room is { IsRelaySessionCreated: false, GameMode: GameMode.Live })
+                {
+                    try
+                    {
+                        _ = relayService.CreateSession(new CreateRelaySessionRequest
+                        {
+                            Members = room.Slots
+                                .OfType<Room.MemberSlot>()
+                                .Select(m => m.Actor.RelaySessionInfo)
+                                .Where(info => info != null)
+                                .Select(info => new CreateRelaySessionRequest.RoomMember
+                                {
+                                    SessionKey1 = info!.RelaySessionKey1,
+                                    SessionKey2 = info.RelaySessionKey2,
+                                })
+                                .ToList()
+                        }, CancellationToken.None);
+                        room.IsRelaySessionCreated = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Failed to dispatch relay CreateSession");
+                    }
+                }
+            }
+            else
+            {
+                if (room is { IsRelaySessionCreated: true, GameMode: GameMode.Live })
+                {
+                    try
+                    {
+                        _ = relayService.DeleteSession(new DeleteRelaySessionRequest
+                        {
+                            Members = room.Slots
+                                .OfType<Room.MemberSlot>()
+                                .Select(m => m.Actor.RelaySessionInfo)
+                                .Where(info => info != null)
+                                .Select(info => new DeleteRelaySessionRequest.RoomMember
+                                {
+                                    SessionKey1 = info!.RelaySessionKey1,
+                                    SessionKey2 = info.RelaySessionKey2,
+                                })
+                                .ToList()
+                        }, CancellationToken.None);
+                        room.IsRelaySessionCreated = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Failed to dispatch relay DeleteSession");
+                    }
+                }
             }
 
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
@@ -327,9 +445,11 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(new WaitingSkillChangedEventData()
+            await room.Broadcast(new WaitingSkillChangedEventData
             {
-                Skills = e.Skills
+                Skills                   = e.Skills,
+                HasSuperRoomManager      = false,
+                SuperRoomManagerMemberId = 0
             }, CancellationToken.None);
 
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData

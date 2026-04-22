@@ -9,7 +9,7 @@ using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 public class AuthorizeUserCommandTask(
     IAuthService authService,
@@ -69,6 +69,8 @@ public class AuthorizeUserCommandTask(
             string gatewayIp   = isChannel ? gatewayOptions.Value.Address : tcpOptions.Value.Address;
             int    gatewayPort = isChannel ? gatewayOptions.Value.Port    : tcpOptions.Value.Port;
 
+            // Note that some of these non-numeric string fields may garble and unreliable
+            // But none are being in use anyway
             var authParams = new AuthParameters
             {
                 UserIndexId    = user.Id.ToString(),
@@ -84,6 +86,7 @@ public class AuthorizeUserCommandTask(
             Console.WriteLine();
             Console.WriteLine($"  Token:        {token}");
             Console.WriteLine($"  Launch token: {authParams.Encode()}");
+            Console.WriteLine($"\n  Plaintext:  {authParams}");
             return 0;
         }
         catch (ArgumentException ex)

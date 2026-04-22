@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages;
+namespace Memoryer.Messages;
 
 public class RoomArenaMessage : SubMessage
 {

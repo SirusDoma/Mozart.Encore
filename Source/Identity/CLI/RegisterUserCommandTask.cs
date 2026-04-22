@@ -9,7 +9,7 @@ using Mozart.Metadata.Items;
 using Mozart.Options;
 using Mozart.Services;
 
-namespace Identity.CLI;
+namespace Memoryer.CLI;
 
 public class RegisterUserCommandTask(MainDbContext context, IOptions<AuthOptions> authOptions) : ICommandLineTask
 {

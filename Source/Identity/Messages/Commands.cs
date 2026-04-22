@@ -1,4 +1,4 @@
-namespace Identity;
+namespace Memoryer;
 
 public enum GenericCommand : ushort
 {
@@ -23,6 +23,8 @@ public enum RequestCommand : ushort
     SendMusicList        = 0x07E8, // 2024
     GetMusicPlayRanking  = 0x07EB, // 2027
     GetMusicScoreList    = 0x07EE, // 2030
+    GetMusicMaxScore     = 0x07F0, // 2032
+    GetFreeMusicStatus   = 0x07F2, // 2034
     SetRoomTitle         = 0x0BB8, // 3000
     JoinWaiting          = 0x0BBA, // 3002
     ExitWaiting          = 0x0BBD, // 3005
@@ -46,6 +48,14 @@ public enum RequestCommand : ushort
     SyncMemberMusicState = 0x0FC4, // 4036
     SetDownloadProgress  = 0x0FC6, // 4038
     FinalizeRank         = 0x0FC9, // 4041
+    GetLiveState         = 0x0FCA, // 4042
+    GetP2PList           = 0x0FCC, // 4044
+    ReportUdpPunchHole   = 0x0FCE, // 4046
+    TestNetworkLatency   = 0x0FD0, // 4048
+    StartSelectMusic     = 0x0FD3, // 4051
+    CancelSelectMusic    = 0x0FD5, // 4053
+    ConfirmMusicLoadedEx = 0x0FD7, // 4055
+    SetRoomSkillEx       = 0x0FD9, // 4057
     SyncItemPurchase     = 0x1388, // 5000
     SellItem             = 0x138A, // 5002
     EquipItem            = 0x138C, // 5004
@@ -89,11 +99,17 @@ public enum ResponseCommand : ushort
     ChannelLogout        = 0x07E6, // 2022
     GetMusicPlayRanking  = 0x07EC, // 2028
     GetMusicScoreList    = 0x07EF, // 2031
+    GetMusicMaxScore     = 0x07F1, // 2033
+    GetFreeMusicStatus   = 0x07F3, // 2035
     JoinRoom             = 0x0BBB, // 3003
     ExitWaiting          = 0x0BBE, // 3006
     WaitingUserMessage   = 0x0BC4, // 3012
     WaitingAdminMessage  = 0x0BC5, // 3013
     GetMusicList         = 0x0FBF, // 4031
+    GetLiveState         = 0x0FCB, // 4043
+    GetP2PList           = 0x0FCD, // 4045
+    ReportUdpPunchHole   = 0x0FCF, // 4047
+    MusicLoadedEx        = 0x0FD8, // 4056
     SyncPurchase         = 0x1389, // 5001
     SellItem             = 0x138B, // 5003
     EquipItem            = 0x138D, // 5005
@@ -114,41 +130,47 @@ public enum ResponseCommand : ushort
 
 public enum EventCommand : ushort
 {
-    RoomCreated             = 0x07D5, // 2005
-    RoomRemoved             = 0x07D7, // 2007
-    RoomTitleChanged        = 0x07D8, // 2008
-    RoomUserCountChanged    = 0x07D9, // 2009
-    ReceiveWhisper          = 0x07E3, // 2019
-    RoomStateChanged        = 0x07E4, // 2020
-    RoomParameterChanged    = 0x07E7, // 2023
-    RoomSkillChanged        = 0x07E9, // 2025
-    MusicPremiumTimeList    = 0x07EA, // 2026
-    RankNotification        = 0x07ED, // 2029
-    WaitingTitleChanged     = 0x0BB9, // 3001
-    UserJoinWaiting         = 0x0BBC, // 3004
-    UserLeaveWaiting        = 0x0BBF, // 3007
-    RoomSlotUpdate          = 0x0BC1, // 3009
-    Kick                    = 0x0BC2, // 3010
-    RoomForceRemoved        = 0x0BC6, // 3014
-    WaitingMusicChanged     = 0x0FA1, // 4001
-    RoomArenaChanged        = 0x0FA3, // 4003
-    UserTeamChanged         = 0x0FA5, // 4005
-    UserInstrumentChanged   = 0x0FA7, // 4007
-    UserReadyStateChanged   = 0x0FA9, // 4009
-    StartGame               = 0x0FAB, // 4011
-    MusicLoaded             = 0x0FAD, // 4013
-    GameStatsUpdate         = 0x0FAF, // 4015
-    ScoreSubmission         = 0x0FB1, // 4017
-    ScoreCompleted          = 0x0FB2, // 4018
-    UserLeaveGame           = 0x0FB6, // 4022
-    WaitingSkillChanged     = 0x0FB8, // 4024
-    MusicStateChanged       = 0x0FBA, // 4026
-    WaitingAlbumChanged     = 0x0FBC, // 4028
-    AlbumScoreCompleted     = 0x0FBD, // 4029
-    AcquireMusic            = 0x0FC3, // 4035
-    SyncMemberMusicState    = 0x0FC5, // 4037
-    DownloadProgressChanged = 0x0FC7, // 4039
-    GameRankUpdate          = 0x0FC8, // 4040
+    RoomCreated                 = 0x07D5, // 2005
+    RoomRemoved                 = 0x07D7, // 2007
+    RoomTitleChanged            = 0x07D8, // 2008
+    RoomUserCountChanged        = 0x07D9, // 2009
+    ReceiveWhisper              = 0x07E3, // 2019
+    RoomStateChanged            = 0x07E4, // 2020
+    RoomParameterChanged        = 0x07E7, // 2023
+    RoomSkillChanged            = 0x07E9, // 2025
+    MusicPremiumTimeList        = 0x07EA, // 2026
+    RankNotification            = 0x07ED, // 2029
+    WaitingTitleChanged         = 0x0BB9, // 3001
+    UserJoinWaiting             = 0x0BBC, // 3004
+    UserLeaveWaiting            = 0x0BBF, // 3007
+    RoomSlotUpdate              = 0x0BC1, // 3009
+    Kick                        = 0x0BC2, // 3010
+    RoomForceRemoved            = 0x0BC6, // 3014
+    WaitingMusicChanged         = 0x0FA1, // 4001
+    RoomArenaChanged            = 0x0FA3, // 4003
+    UserTeamChanged             = 0x0FA5, // 4005
+    UserInstrumentChanged       = 0x0FA7, // 4007
+    UserReadyStateChanged       = 0x0FA9, // 4009
+    StartGame                   = 0x0FAB, // 4011
+    MusicLoaded                 = 0x0FAD, // 4013
+    GameStatsUpdate             = 0x0FAF, // 4015
+    ScoreSubmission             = 0x0FB1, // 4017
+    ScoreCompleted              = 0x0FB2, // 4018
+    UserLeaveGame               = 0x0FB6, // 4022
+    WaitingSkillChanged         = 0x0FB8, // 4024
+    MusicStateChanged           = 0x0FBA, // 4026
+    WaitingAlbumChanged         = 0x0FBC, // 4028
+    AlbumScoreCompleted         = 0x0FBD, // 4029
+    AcquireMusic                = 0x0FC3, // 4035
+    SyncMemberMusicState        = 0x0FC5, // 4037
+    DownloadProgressChanged     = 0x0FC7, // 4039
+    TestNetworkLatencyCompleted = 0x0FD1, // 4049
+    GameRankUpdate              = 0x0FC8, // 4040
+    RoomMembersLatencySynced    = 0x0FD2, // 4050
+    SelectMusicStarted          = 0x0FD4, // 4052
+    SelectMusicCancelled        = 0x0FD6, // 4054
+    WaitingSkillExChanged       = 0x0FDA, // 4058
+    SyncMemberMusicList         = 0x13A3, // 5027
 }
 
 public enum GatewayCommand : ushort

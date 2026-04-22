@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class ScoreCompletedEventData : IMessage
 {
@@ -72,9 +72,15 @@ public class ScoreCompletedEventData : IMessage
         public GameSpeed? Speed { get; init; }
 
         [MessageField(order: 16)]
-        public int? Penalty { get; init; }
+        public int? LongNoteScore { get; init; }
     }
 
-    [CollectionMessageField(order: 0, maxCount: 8, prefixSizeType: TypeCode.Int32)]
+    [MessageField(order: 0)]
+    private int Count => Scores.Count;
+
+    [MessageField(order: 1)]
+    public byte RoomMasterMemberId { get; init; }
+
+    [CollectionMessageField(order: 2, maxCount: 8, prefixSizeType: TypeCode.Empty)]
     public required IList<ScoreEntry> Scores { get; init; } = [];
 }

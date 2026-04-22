@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.36105.23 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityP2", "Source\Identity\IdentityP2.csproj", "{F4D73EA8-2503-4B2E-BA1C-6E57075F6778}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memoryer", "Source\Identity\Memoryer.csproj", "{F4D73EA8-2503-4B2E-BA1C-6E57075F6778}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore", "Source\Encore\Encore.shproj", "{79BBA56F-AADA-4F4A-B5CA-ADE62335CA18}"
 EndProject
@@ -19,7 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Server", "Source\Moz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart.Data", "Source\Mozart.Data\Mozart.Data.csproj", "{88AD1B4F-B812-4376-9F94-D48735103DA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityP2.Web", "Source\Identity.Web\IdentityP2.Web.csproj", "{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memoryer.Web", "Source\Identity.Web\Memoryer.Web.csproj", "{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memoryer.Relay", "Source\Memoryer.Relay\Memoryer.Relay.csproj", "{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,14 @@ Global
 		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x64.Build.0 = Release|x64
 		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x86.ActiveCfg = Release|x86
 		{6CFB7ECB-04E8-41C5-9864-24DC999A3E11}.Release|x86.Build.0 = Release|x86
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Debug|x86.ActiveCfg = Debug|x86
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Debug|x86.Build.0 = Debug|x86
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Debug|x64.ActiveCfg = Debug|x64
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Debug|x64.Build.0 = Debug|x64
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Release|x64.ActiveCfg = Release|x64
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Release|x64.Build.0 = Release|x64
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Release|x86.ActiveCfg = Release|x86
+		{A7F3C2D5-9B18-4F6E-B3A1-0E2D4C8B7F91}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

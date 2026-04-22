@@ -1,7 +1,7 @@
 using Encore;
 using Mozart.Options;
 
-namespace Identity;
+namespace Memoryer;
 
 public static class DatabaseDriverExtensions
 {

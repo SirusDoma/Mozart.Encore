@@ -1,6 +1,7 @@
 using Encore.Messaging;
+using Mozart.Metadata;
 
-namespace Identity.Messages.Requests;
+namespace Memoryer.Messages.Requests;
 
 public class ConfirmMusicLoadedRequest : IMessage
 {
@@ -8,4 +9,7 @@ public class ConfirmMusicLoadedRequest : IMessage
 
     [MessageField(order: 0)]
     public int PowerSkillId { get; init; }
+
+    [MessageField(order: 1)]
+    public GameSpeed Speed { get; init; }
 }

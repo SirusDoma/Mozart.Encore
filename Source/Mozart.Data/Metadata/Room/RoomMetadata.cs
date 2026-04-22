@@ -6,7 +6,9 @@ public class RoomMetadata : ICloneable
 
     public required string Title { get; set; }
 
-    public required GameMode Mode { get; set; }
+    public required KeyMode KeyMode { get; set; }
+
+    public required GameMode GameMode { get; set; }
 
     public required int MusicId { get; set; }
 
@@ -14,9 +16,9 @@ public class RoomMetadata : ICloneable
 
     public required GameSpeed Speed { get; set; }
 
-    public required int MinLevelLimit { get; init; }
+    public required int MinLevelLimit { get; set; }
 
-    public required int MaxLevelLimit { get; init; }
+    public required int MaxLevelLimit { get; set; }
 
     public required Arena Arena { get; set; }
 
@@ -26,7 +28,7 @@ public class RoomMetadata : ICloneable
 
     public int SkillsSeed { get; set; }
 
-    public string Password { get; init; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 
     public RoomState State { get; set; } = RoomState.Waiting;
 

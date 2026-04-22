@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 
 public class RoomListResponse : IMessage
@@ -29,30 +29,33 @@ public class RoomListResponse : IMessage
         public Difficulty Difficulty { get; set; } = Difficulty.EX;
 
         [MessageField(order: 6)]
-        public GameMode Mode { get; set; } = GameMode.Single;
+        public KeyMode KeyMode { get; set; } = KeyMode.SevenKeys;
 
         [MessageField(order: 7)]
-        public GameSpeed Speed { get; set; } = GameSpeed.X10;
+        public GameMode GameMode { get; set; } = GameMode.Normal;
 
         [MessageField(order: 8)]
-        public byte Capacity { get; set; } = 8;
+        public GameSpeed Speed { get; set; } = GameSpeed.X10;
 
         [MessageField(order: 9)]
-        public byte UserCount { get; set; } = 0;
+        public byte Capacity { get; set; } = 8;
 
         [MessageField(order: 10)]
-        public byte MinLevelLimit { get; set; } = 0;
+        public byte UserCount { get; set; } = 0;
 
         [MessageField(order: 11)]
+        public byte MinLevelLimit { get; set; } = 0;
+
+        [MessageField(order: 12)]
         public byte MaxLevelLimit { get; set; } = 0;
 
-        [CollectionMessageField(12, prefixSizeType: TypeCode.Int32)]
+        [CollectionMessageField(13, prefixSizeType: TypeCode.Int32)]
         public IReadOnlyList<int> Skills { get; set; } = [];
 
-        [MessageField<MessageFieldCodec<ushort>>(order: 13)]
+        [MessageField<MessageFieldCodec<ushort>>(order: 14)]
         public bool Premium { get; init; } = false;
 
-        [MessageField(order: 14)]
+        [MessageField(order: 15)]
         public byte Type { get; init; } = 0;
     }
 

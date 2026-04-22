@@ -1,4 +1,4 @@
-namespace Identity.Web;
+namespace Memoryer.Web;
 
 public static class PingEndpoint
 {

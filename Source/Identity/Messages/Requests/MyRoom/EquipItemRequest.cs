@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Requests;
+namespace Memoryer.Messages.Requests;
 
 public class EquipItemRequest : IMessage
 {

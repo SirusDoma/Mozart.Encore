@@ -22,6 +22,7 @@ public class RoomUserLeftEventArgs : EventArgs
 public class RoomTitleChangedEventArgs : EventArgs
 {
     public required string Title { get; init; }
+    public required string Password { get; init; }
 }
 
 public class RoomMusicChangedEventArgs : EventArgs

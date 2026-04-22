@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Identity.Workers.Gateway;
+namespace Memoryer.Workers.Gateway;
 
 public interface IChannelAggregator
 {

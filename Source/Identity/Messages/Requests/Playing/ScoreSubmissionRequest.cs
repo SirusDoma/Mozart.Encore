@@ -1,7 +1,7 @@
 using Encore.Messaging;
 using Mozart.Metadata;
 
-namespace Identity.Messages.Requests;
+namespace Memoryer.Messages.Requests;
 
 public class ScoreSubmissionRequest : IMessage
 {
@@ -38,7 +38,7 @@ public class ScoreSubmissionRequest : IMessage
     public GameSpeed Speed { get; init; }
 
     [MessageField(order: 10)]
-    public int Penalty { get; init; }
+    public int LongNoteScore { get; init; }
 
     public bool Clear => Life > 0;
 }

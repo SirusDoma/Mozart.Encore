@@ -1,9 +1,9 @@
 using System.Text;
-using Identity.Controllers.Filters;
-using Identity.Messages.Responses;
 using Encore.Server;
-using Identity.Messages.Events;
-using Identity.Messages.Requests;
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages.Events;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
@@ -13,7 +13,7 @@ using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Sessions;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [ChannelAuthorize]
 public class MusicShopController(

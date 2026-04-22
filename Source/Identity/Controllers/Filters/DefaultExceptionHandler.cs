@@ -1,7 +1,7 @@
-using Identity.Messages.Responses;
 using Encore.Server;
+using Memoryer.Messages.Responses;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class DefaultExceptionHandler : CommandExceptionHandler
 {

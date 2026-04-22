@@ -1,9 +1,9 @@
-using Identity.Messages.Requests;
 using Encore.Server;
+using Memoryer.Messages.Requests;
 using Microsoft.Extensions.Logging;
 using Mozart.Sessions;
 
-namespace Identity.Controllers.Filters;
+namespace Memoryer.Controllers.Filters;
 
 public class SessionScopeLoggerFilter(ILogger<SessionScopeLoggerFilter> logger) : CommandFilter
 {

@@ -2,13 +2,13 @@ using Encore.Server;
 using Microsoft.Extensions.Options;
 using Mozart.Sessions;
 
-namespace Identity;
+namespace Memoryer;
 
 public interface IMozartServer : ITcpServer<Session>;
 
-public class MozartServer : TcpServer<Session>, IMozartServer
+public class GameServer : TcpServer<Session>, IMozartServer
 {
-    public MozartServer(ISessionFactory factory, IOptions<TcpOptions> options)
+    public GameServer(ISessionFactory factory, IOptions<TcpOptions> options)
         : base(factory, options)
     {
     }

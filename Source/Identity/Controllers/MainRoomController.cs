@@ -9,16 +9,16 @@ using Mozart.Events;
 using Mozart.Metadata;
 using Mozart.Services;
 using Mozart.Sessions;
-using Identity.Controllers.Filters;
-using Identity.Messages;
-using Identity.Messages.Events;
-using Identity.Messages.Requests;
-using Identity.Messages.Responses;
+using Memoryer.Controllers.Filters;
+using Memoryer.Messages;
+using Memoryer.Messages.Events;
+using Memoryer.Messages.Requests;
+using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
 using Mozart.Options;
 
-namespace Identity.Controllers;
+namespace Memoryer.Controllers;
 
 [ChannelAuthorize]
 public class MainRoomController(
@@ -186,18 +186,13 @@ public class MainRoomController(
                     Id          = (ushort)music.Id,
                     NoteCountEx = (ushort)music.NoteCountEx,
                     NoteCountNx = (ushort)music.NoteCountNx,
-                    NoteCountHx = (ushort)music.NoteCountHx,
-                    Price       = new MusicListResponse.MusicPrice
-                    {
-                        O2Cash = music.PriceO2Cash,
-                        Gem    = music.PriceGem
-                    }
+                    NoteCountHx = (ushort)music.NoteCountHx
                 }
-            ).ToList()
+            ).ToList(),
+            FreeMusic = gameOptions.Value.FreeMusic
         };
     }
 
-    [CommandHandler(RequestCommand.GetChannelInfo)]
     [CommandHandler(RequestCommand.GetUserList)]
     public UserListResponse GetUserList()
     {
@@ -247,7 +242,8 @@ public class MainRoomController(
                 HasPassword      = !string.IsNullOrEmpty(room?.Password),
                 MusicId          = (ushort)(room?.MusicId ?? 0),
                 Difficulty       = room?.Difficulty ?? Difficulty.EX,
-                Mode             = room?.Mode ?? GameMode.Single,
+                KeyMode          = room?.KeyMode ?? KeyMode.SevenKeys,
+                GameMode         = room?.GameMode ?? GameMode.Normal,
                 Speed            = room?.Speed ?? GameSpeed.X10,
                 Capacity         = (byte)(room?.Capacity ?? 0),
                 UserCount        = (byte)(room?.UserCount ?? 0),
@@ -275,7 +271,7 @@ public class MainRoomController(
         );
 
         var room = roomService.GetRoom(Channel, request.Number);
-        if (room.Mode == GameMode.Single)
+        if (room.GameMode == GameMode.Single)
         {
             return new JoinRoomResponse
             {
@@ -295,19 +291,23 @@ public class MainRoomController(
 
             return new JoinRoomResponse
             {
-                Result     = JoinRoomResponse.JoinResult.Success,
-                Index      = (byte)index,
-                Team       = member.Team,
-                RoomTitle  = room.Title,
-                MusicId    = (ushort)room.MusicId,
-                ArenaInfo  = new RoomArenaMessage(room.Arena, room.ArenaRandomSeed),
-                Mode       = room.Mode,
-                Difficulty = room.Difficulty,
-                Speed      = room.Speed,
-                UserCount  = room.UserCount,
-                Premium    = room.Premium,
-                Skills     = room.Skills.ToList(),
-                Slots      = room.Slots.Select((slot, i) =>
+                Result              = JoinRoomResponse.JoinResult.Success,
+                MemberId            = (byte)index,
+                Team                = member.Team,
+                RoomTitle           = room.Title,
+                MusicId             = (ushort)room.MusicId,
+                ArenaInfo           = new RoomArenaMessage(room.Arena, room.ArenaRandomSeed),
+                KeyMode             = room.KeyMode,
+                GameMode            = room.GameMode,
+                Difficulty          = room.Difficulty,
+                Speed               = room.Speed,
+                UserCount           = room.UserCount,
+                Premium             = room.Premium,
+                Skills              = room.Skills.ToList(),
+                HasSuperRoomManager = room.Slots.OfType<Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
+                ChampionMemberId    = room.GameMode == GameMode.Live ? 0 : null,
+                ChampionWinStreak   = room.GameMode == GameMode.Live ? ((Room.MemberSlot)room.Slots[0]).WinStreak : null,
+                Slots               = room.Slots.Select((slot, i) =>
                 {
                     return slot switch
                     {
@@ -333,20 +333,21 @@ public class MainRoomController(
                             State = JoinRoomResponse.RoomSlotState.Occupied,
                             MemberInfo = new JoinRoomResponse.RoomMemberInfo
                             {
-                                Nickname        = m.Actor.Nickname,
-                                Level           = m.Actor.Level,
-                                Gender          = m.Actor.Gender,
-                                Gem             = m.Actor.Gem,
-                                IsRoomMaster    = m.IsMaster,
-                                Team            = m.Team,
-                                Ready           = m.IsReady,
-                                MusicState      = m.MusicState,
-                                Equipments      = m.Actor.Equipments,
-                                MusicIds        = m.Actor.InstalledMusicIds.ToList(),
-                                CashPoint       = m.Actor.CashPoint,
-                                FreePass        = m.Actor.FreePass.Type,
-                                IsPlaying       = room.ScoreTracker.IsTracked(m.Session),
-                                IsAdministrator = m.Actor.IsAdministrator
+                                Nickname           = m.Actor.Nickname,
+                                Level              = m.Actor.Level,
+                                Gender             = m.Actor.Gender,
+                                Gem                = m.Actor.Gem,
+                                IsRoomMaster       = m.IsMaster,
+                                Team               = m.Team,
+                                Ready              = m.IsReady,
+                                MusicState         = m.MusicState,
+                                Equipments         = m.Actor.Equipments,
+                                MusicIds           = m.Actor.InstalledMusicIds.ToList(),
+                                CashPoint          = m.Actor.CashPoint,
+                                FreePass           = m.Actor.FreePass.Type,
+                                PlayingState       = m.PlayingState,
+                                IsAdministrator    = m.Actor.IsAdministrator,
+                                IsSuperRoomManager = m.Actor.InfinityRingPass && !m.IsMaster
                             }
                         },
                         _ => throw new UnreachableException()
@@ -391,7 +392,8 @@ public class MainRoomController(
             var room = roomService.CreateRoom(
                 session:       Session,
                 title:         request.Title,
-                mode:          request.Mode,
+                keyMode:       request.KeyMode,
+                gameMode:      request.GameMode,
                 password:      request.HasPassword ? request.Password : string.Empty,
                 minLevelLimit: request.MinLevelLimit,
                 maxLevelLimit: request.MaxLevelLimit,
@@ -402,9 +404,13 @@ public class MainRoomController(
 
             return new CreateRoomResponse
             {
-                Result  = CreateRoomResponse.CreateResult.Success,
-                Number  = room.Id,
-                Premium = room.Premium
+                Result        = CreateRoomResponse.CreateResult.Success,
+                Number        = room.Id,
+                Premium       = room.Premium,
+                Title         = room.Title,
+                HasPassword   = !string.IsNullOrEmpty(room.Password),
+                MinLevelLimit = (byte)room.MinLevelLimit,
+                MaxLevelLimit = (byte)room.MaxLevelLimit
             };
         }
         catch (InvalidOperationException)
@@ -462,6 +468,21 @@ public class MainRoomController(
                 Title     = m.Title,
                 Content   = m.Content,
             }).ToList()
+        };
+    }
+
+    [CommandHandler(RequestCommand.GetFreeMusicStatus)]
+    public FreeMusicResponse GetFreeMusicStatus()
+    {
+        logger.LogInformation(
+            (int)RequestCommand.ChannelLogout,
+            "Free music: [{channelId:00}]",
+            Channel.Id
+        );
+
+        return new FreeMusicResponse
+        {
+            FreeMusicEnabled = gameOptions.Value.FreeMusic
         };
     }
 

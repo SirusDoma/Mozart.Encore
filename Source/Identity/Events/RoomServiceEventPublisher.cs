@@ -1,10 +1,10 @@
-using Identity.Messages.Events;
+using Memoryer.Messages.Events;
 using Microsoft.Extensions.Logging;
 using Mozart.Events;
 using Mozart.Metadata;
 using Mozart.Services;
 
-namespace Identity.Events;
+namespace Memoryer.Events;
 
 public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger) : IEventPublisher<RoomService>
 {
@@ -23,7 +23,8 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
             {
                 Number        = room.Id,
                 Title         = room.Title,
-                Mode          = room.Mode,
+                KeyMode       = room.KeyMode,
+                GameMode      = room.GameMode,
                 HasPassword   = !string.IsNullOrEmpty(room.Password),
                 MinLevelLimit = (byte)room.Metadata.MinLevelLimit,
                 MaxLevelLimit = (byte)room.Metadata.MaxLevelLimit,
@@ -31,7 +32,7 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                 Type          = (byte)room.Metadata.Type
             }, CancellationToken.None);
 
-            if (room.Mode == GameMode.Jam)
+            if (room.GameMode == GameMode.Jam)
             {
                 await e.Channel.Broadcast(room.Master, new RoomParameterChangedEventData
                 {
@@ -56,6 +57,12 @@ public class RoomServiceEventPublisher(ILogger<RoomServiceEventPublisher> logger
                     }
                 }, CancellationToken.None);
             }
+
+            await room.Broadcast(new WaitingArenaChangedEventData
+            {
+                Arena      = room.Arena,
+                RandomSeed = room.ArenaRandomSeed
+            }, CancellationToken.None);
 
             await e.Channel.Broadcast(room.Master, new RoomSkillChangedEventData
             {

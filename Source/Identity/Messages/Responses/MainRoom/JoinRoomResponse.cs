@@ -1,10 +1,10 @@
-using Identity.Messages.Codecs;
 using Encore.Messaging;
+using Memoryer.Messages.Codecs;
 using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Items;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class JoinRoomResponse : IMessage
 {
@@ -18,7 +18,8 @@ public class JoinRoomResponse : IMessage
         InvalidPassword = 0xFFFFFFFD, // -3
         InProgress      = 0xFFFFFFFB, // -5
         Full            = 0xFFFFFFFA, // -6 (or -4 / 0xFFFFFFFC)
-        NoPass          = 0xFFFFFFF9  // -7
+        NoPass          = 0xFFFFFFF9, // -7
+        InvalidNumber   = 0xFFFFFFF8  // -8
     }
 
     public enum RoomSlotState : int
@@ -67,10 +68,13 @@ public class JoinRoomResponse : IMessage
         public FreePassType FreePass { get; init; }
 
         [MessageField(order: 12)]
-        public bool IsPlaying { get; init; }
+        public PlayingState PlayingState { get; init; }
 
         [MessageField(order: 13)]
         public bool IsAdministrator { get; init; }
+
+        [MessageField<MessageFieldCodec<int>>(order: 14)]
+        public bool IsSuperRoomManager { get; init; }
     }
 
     public class RoomSlotInfo : SubMessage
@@ -89,7 +93,7 @@ public class JoinRoomResponse : IMessage
     public JoinResult Result = JoinResult.Success;
 
     [MessageField(order: 1)]
-    public byte Index { get; init; }
+    public byte MemberId { get; init; }
 
     [MessageField(order: 2)]
     public RoomTeam Team { get; init; }
@@ -104,7 +108,10 @@ public class JoinRoomResponse : IMessage
     public RoomArenaMessage ArenaInfo { get; init; } = new();
 
     [MessageField(order: 6)]
-    public GameMode Mode { get; init; }
+    public KeyMode KeyMode { get; init; }
+
+    [MessageField(order: 7)]
+    public GameMode GameMode { get; init; }
 
     [MessageField(order: 7)]
     public Difficulty Difficulty { get; init; }
@@ -112,15 +119,24 @@ public class JoinRoomResponse : IMessage
     [MessageField(order: 8)]
     public GameSpeed Speed { get; init; }
 
-    [MessageField(order: 9)]
+    [MessageField<MessageFieldCodec<int>>(order: 9)]
+    public bool HasSuperRoomManager { get; init; }
+
+    [MessageField(order: 10)]
     public int UserCount { get; init; }
 
-    [CollectionMessageField(order: 10, minCount: 7, maxCount: 7)]
+    [CollectionMessageField(order: 11, minCount: 7, maxCount: 7)]
     public IReadOnlyList<RoomSlotInfo> Slots { get; init; } = [];
 
-    [CollectionMessageField(order: 11, prefixSizeType: TypeCode.Int32)]
+    [CollectionMessageField(order: 12, prefixSizeType: TypeCode.Int32)]
     public IReadOnlyList<int> Skills { get; init; } = [];
 
-    [MessageField<MessageFieldCodec<short>>(order: 12)]
+    [MessageField<MessageFieldCodec<short>>(order: 13)]
     public bool Premium { get; init; }
+
+    [MessageField(order: 14)]
+    public byte? ChampionMemberId { get; init; } = null;
+
+    [MessageField(order: 15)]
+    public int? ChampionWinStreak { get; init; } = null;
 }

@@ -1,8 +1,8 @@
 using Encore.Messaging;
-using Identity.Messages.Codecs;
+using Memoryer.Messages.Codecs;
 using Mozart.Data.Entities;
 
-namespace Identity.Messages.Responses;
+namespace Memoryer.Messages.Responses;
 
 public class SyncFreePassResponse : IMessage
 {

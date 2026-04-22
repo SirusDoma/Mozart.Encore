@@ -2,7 +2,7 @@ using Mozart.Metadata;
 using Mozart.Metadata.Music;
 using Mozart.Services;
 
-namespace Identity;
+namespace Memoryer;
 
 public static class RankEvaluator
 {
@@ -29,8 +29,8 @@ public static class RankEvaluator
         int maxJams   = (noteCount - 26) / 25;
         int remainder = (noteCount - 26) % 25;
         int maxScore  = 200 * noteCount
-                        + (25 * 10) * maxJams * (maxJams + 1)
-                        + (remainder > 0 ? 10 * remainder * (maxJams + 1) : 0);
+                        + 125 * maxJams * (maxJams + 1)
+                        + 10  * remainder * (maxJams + 1);
 
         uint score = state.Score;
 
@@ -77,8 +77,8 @@ public static class RankEvaluator
         int maxJams   = (noteCount - 26) / 25;
         int remainder = (noteCount - 26) % 25;
         int maxScore  = 200 * noteCount
-                        + (25 * 10) * maxJams * (maxJams + 1)
-                        + (remainder > 0 ? 10 * remainder * (maxJams + 1) : 0);
+                        + 125 * maxJams * (maxJams + 1)
+                        + 10  * remainder * (maxJams + 1);
 
         if (score == 0)
             return Rank.F;

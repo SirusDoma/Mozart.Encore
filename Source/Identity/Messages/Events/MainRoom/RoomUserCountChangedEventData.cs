@@ -1,6 +1,6 @@
 using Encore.Messaging;
 
-namespace Identity.Messages.Events;
+namespace Memoryer.Messages.Events;
 
 public class RoomUserCountChangedEventData : IMessage
 {

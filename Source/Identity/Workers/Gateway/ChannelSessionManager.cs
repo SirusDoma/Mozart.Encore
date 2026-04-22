@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Encore.Sessions;
 
-namespace Identity.Workers.Gateway;
+namespace Memoryer.Workers.Gateway;
 
 public interface IChannelSessionManager : ISessionManager<ChannelSession>
 {
