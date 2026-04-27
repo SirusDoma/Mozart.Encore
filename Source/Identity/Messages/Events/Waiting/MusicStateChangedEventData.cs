@@ -11,7 +11,7 @@ public class MusicStateChangedEventData : IMessage
     public byte MemberId { get; init; }
 
     [MessageField(order: 1)]
-    public bool Playing { get; init; }
+    public PlayingState PlayingState { get; init; }
 
     [MessageField(order: 2)]
     public MusicState State { get; init; }

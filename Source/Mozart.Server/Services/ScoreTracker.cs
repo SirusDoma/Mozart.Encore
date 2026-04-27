@@ -214,6 +214,9 @@ public class ScoreTracker : IScoreTracker
             _states.Remove(state);
         }
 
+        if (Room.Slots[state.MemberId] is Room.MemberSlot member)
+            member.PlayingState = PlayingState.Waiting;
+
         UserUntracked?.Invoke(this, new ScoreTrackEventArgs
         {
             MemberId = state.MemberId,

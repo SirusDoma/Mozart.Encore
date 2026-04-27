@@ -48,9 +48,18 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 MusicIds        = e.Member.Actor.InstalledMusicIds.ToList(),
                 CashPoint       = e.Member.Actor.CashPoint,
                 FreePass        = e.Member.Actor.FreePass.Type,
-                IsPlaying       = room.ScoreTracker.IsTracked(e.Member.Session),
+                PlayingState    = e.Member.PlayingState,
                 IsAdministrator = e.Member.Actor.IsAdministrator
             }, CancellationToken.None);
+
+            if (e.Member.PlayingState == PlayingState.Waiting)
+            {
+                await room.Broadcast(new MusicLoadedEventData
+                {
+                    MemberId     = (byte)e.MemberId,
+                    PlayingState = PlayingState.Waiting
+                }, CancellationToken.None);
+            }
         }
         catch (Exception ex)
         {
@@ -125,9 +134,9 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
 
             await room.Broadcast(new MusicStateChangedEventData
             {
-                MemberId = (byte)e.MemberId,
-                Playing  = room.ScoreTracker.IsTracked(e.Member.Session),
-                State    = e.State
+                MemberId     = (byte)e.MemberId,
+                PlayingState = e.Member.PlayingState,
+                State        = e.State
             }, CancellationToken.None);
         }
         catch (Exception ex)

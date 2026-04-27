@@ -47,7 +47,7 @@ public class UserJoinWaitingEventData : IMessage
     public FreePassType FreePass { get; init; }
 
     [MessageField(order: 12)]
-    public bool IsPlaying { get; init; }
+    public PlayingState PlayingState { get; init; }
 
     [MessageField(order: 13)]
     public bool IsAdministrator { get; init; }

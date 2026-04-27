@@ -13,6 +13,7 @@ public interface IRoom : IBroadcastable
     RoomMetadata Metadata { get; }
     int Capacity { get; }
     int UserCount { get; }
+    int PlayingUserCount { get; }
     string Title { get; set; }
     string Password { get; }
     int MusicId { get; set; }

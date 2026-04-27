@@ -55,8 +55,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             var tracker = (ScoreTracker)sender!;
             await tracker.Room.Broadcast(new MusicLoadedEventData
             {
-                MemberId  = (byte)e.MemberId,
-                IsPlaying = true
+                MemberId     = (byte)e.MemberId,
+                PlayingState = PlayingState.Playing
             }, CancellationToken.None);
         }
         catch (Exception ex)

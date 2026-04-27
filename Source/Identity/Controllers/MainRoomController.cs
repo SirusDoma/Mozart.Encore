@@ -345,7 +345,7 @@ public class MainRoomController(
                                 MusicIds        = m.Actor.InstalledMusicIds.ToList(),
                                 CashPoint       = m.Actor.CashPoint,
                                 FreePass        = m.Actor.FreePass.Type,
-                                IsPlaying       = room.ScoreTracker.IsTracked(m.Session),
+                                PlayingState    = m.PlayingState,
                                 IsAdministrator = m.Actor.IsAdministrator
                             }
                         },

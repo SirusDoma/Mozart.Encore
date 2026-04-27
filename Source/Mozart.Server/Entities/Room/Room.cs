@@ -67,6 +67,8 @@ public class Room : Broadcastable, IRoom
 
         public MusicState MusicState { get; set; } = MusicState.Ready;
 
+        public PlayingState PlayingState { get; set; } = PlayingState.None;
+
         public Actor Actor => Session.GetAuthorizedToken<Actor>();
     }
 
@@ -89,6 +91,8 @@ public class Room : Broadcastable, IRoom
     public int Capacity => Slots.Count(s => s is not LockedSlot);
 
     public int UserCount => Slots.Count(s => s is MemberSlot);
+
+    public int PlayingUserCount => Slots.Count(s => s is MemberSlot { PlayingState: PlayingState.Playing });
 
     public string Title
     {
@@ -181,10 +185,11 @@ public class Room : Broadcastable, IRoom
 
         var member = new MemberSlot
         {
-            Session  = session,
-            Team     = Enum.GetValues<RoomTeam>().Except(_slots.OfType<MemberSlot>().Select(m => m.Team)).First(),
-            IsMaster = false,
-            IsReady  = false
+            Session      = session,
+            Team         = Enum.GetValues<RoomTeam>().Except(_slots.OfType<MemberSlot>().Select(m => m.Team)).First(),
+            IsMaster     = false,
+            IsReady      = false,
+            PlayingState = State == RoomState.Playing ? PlayingState.Waiting : PlayingState.None
         };
 
         for (int i = 0; i < _slots.Count; i++)
@@ -444,6 +449,9 @@ public class Room : Broadcastable, IRoom
     {
         ScoreTracker = new ScoreTracker(this);
 
+        foreach (var member in _slots.OfType<MemberSlot>())
+            member.PlayingState = PlayingState.Playing;
+
         _metadata.State = RoomState.Playing;
         SaveMetadataChanges();
 
@@ -456,7 +464,10 @@ public class Room : Broadcastable, IRoom
             return;
 
         foreach (var member in _slots.OfType<MemberSlot>())
+        {
             member.IsReady = member.IsMaster;
+            member.PlayingState = PlayingState.None;
+        }
 
         _metadata.State = RoomState.Waiting;
         SaveMetadataChanges();
@@ -488,13 +499,16 @@ public class Room : Broadcastable, IRoom
 
         await Task.Delay(TimeSpan.FromSeconds(_options.MusicLoadTimeout));
 
-        if (State != RoomState.Playing || ScoreTracker.Count == UserCount)
+        if (State != RoomState.Playing || ScoreTracker.Count == PlayingUserCount)
             return;
 
         for (int i = 0; i < _slots.Count; i++)
         {
             var slot = _slots[i];
             if (slot is not MemberSlot member)
+                continue;
+
+            if (member.PlayingState == PlayingState.Waiting)
                 continue;
 
             if (ScoreTracker.IsTracked(member.Session))
