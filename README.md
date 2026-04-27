@@ -64,11 +64,13 @@ Use `--Server:<Option>` to configure these settings via command-line arguments (
 ## HTTP
 Lightweight HTTP web server settings.
 
+Use `--Http:<Option>` to configure these settings via command-line arguments (e.g, `--Http:Port=15000`)
+
 | Option    | Description                                                                                                       |
 |-----------|-------------------------------------------------------------------------------------------------------------------|
 | `Enabled` | Determine whether the web server is enabled.  Default: `false`                                                    |
 | `Address` | Web server address to listen incoming requests. Using `0.0.0.0` may require admin privilege. Default: `127.0.0.1` |
-| `Port`    | HTTP port to listen incoming requests. Default: `15010`                                                           |
+| `Port`    | HTTP port to listen incoming requests. Default: `15000`                                                           |
 
 ## Database
 Database connection setting.
