@@ -64,7 +64,7 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
             score: request.Score,
             life: request.Life,
             speed: request.Speed,
-            penalty: request.Penalty
+            longNoteScore: request.LongNoteScore
         );
     }
 

@@ -217,8 +217,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     int maxJams   = (totalNotes - 26) / 25;
                     int remainder = (totalNotes - 26) % 25;
                     int maxScore  = 200 * totalNotes
-                                    + 25 * 10 * maxJams * (maxJams + 1)
-                                    + (remainder > 0 ? 10 * remainder * (maxJams + 1) : 0);
+                                    + 125 * maxJams * (maxJams + 1)
+                                    + 10  * remainder * (maxJams + 1);
 
                     reward = (int)((((user.Level - 1f) / 5f) * 38f + 87f) * Math.Sqrt((float)state.Score / maxScore));
                     if (state is { Clear: true })
@@ -306,7 +306,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     Gem        = state.Session.Actor.Gem,
                     CashPoint  = state.Session.Actor.CashPoint,
                     Speed      = state.Speed,
-                    Penalty    = state.LongNoteScore
+                    LongNoteScore = state.LongNoteScore
                 });
             }
 

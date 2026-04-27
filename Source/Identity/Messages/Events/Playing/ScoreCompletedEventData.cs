@@ -72,7 +72,7 @@ public class ScoreCompletedEventData : IMessage
         public GameSpeed? Speed { get; init; }
 
         [MessageField(order: 16)]
-        public int? Penalty { get; init; }
+        public int? LongNoteScore { get; init; }
     }
 
     [CollectionMessageField(order: 0, maxCount: 8, prefixSizeType: TypeCode.Int32)]

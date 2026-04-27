@@ -17,7 +17,7 @@ public interface IScoreTracker
     void Untrack(Session session);
 
     void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo, int maxJamCombo,
-        uint score, int life, GameSpeed speed, int penalty = 0);
+        uint score, int life, GameSpeed speed, int longNoteScore = 0);
 
     void CompleteGame();
 }
@@ -235,7 +235,7 @@ public class ScoreTracker : IScoreTracker
     }
 
     public void SubmitScore(Session session, int cool, int good, int bad, int miss, int maxCombo,
-        int maxJamCombo, uint score, int life, GameSpeed speed, int penalty = 0)
+        int maxJamCombo, uint score, int life, GameSpeed speed, int longNoteScore = 0)
     {
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -253,7 +253,7 @@ public class ScoreTracker : IScoreTracker
             state.MaxCombo    = maxCombo;
             state.MaxJamCombo = maxJamCombo;
             state.Score       = score;
-            state.LongNoteScore     = penalty;
+            state.LongNoteScore = longNoteScore;
             state.Life        = life;
             state.Speed       = speed;
             state.Clear       = state.Life > 0;
