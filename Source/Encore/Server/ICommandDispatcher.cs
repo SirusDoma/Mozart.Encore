@@ -54,4 +54,9 @@ public interface ICommandDispatcher
     ICommandDispatcher AddExceptionLogger(ICommandExceptionLogger logger);
 
     Task Dispatch(Session session, byte[] payload, CancellationToken cancellationToken);
+
+    Task Dispatch<TMessage>(Session session, TMessage message, CancellationToken cancellationToken)
+        where TMessage : class, IMessage;
+
+    Task Dispatch(Session session, Enum command, CancellationToken cancellationToken);
 }
