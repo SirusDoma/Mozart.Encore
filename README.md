@@ -14,6 +14,7 @@ Supported client version: **v5.89\* (O2JamO2 Final)**
 | [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
 | [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
 | [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| [Memoryer.Encore](../../tree/memoryer)    | v8.02 (O2Jam Classic)    |
 
 ## Features
 
