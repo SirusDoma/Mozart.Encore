@@ -14,7 +14,7 @@ namespace Mozart.Services;
 
 public interface IRoomService
 {
-    Room CreateRoom(Session session, string title, GameMode mode, string password,
+    Room CreateRoom(Session session, string title, KeyMode keyMode, GameMode gameMode, string password,
         int minLevelLimit, int maxLevelLimit, bool premium, int type);
 
     Room DeleteRoom(IChannel channel, int id);
@@ -51,7 +51,7 @@ public class RoomService : Broadcastable, IRoomService
     public override IReadOnlyList<Session> Sessions =>
         _rooms.Values.SelectMany(e => e.Values.SelectMany(r => r.Sessions)).ToList();
 
-    public Room CreateRoom(Session session, string title, GameMode mode, string password,
+    public Room CreateRoom(Session session, string title, KeyMode keyMode, GameMode gameMode, string password,
         int minLevelLimit, int maxLevelLimit, bool premium, int type)
     {
         if (session.Room != null)
@@ -68,7 +68,7 @@ public class RoomService : Broadcastable, IRoomService
             throw new InvalidOperationException("Channel is full");
 
         int musicId = session.GetAuthorizedToken<Actor>().InstalledMusicIds.FirstOrDefault((ushort)0);
-        if (mode == GameMode.Jam)
+        if (gameMode == GameMode.Jam)
             musicId = channel.GetAlbumList().FirstOrDefault().Value.AlbumId;
 
         for (int i = 0; i < channel.Capacity; i++)
@@ -77,7 +77,8 @@ public class RoomService : Broadcastable, IRoomService
             {
                 Id              = i,
                 Title           = title,
-                Mode            = mode,
+                KeyMode         = keyMode,
+                GameMode        = gameMode,
                 MusicId         = musicId,
                 Difficulty      = Difficulty.EX,
                 Speed           = GameSpeed.X10,
@@ -156,7 +157,7 @@ public class RoomService : Broadcastable, IRoomService
         }
     }
 
-    private void OnRoomSessionDisconnected(object? sender, SessionEventArgs e)
+    private void OnRoomSessionDisconnected(object? sender, SessionEventArgs<TcpSession> e)
     {
         _logger.LogWarning("Session [{User}] removed from the room due to connection lost",
             e.Session.Socket.RemoteEndPoint);

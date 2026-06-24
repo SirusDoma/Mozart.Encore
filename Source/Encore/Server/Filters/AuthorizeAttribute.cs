@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Encore.Sessions;
 
 namespace Encore.Server;
 
@@ -22,7 +23,13 @@ public class AuthorizeAttribute : CommandFilterAttribute
         if (context.Descriptor.HasCustomAttribute<AllowAnonymousAttribute>())
             return;
 
-        if (!context.Session.Authorized)
+        if (context.Session is not ITcpSession tcp)
+        {
+            throw new InvalidOperationException(
+                "[Authorize] is not valid on a non-TCP session. Encode identity in the payload instead.");
+        }
+
+        if (!tcp.Authorized)
         {
             if (_exceptionType == null)
                 throw new InvalidOperationException("Unauthorized access");

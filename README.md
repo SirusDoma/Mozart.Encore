@@ -1,19 +1,28 @@
-# IdentityP2.Encore
+# Memoryer.Encore
 
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Final)**  
-<sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, v0.5 and v0.6</sub>
+Supported client version: **v8.02 (O2Jam Classic)**
 
 ### Other Builds
 
-| Build                                     | Supported client version |
-|-------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)        | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)      | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time) | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)    | v5.89 (O2JamO2 Beta)     |
+| Build                                       | Supported client version |
+|---------------------------------------------|--------------------------|
+| [Mozart.Encore](../../tree/mozart)          | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](../../tree/amadeus)        | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](../../tree/cross-time)   | v2.33 (O2Jam X2)         |
+| [Identity.Encore](../../tree/identity)      | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](../../tree/identity-p2) | v5.89 (O2JamO2 Final)    |
+
+> [!IMPORTANT]
+> **O2Jam Classic requires game client modifications and/or client-side hosts file and IP table configuration to run and connect to a custom server.**   
+>
+> Common issues:
+> - The game connects to several web endpoints during startup. 
+>   Failure to connect to `http://o2jam.nopp.co.kr/client/event/2009/06_moa/hot_time.php` will result in crash.
+> - There are 3 hardcoded IP addresses inside the client that are assigned to each game server, which act as UDP+TCP relay servers.
+>   Live mode will disabled when the game cannot to connect to the both TCP and UDP relay server. See [Live Mode](#live-mode) to learn more.
 
 ## Features
 
@@ -41,8 +50,8 @@ Supported client version: **v5.89\* (O2JamO2 Final)**
 | [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
 | [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
 | [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Identity.Web](Source/Identity.Web/)           | Lightweight HTTP Web server                       |
-| [Identity](Source/Identity/)                   | Game server implementation for O2Jam client v5.89 |
+| [Memoryer.Web](Source/Memoryer.Web/)           | Lightweight HTTP Web server                       |
+| [Memoryer](Source/Memoryer/)                   | Game server implementation for O2Jam client v8.02 |
 
 # Configuration
 
@@ -65,11 +74,42 @@ Use `--Server:<Option>` to configure these settings via command-line arguments (
 ## HTTP
 Lightweight HTTP web server settings.
 
+Use `--Http:<Option>` to configure these settings via command-line arguments (e.g, `--Http:Port=15000`)
+
 | Option    | Description                                                                                                       |
 |-----------|-------------------------------------------------------------------------------------------------------------------|
 | `Enabled` | Determine whether the web server is enabled.  Default: `false`                                                    |
 | `Address` | Web server address to listen incoming requests. Using `0.0.0.0` may require admin privilege. Default: `127.0.0.1` |
-| `Port`    | HTTP port to listen incoming requests. Default: `15010`                                                           |
+| `Port`    | HTTP port to listen incoming requests. Default: `15000`                                                           |
+
+## Relay Server
+UDP and TCP Relay server for Live Mode.
+
+Use `--Relay:<Option>` &amp; `--Relay:Endpoints:<N>:<Option>` to configure these settings via command-line arguments (e.g, `--Relay:Endpoints:0:Address="127.0.0.1"`).
+`<N>` is the index of relay endpoint table.
+
+The index (`<N>`) represents an array index and must always start from 0, ordered and with no gap in-between.
+
+> [!IMPORTANT]
+> For more information, see [Live Mode](#live-mode).
+
+| Option                      | Description                                                                                                                                                                       |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Enabled`                   | Determine whether the fallback relay server (TCP) is enabled.  Default: `false`                                                                                                   |
+| `P2PEnabled`                | Determine whether the primary relay server (UDP) is enabled. The fallback relay server must be `Enabled` in order to turn on the primary relay server.  Default: `true`           |
+| `MaxConnections`            | The maximum number of clients connecting to the relay server. Default: `10000`                                                                                                    |
+| `PacketBufferSize`          | The maximum number of bytes per [message frame](https://blog.stephencleary.com/2009/04/message-framing.html) that can be processed by the TCP relay server. Default: `4096` bytes |
+| `RetransmissionInterval`    | The wait time (in seconds) for the client peer need to reply before the UDP packet retransmission triggered by the UDP relay server. Default: 100ms                               |                                                                                                                                                                         |
+| `MaxRetransmissionAttempts` | The maximum number of retransmission attempts before the UDP reliability channel drop a packet. Default: `0` (Always retry)                                                         |                                                                                                                                                                         |
+
+### Relay Endpoints
+
+These options can be configured under `Relay:Endpoints:<N>` section as explained above.
+
+| Option    | Description                                                                                                                                                                                                                                   |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Address` | <ul><li>In `Relay` mode:<br/>Inbound TCP/UDP address to listen incoming relay client connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In other modes:<br/>Outbound TCP address to connect to the Relay server.</li></ul> |
+| `Port`    | <ul><li>In `Relay` mode:<br/>Inbound TCP/UDP port to listen incoming relay client connection.</li><br/><li>In other modes:<br/>Outbound TCP port to connect to the Relay server.</li></ul>                                                    |
 
 ## Database
 Database connection setting.
@@ -189,7 +229,7 @@ Use the following command to create a new migration:
 ```shell
  # Replace "MySql" with your preferred database driver
  dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Identity\Identity.csproj \
+                             --startup-project Source\Memoryer\Memoryer.csproj \
                              --context Mozart.Data.Contexts.MainDbContext \
                              <migration name>
                              -- Auth:Mode=<auth mode> \
@@ -219,7 +259,7 @@ Run the following command to execute the migration:
 
 ```shell
  dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Identity\Identity.csproj \
+                           --startup-project Source\Memoryer\Memoryer.csproj \
                            --context Mozart.Data.Contexts.MainDbContext \
                            -- Auth:Mode=<auth mode> \
                            Db:Driver=<driver> \
@@ -265,6 +305,27 @@ You cannot run multiple instances to represent a single `Gateway` or `Channel`, 
 
 See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configuration section above to configure the `Gateway` and `Channel` instances.
 
+# Live Mode
+
+Live Mode is a new mode exclusive to O2Jam Classic where two players play against each other while showing both player lanes.
+The game use [UDP Hole Punching](https://en.wikipedia.org/wiki/UDP_hole_punching) as the first option to communicate directly to the opponent client. 
+If that fails, the game will fallback to relay server provided by the server via TCP connection.
+
+Refer to the [relay server configuration](#relay-server) to enable Live Mode.
+
+> [!NOTE]
+> Memoryer.Encore will try to start both TCP and UDP servers using the `Relay:Endpoints:N` configuration by default.
+> When `Relay:Enabled` is enabled or the deployment mode is set to `Relay`, at least one TCP relay server must start successfully.
+> The UDP relay is controlled by `Relay:P2PEnabled` and it is optional. However, the game treat UDP relay as a primary connection for Live mode and will likely to fall back to TCP relay instead of peer-to-peer when UDP server is not available.
+> 
+> **When using TCP relay fallback, there will be significant delay and/or freeze every time the room master start the game.**
+
+> [!IMPORTANT]
+> The server IP addresses for Live Mode are hardcoded into the client. 
+> You will have to either modify the computer IP tables/routing or modify the game client to change these IP.
+> 
+> Make sure that your firewall allow the incoming connection of the relay ports for both TCP and UDP.
+
 ## Service Discovery
 
 ### Gateway
@@ -283,8 +344,12 @@ OTwo.exe <encrypted_parameters> \
 > For example: `^|test^|??^|127.0.0.1^|15010`
 
 > [!NOTE]
+> `\` is an escape character for line break. 
+> Please remove it if you are running the command in one single line / without line-break.
+
+> [!NOTE]
 > The number of servers are not explicitly specified.  
-> See [AuthParameters](Source/Identity/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Identity/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
+> See [AuthParameters](Source/Memoryer/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Memoryer/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
 >
 > Use [`user:authorize`](#cli-command) command to generate the session and the encrypted parameters.
 

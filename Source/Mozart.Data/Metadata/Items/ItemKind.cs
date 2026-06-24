@@ -30,4 +30,5 @@ public enum ItemKind : byte
     NameChanger        = 25,
     PenaltyReset       = 26,
     BagExpansion       = 27,
+    Costume            = 28
 }

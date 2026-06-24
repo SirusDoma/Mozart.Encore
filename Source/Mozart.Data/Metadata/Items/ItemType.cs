@@ -18,4 +18,5 @@ public enum ItemType : int
     MusicalAccessories = 13,
     Pet                = 14,
     HairAccessories    = 15,
+    Costume            = 16
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mozart.Data.Contexts;
 using Mozart.Data.Entities;
 using Mozart.Data.Repositories;
+using System.Security.Cryptography;
 
 namespace Mozart.Contexts;
 
@@ -61,7 +62,7 @@ public class AuthContext : IAuthContext
             GatewayId = gatewayId,
             ServerId  = 0,
             ChannelId = 0,
-            Token     = Guid.NewGuid().ToString("N").ToUpper(),
+            Token     = RandomNumberGenerator.GetInt32(0, (int)Math.Pow(10, 12)).ToString("D12"),
             Address   = clientAddress,
             LoginTime = DateTime.UtcNow
         };

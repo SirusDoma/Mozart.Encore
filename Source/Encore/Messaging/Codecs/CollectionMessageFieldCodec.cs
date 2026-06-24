@@ -7,6 +7,7 @@ namespace Encore.Messaging;
 public sealed class CollectionMessageFieldCodec : MessageFieldCodec
 {
     private readonly IMessageFieldCodec _defaultCodec;
+    private IMessageFieldCodec? _elementCodec;
 
     public CollectionMessageFieldCodec(IMessageFieldCodec defaultCodec, IMessageFieldAttribute attribute)
         : base(SingleOrDefaultAttribute(attribute))
@@ -32,6 +33,33 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         return attribute;
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL2072",
+        Justification = "ElementCodecType is annotated with DynamicallyAccessedMembers(PublicConstructors)")]
+    private IMessageFieldCodec GetElementCodec()
+    {
+        if (_elementCodec != null)
+            return _elementCodec;
+
+        var attribute = (CollectionMessageFieldAttribute)Attribute;
+        if (attribute.ElementCodecType == null)
+            return _defaultCodec;
+
+        try
+        {
+            object?[] args = attribute.ElementCodecArgs ?? [];
+            _elementCodec = (MessageFieldCodec)Activator.CreateInstance(
+                attribute.ElementCodecType, args.Prepend(attribute).ToArray())!;
+
+            return _elementCodec;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Failed to create element codec of type '{attribute.ElementCodecType.Name}' with provided arguments",
+                ex);
+        }
+    }
+
     public override void Encode(BinaryWriter writer, object value,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type sourceType)
     {
@@ -40,7 +68,7 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         var prefixSizeType = attribute.PrefixSizeType;
         int minCount       = attribute.MinCount;
         int maxCount       = attribute.MaxCount;
-        var codec          = _defaultCodec;
+        var codec          = GetElementCodec();
 
         var elementType = GetEnumerableElementType(sourceType);
 
@@ -85,7 +113,7 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         var prefixSizeType = attribute.PrefixSizeType;
         int minCount       = attribute.MinCount;
         int maxCount       = attribute.MaxCount;
-        var codec          = _defaultCodec;
+        var codec          = GetElementCodec();
         var elementType    = GetEnumerableElementType(targetType);
 
         int realCount = minCount;
@@ -182,8 +210,15 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
     }
 
     [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    private Type? ToSupportedFieldType(Type? type)
+    private Type? ToSupportedFieldType(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type? type)
     {
+        // If a custom element codec is specified, trust it to handle arbitrary object types
+        // that would otherwise be rejected by the IMessage-registration fallback below.
+        var attribute = (CollectionMessageFieldAttribute)Attribute;
+        if (attribute.ElementCodecType != null && type != null && Type.GetTypeCode(type) == TypeCode.Object)
+            return type;
+
         return Type.GetTypeCode(type) switch
         {
             TypeCode.Object   => _defaultCodec is IMessageCodec d ? d.GetRegisteredType(type) : null,

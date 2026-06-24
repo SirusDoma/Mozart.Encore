@@ -13,16 +13,22 @@ public interface IRoom : IBroadcastable
     RoomMetadata Metadata { get; }
     int Capacity { get; }
     int UserCount { get; }
+    int PlayingUserCount { get; }
     string Title { get; set; }
-    string Password { get; }
+    string Password { get; set; }
     int MusicId { get; set; }
-    GameMode Mode { get; }
+    KeyMode KeyMode { get; set; }
+    GameMode GameMode { get; set; }
     Difficulty Difficulty { get; set; }
     GameSpeed Speed { get; set; }
     Arena Arena { get; set; }
     byte ArenaRandomSeed { get; set; }
+    int MinLevelLimit { get; set; }
+    int MaxLevelLimit { get; set; }
     IList<int> Skills { get; set; }
     int SkillsSeed { get; set; }
+    bool IsSelectingMusic { get; set; }
+    bool IsRelaySessionCreated { get; set; }
     Session Master { get; }
     IReadOnlyList<Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }
@@ -35,6 +41,7 @@ public interface IRoom : IBroadcastable
     void UpdateTeam(Session session, RoomTeam team);
     void UpdateMusicState(Session session, MusicState state);
     void UpdateSlot(Session session, int slotId);
+    void UpdateSlotPositions(bool newChampion);
 
     void StartGame();
     void CompleteGame();

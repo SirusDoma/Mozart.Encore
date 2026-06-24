@@ -5,7 +5,7 @@ namespace Encore.Server;
 
 public class CommandExceptionContext
 {
-    public CommandExceptionContext(Exception exception, Session session, CommandHandlerDescriptor? descriptor,
+    public CommandExceptionContext(Exception exception, ISession session, CommandHandlerDescriptor? descriptor,
         IMessage? request = null)
     {
         Exception  = exception;
@@ -16,7 +16,7 @@ public class CommandExceptionContext
 
     public Exception Exception { get; }
 
-    public Session Session { get; }
+    public ISession Session { get; }
 
     public CommandHandlerDescriptor? Descriptor { get; }
 
@@ -32,7 +32,7 @@ public class CommandExceptionHandlerContext
 
     public Exception Exception => ExceptionContext.Exception;
 
-    public Session Session => ExceptionContext.Session;
+    public ISession Session => ExceptionContext.Session;
 
     public CommandHandlerDescriptor? Descriptor => ExceptionContext.Descriptor;
 
@@ -54,7 +54,7 @@ public class CommandExceptionLoggerContext
 
     public Exception Exception => ExceptionContext.Exception;
 
-    public Session Session => ExceptionContext.Session;
+    public ISession Session => ExceptionContext.Session;
 
     public CommandHandlerDescriptor? Descriptor => ExceptionContext.Descriptor;
 

@@ -198,20 +198,21 @@ public static class MusicListParser
         if (stream.Position == stream.Length)
             return headers;
 
-        // -- Unknown section
-        // Stored partially inside the client, but has no reference, never being used
-        // The actual OJNList.dat has song count set to 0.
+        // -- Free music section
+        // Music in this section become free and playable without purchasing or owning vip pass.
 
         songCount = reader.ReadInt32();
         for (int i = 0; i < songCount; i++)
         {
             int id = reader.ReadInt32();
 
-            // -- Unknown
-            int p1 = reader.ReadInt16();
+            // -- isFreeMusic
+            // If non-zero, the song is free and playable.
+            int isFreeMusic = reader.ReadInt16();
 
-            // -- Unknown
-            int p2 = reader.ReadInt16();
+            // -- Unused
+            // Unused, observed value is always 0
+            int p3 = reader.ReadInt16();
         }
 
         if (stream.Position == stream.Length)
