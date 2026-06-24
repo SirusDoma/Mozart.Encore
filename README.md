@@ -13,6 +13,7 @@ Supported client version: **v2.33 (O2Jam X2)**
 | [Amadeus.Encore](../../tree/amadeus)         | v3.82 (O2Jam NX)         |
 | [Identity.Encore](../../tree/identity)       | v5.89 (O2JamO2 Beta)     |
 | [IdentityP2.Encore](../../tree/identity-p2)  | v5.89 (O2JamO2 Final)    |
+| [Memoryer.Encore](../../tree/memoryer)       | v8.02 (O2Jam Classic)    |
 
 > [!CAUTION]
 > **Cross.Time.Encore build is set to be diverged from the main build**
