@@ -640,7 +640,7 @@ public class Room : Broadcastable, IRoom
             member.IsReady = member.IsMaster;
             member.PlayingState = PlayingState.None;
 
-            if (member.IsMaster)
+            if (member.Role == MemberRole.Champion && GameMode == GameMode.Live)
                 _metadata.Title = $"{member.WinStreak} Wins : {member.Actor.Nickname}";
         }
 

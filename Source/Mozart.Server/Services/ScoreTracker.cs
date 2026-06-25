@@ -336,6 +336,7 @@ public class ScoreTracker : IScoreTracker
 
         // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
         // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+        // TODO: Invoke this in ScoreCompleted instead
         Room.CompleteGame();
     }
 
