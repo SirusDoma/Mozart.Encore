@@ -192,8 +192,8 @@ Use `--Metadata:<Option>` to configure these settings via command-line arguments
 
 | Option      | Description                                                                                                   |
 |-------------|---------------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).   |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).  |
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`8.02` (O2Jam Classic).       |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`8.02` (O2Jam Classic).      |
 
 ## Game settings
 Gameplay-specific settings.
