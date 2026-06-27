@@ -201,7 +201,7 @@ public class ScoreTracker : IScoreTracker
             UserTracked?.Invoke(this, new ScoreTrackEventArgs
             {
                 MemberId = i,
-                Session = member.Session
+                Session  = member.Session
             });
 
             return;
@@ -231,7 +231,7 @@ public class ScoreTracker : IScoreTracker
                 state.MemberId = memberId;
 
             if (Room.Slots[state.MemberId] is Room.MemberSlot member)
-                member.PlayingState = PlayingState.Waiting;
+                member.PlayingState = PlayingState.None;
 
             UserUntracked?.Invoke(this, new ScoreTrackEventArgs
             {
@@ -304,16 +304,16 @@ public class ScoreTracker : IScoreTracker
             state.Speed         = speed;
             state.Clear         = state.Life > 0;
             state.Completed     = true;
+
+            state.Session.Disconnected -= OnSessionDisconnected;
+            UserScoreSubmitted?.Invoke(this, new ScoreSubmitEventArgs
+            {
+                MemberId = state.MemberId
+            });
+
+            if (Completed)
+                CompleteGame();
         }
-
-        state.Session.Disconnected -= OnSessionDisconnected;
-        UserScoreSubmitted?.Invoke(this, new ScoreSubmitEventArgs
-        {
-            MemberId = state.MemberId
-        });
-
-        if (Completed)
-            CompleteGame();
     }
 
     public void CompleteGame()

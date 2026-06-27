@@ -128,7 +128,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         try
         {
             var tracker = (ScoreTracker)sender!;
-            if (tracker.Completed ||tracker.Room.State != RoomState.Playing)
+            if (tracker.Completed || tracker.Room.State != RoomState.Playing)
                 return;
 
             await tracker.Room.Broadcast(new GameStatsUpdateEventData
@@ -371,7 +371,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 default:            await room.Broadcast(new ScoreCompletedEventData
                                     {
                                         RoomMasterMemberId = (byte)room.Slots.ToList().FindIndex(s => s is Room.MemberSlot { IsMaster: true }),
-                                       Scores              = entries
+                                        Scores             = entries
                                     }, CancellationToken.None);
 
                                     break;

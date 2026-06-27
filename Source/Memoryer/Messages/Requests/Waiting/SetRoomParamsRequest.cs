@@ -3,9 +3,9 @@ using Mozart.Metadata;
 
 namespace Memoryer.Messages.Requests;
 
-public class SetRoomTitleRequest : IMessage
+public class SetRoomParamsRequest : IMessage
 {
-    public static Enum Command => RequestCommand.SetRoomTitle;
+    public static Enum Command => RequestCommand.SetRoomParams;
 
     [StringMessageField(order: 0, maxLength: 21)]
     public required string Title { get; init; }

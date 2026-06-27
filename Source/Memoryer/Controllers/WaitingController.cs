@@ -235,10 +235,10 @@ public class WaitingController(
 
     [RoomMasterAuthorize]
     [CommandHandler]
-    public void SetRoomTitle(SetRoomTitleRequest request)
+    public void SetRoomParams(SetRoomParamsRequest request)
     {
-        logger.LogInformation((int)RequestCommand.SetRoomTitle,
-            "Update room [{RoomId:000}] info: [{Title}]", Room.Id, request.Title);
+        logger.LogInformation((int)RequestCommand.SetRoomParams,
+            "Update room [{RoomId:000}] params: [{Title}]", Room.Id, request.Title);
 
         Room.Title         = request.Title;
         Room.Password      = request.HasPassword ? request.Password : Room.Password;
@@ -376,12 +376,23 @@ public class WaitingController(
         logger.LogInformation((int)RequestCommand.StartGame,
             "Start game: [{RoomId:000}]", Room.Id);
 
-        if (Room.Metadata.GameMode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
+        if (Room.State == RoomState.Playing)
+        {
+            await Session.WriteMessage(new StartGameEventData
+            {
+                Result = StartGameEventData.StartResult.GenericError
+            }, cancellationToken);
+
+            return;
+        }
+
+        if (Room is { GameMode: GameMode.Versus, UserCount: 1 } && !options.Value.AllowSoloInVersus)
         {
             await Session.WriteMessage(new StartGameEventData
             {
                 Result = StartGameEventData.StartResult.InsufficientPlayers
             }, cancellationToken);
+
             return;
         }
 
@@ -476,7 +487,7 @@ public class WaitingController(
 
             if (skills.Count > 0)
             {
-                // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
+                // Host doesn't have sufficient attributive items in their inventory. Desync or forged?
                 await Session.WriteMessage(new StartGameEventData
                 {
                     Result = StartGameEventData.StartResult.GenericError,

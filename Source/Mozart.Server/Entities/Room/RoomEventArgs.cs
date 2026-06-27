@@ -19,10 +19,15 @@ public class RoomUserLeftEventArgs : EventArgs
     public required int RoomMasterMemberId { get; init; }
 }
 
-public class RoomTitleChangedEventArgs : EventArgs
+public class RoomParamsChangedEventArgs : EventArgs
 {
-    public required string Title { get; init; }
-    public required string Password { get; init; }
+    public required string Title      { get; init; }
+    public required string Password   { get; init; }
+    public required int MusicId       { get; init; }
+    public required KeyMode KeyMode   { get; init; }
+    public required GameMode GameMode { get; init; }
+    public required int MinLevelLimit { get; init; }
+    public required int MaxLevelLimit { get; init; }
 }
 
 public class RoomMusicChangedEventArgs : EventArgs
@@ -66,9 +71,10 @@ public class RoomUserTeamChangedEventArgs : EventArgs
 
 public class RoomUserMusicStateChangedEventArgs : EventArgs
 {
-    public required int MemberId           { get; init; }
-    public required Room.MemberSlot Member { get; init; }
-    public required MusicState State     { get; init; }
+    public required int MemberId              { get; init; }
+    public required Room.MemberSlot Member    { get; init; }
+    public required PlayingState PlayingState { get; init; }
+    public required MusicState MusicState     { get; init; }
 }
 
 public class RoomSlotChangedEventArgs : EventArgs

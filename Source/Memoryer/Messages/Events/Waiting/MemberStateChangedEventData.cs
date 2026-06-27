@@ -3,9 +3,9 @@ using Mozart.Metadata;
 
 namespace Memoryer.Messages.Events;
 
-public class MusicStateChangedEventData : IMessage
+public class MemberStateChangedEventData : IMessage
 {
-    public static Enum Command => EventCommand.MusicStateChanged;
+    public static Enum Command => EventCommand.MemberStateChanged;
 
     [MessageField(order: 0)]
     public byte MemberId { get; init; }
@@ -14,5 +14,5 @@ public class MusicStateChangedEventData : IMessage
     public PlayingState PlayingState { get; init; }
 
     [MessageField(order: 2)]
-    public MusicState State { get; init; }
+    public MusicState MusicState { get; init; }
 }

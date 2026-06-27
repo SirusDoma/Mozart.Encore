@@ -39,13 +39,11 @@ public class PlayingController(
         member.IsReady = false;
     }
 
-    [CommandHandler(RequestCommand.ConfirmMusicLoadedEx)]
-    public MusicLoadedExResponse ConfirmMusicLoadedEx()
+    [CommandHandler(RequestCommand.ConfirmRelay, ResponseCommand.ConfirmRelay)]
+    public void ConfirmRelay()
     {
         logger.LogInformation((int)RequestCommand.ConfirmMusicLoaded,
-            "User music loaded ex: [{RoomId:000}]", Room.Id);
-
-        return new MusicLoadedExResponse();
+            "User confirm relay connection: [{RoomId:000}]", Room.Id);
     }
 
     [CommandHandler(RequestCommand.ReportUdpPunchHole, ResponseCommand.ReportUdpPunchHole)]
@@ -62,7 +60,7 @@ public class PlayingController(
     public async Task TestNetworkLatency(TestNetworkLatencyRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation((int)RequestCommand.TestNetworkLatency,
-            "Test network latency: [{MemberId} / {RT} / {LT} / {Seq} / {Unk}]",
+            "Test network latency: [{MemberId} / {RT} / {LT} / {Seq} / {Flag}]",
             request.MemberId, request.RemoteTick, request.LocalTick, request.Sequence, request.Last);
 
         await Room.Broadcast(new TestNetworkLatencyCompletedEventData

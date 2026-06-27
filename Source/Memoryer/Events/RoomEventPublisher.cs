@@ -20,7 +20,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
         room.UserMusicStateChanged   += OnUserMusicStateChanged;
         room.UserReadyStateChanged   += OnUserReadyStateChanged;
 
-        room.TitleChanged += OnTitleChanged;
+        room.RoomParamsChanged += OnRoomParamsChanged;
         room.MusicChanged += OnMusicChanged;
         room.AlbumChanged += OnAlbumChanged;
         room.ArenaChanged += OnArenaChanged;
@@ -51,15 +51,6 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 PlayingState    = e.Member.PlayingState,
                 IsAdministrator = e.Member.Actor.IsAdministrator
             }, CancellationToken.None);
-
-            if (e.Member.PlayingState == PlayingState.Waiting)
-            {
-                await room.Broadcast(new MusicLoadedEventData
-                {
-                    MemberId     = (byte)e.MemberId,
-                    PlayingState = PlayingState.Waiting
-                }, CancellationToken.None);
-            }
         }
         catch (Exception ex)
         {
@@ -176,11 +167,11 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(new MusicStateChangedEventData
+            await room.Broadcast(new MemberStateChangedEventData
             {
                 MemberId     = (byte)e.MemberId,
-                PlayingState = e.Member.PlayingState,
-                State        = e.State
+                PlayingState = e.PlayingState,
+                MusicState   = e.MusicState
             }, CancellationToken.None);
         }
         catch (Exception ex)
@@ -209,34 +200,35 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
         }
     }
 
-    private async void OnTitleChanged(object? sender, RoomTitleChangedEventArgs e)
+    private async void OnRoomParamsChanged(object? sender, RoomParamsChangedEventArgs e)
     {
         try
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
-            await room.Broadcast(new WaitingRoomTitleEventData
+            await room.Broadcast(new WaitingRoomParamsEventData
             {
                 Title         = e.Title,
                 Password      = e.Password,
                 HasPassword   = !string.IsNullOrEmpty(e.Password),
-                MinLevelLimit = (byte)room.MinLevelLimit,
-                MaxLevelLimit = (byte)room.MaxLevelLimit,
-                KeyMode       = room.KeyMode,
-                GameMode      = room.GameMode,
-                MusicId       = (ushort)room.MusicId,
-
+                MinLevelLimit = (byte)e.MinLevelLimit,
+                MaxLevelLimit = (byte)e.MaxLevelLimit,
+                KeyMode       = e.KeyMode,
+                GameMode      = e.GameMode,
+                MusicId       = (ushort)e.MusicId,
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
+            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParamsChangedEventData
             {
                 Number        = room.Id,
-                Title         = room.Title,
-                KeyMode       = room.KeyMode,
-                GameMode      = room.GameMode,
-                HasPassword   = !string.IsNullOrEmpty(room.Password),
-                MinLevelLimit = (byte)room.MinLevelLimit,
-                MaxLevelLimit = (byte)room.MaxLevelLimit
+                Title         = e.Title,
+                KeyMode       = e.KeyMode,
+                GameMode      = e.GameMode,
+                HasPassword   = !string.IsNullOrEmpty(e.Password),
+                Password      = e.Password,
+                MinLevelLimit = (byte)e.MinLevelLimit,
+                MaxLevelLimit = (byte)e.MaxLevelLimit,
+                MusicId       = e.MusicId
             }, CancellationToken.None);
         }
         catch (Exception ex)

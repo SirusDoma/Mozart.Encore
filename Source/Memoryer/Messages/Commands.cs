@@ -25,7 +25,7 @@ public enum RequestCommand : ushort
     GetMusicScoreList    = 0x07EE, // 2030
     GetMusicMaxScore     = 0x07F0, // 2032
     GetFreeMusicStatus   = 0x07F2, // 2034
-    SetRoomTitle         = 0x0BB8, // 3000
+    SetRoomParams        = 0x0BB8, // 3000
     JoinWaiting          = 0x0BBA, // 3002
     ExitWaiting          = 0x0BBD, // 3005
     UpdateSlot           = 0x0BC0, // 3008
@@ -54,7 +54,7 @@ public enum RequestCommand : ushort
     TestNetworkLatency   = 0x0FD0, // 4048
     StartSelectMusic     = 0x0FD3, // 4051
     CancelSelectMusic    = 0x0FD5, // 4053
-    ConfirmMusicLoadedEx = 0x0FD7, // 4055
+    ConfirmRelay         = 0x0FD7, // 4055
     SetRoomSkillEx       = 0x0FD9, // 4057
     SyncItemPurchase     = 0x1388, // 5000
     SellItem             = 0x138A, // 5002
@@ -109,7 +109,7 @@ public enum ResponseCommand : ushort
     GetLiveState         = 0x0FCB, // 4043
     GetP2PList           = 0x0FCD, // 4045
     ReportUdpPunchHole   = 0x0FCF, // 4047
-    MusicLoadedEx        = 0x0FD8, // 4056
+    ConfirmRelay         = 0x0FD8, // 4056
     SyncPurchase         = 0x1389, // 5001
     SellItem             = 0x138B, // 5003
     EquipItem            = 0x138D, // 5005
@@ -132,7 +132,7 @@ public enum EventCommand : ushort
 {
     RoomCreated                 = 0x07D5, // 2005
     RoomRemoved                 = 0x07D7, // 2007
-    RoomTitleChanged            = 0x07D8, // 2008
+    RoomParamsChanged           = 0x07D8, // 2008
     RoomUserCountChanged        = 0x07D9, // 2009
     ReceiveWhisper              = 0x07E3, // 2019
     RoomStateChanged            = 0x07E4, // 2020
@@ -140,7 +140,7 @@ public enum EventCommand : ushort
     RoomSkillChanged            = 0x07E9, // 2025
     MusicPremiumTimeList        = 0x07EA, // 2026
     RankNotification            = 0x07ED, // 2029
-    WaitingTitleChanged         = 0x0BB9, // 3001
+    WaitingRoomParamsChanged    = 0x0BB9, // 3001
     UserJoinWaiting             = 0x0BBC, // 3004
     UserLeaveWaiting            = 0x0BBF, // 3007
     RoomSlotUpdate              = 0x0BC1, // 3009
@@ -158,7 +158,7 @@ public enum EventCommand : ushort
     ScoreCompleted              = 0x0FB2, // 4018
     UserLeaveGame               = 0x0FB6, // 4022
     WaitingSkillChanged         = 0x0FB8, // 4024
-    MusicStateChanged           = 0x0FBA, // 4026
+    MemberStateChanged          = 0x0FBA, // 4026
     WaitingAlbumChanged         = 0x0FBC, // 4028
     AlbumScoreCompleted         = 0x0FBD, // 4029
     AcquireMusic                = 0x0FC3, // 4035

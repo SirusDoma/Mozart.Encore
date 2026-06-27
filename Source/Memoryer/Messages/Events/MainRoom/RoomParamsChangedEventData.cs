@@ -3,9 +3,9 @@ using Mozart.Metadata;
 
 namespace Memoryer.Messages.Events;
 
-public class RoomTitleChangedEventData : IMessage
+public class RoomParamsChangedEventData : IMessage
 {
-    public static Enum Command => EventCommand.RoomTitleChanged;
+    public static Enum Command => EventCommand.RoomParamsChanged;
 
     [MessageField(order: 0)]
     public int Number { get; init; }
@@ -22,9 +22,15 @@ public class RoomTitleChangedEventData : IMessage
     [MessageField(order: 3)]
     public bool HasPassword { get; init; }
 
-    [MessageField(order: 4)]
-    public byte MinLevelLimit { get; set; }
+    [StringMessageField(order: 4, maxLength: 21)]
+    public required string Password { get; init; }
 
     [MessageField(order: 5)]
+    public byte MinLevelLimit { get; set; }
+
+    [MessageField(order: 6)]
     public byte MaxLevelLimit { get; set; }
+
+    [MessageField(order: 7)]
+    public int MusicId { get; init; }
 }

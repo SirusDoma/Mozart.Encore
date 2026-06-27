@@ -212,7 +212,7 @@ public class Room : Broadcastable, IRoom
     public event EventHandler<RoomUserMusicStateChangedEventArgs>? UserMusicStateChanged;
     public event EventHandler<RoomUserReadyStateChangedEventArgs>? UserReadyStateChanged;
 
-    public event EventHandler<RoomTitleChangedEventArgs>? TitleChanged;
+    public event EventHandler<RoomParamsChangedEventArgs>? RoomParamsChanged;
     public event EventHandler<RoomMusicChangedEventArgs>? MusicChanged;
     public event EventHandler<RoomAlbumChangedEventArgs>? AlbumChanged;
     public event EventHandler<RoomArenaChangedEventArgs>? ArenaChanged;
@@ -328,9 +328,7 @@ public class Room : Broadcastable, IRoom
             }
         }
 
-        if (State == RoomState.Playing)
-            ScoreTracker.Untrack(session);
-
+        ScoreTracker.Untrack(session);
         UserLeft?.Invoke(this, new RoomUserLeftEventArgs
         {
             MemberId           = index,
@@ -354,12 +352,23 @@ public class Room : Broadcastable, IRoom
 
     public void SaveMetadataChanges(bool refresh = false)
     {
-        if (_previous.Title != _metadata.Title || _previous.Password != _metadata.Password)
+        if (refresh ||
+            _previous.Title         != _metadata.Title ||
+            _previous.Password      != _metadata.Password ||
+            _previous.KeyMode       != _metadata.KeyMode ||
+            _previous.GameMode      != _metadata.GameMode ||
+            _previous.MinLevelLimit != _metadata.MinLevelLimit ||
+            _previous.MaxLevelLimit != _metadata.MaxLevelLimit)
         {
-            TitleChanged?.Invoke(this, new RoomTitleChangedEventArgs
+            RoomParamsChanged?.Invoke(this, new RoomParamsChangedEventArgs
             {
-                Title    = _metadata.Title,
-                Password = _metadata.Password
+                Title         = _metadata.Title,
+                Password      = _metadata.Password,
+                MusicId       = _metadata.MusicId,
+                KeyMode       = _metadata.KeyMode,
+                GameMode      = _metadata.GameMode,
+                MinLevelLimit = _metadata.MinLevelLimit,
+                MaxLevelLimit = _metadata.MaxLevelLimit,
             });
         }
 
@@ -481,9 +490,10 @@ public class Room : Broadcastable, IRoom
         member.MusicState = state;
         UserMusicStateChanged?.Invoke(this, new RoomUserMusicStateChangedEventArgs
         {
-            MemberId = index,
-            Member   = member,
-            State    = state
+            MemberId     = index,
+            Member       = member,
+            PlayingState = member.PlayingState,
+            MusicState   = state
         });
     }
 
@@ -637,9 +647,10 @@ public class Room : Broadcastable, IRoom
 
         foreach (var member in _slots.OfType<MemberSlot>())
         {
-            member.IsReady = member.IsMaster;
-            member.PlayingState = PlayingState.None;
+            if (member.PlayingState !=  PlayingState.Waiting)
+                member.IsReady = member.IsMaster;
 
+            member.PlayingState = PlayingState.None;
             if (member.Role == MemberRole.Champion && GameMode == GameMode.Live)
                 _metadata.Title = $"{member.WinStreak} Wins : {member.Actor.Nickname}";
         }

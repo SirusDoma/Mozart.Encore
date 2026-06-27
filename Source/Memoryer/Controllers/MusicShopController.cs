@@ -36,15 +36,16 @@ public class MusicShopController(
 
             var slots = Session.Room.Slots.ToList();
             int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+            var member = (Room.MemberSlot)slots[memberId];
 
-            await Session.Room.Broadcast(new MusicStateChangedEventData
+            await Session.Room.Broadcast(new MemberStateChangedEventData
             {
-                MemberId = (byte)memberId,
-                State    = ((Room.MemberSlot)slots[memberId]).MusicState
+                MemberId     = (byte)memberId,
+                PlayingState = member.PlayingState,
+                MusicState   = member.MusicState
             }, cancellationToken);
         }
     }
-
 
     [CommandHandler(RequestCommand.SyncMusicPurchase)]
     public async Task<SyncMusicPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)

@@ -3,9 +3,9 @@ using Mozart.Metadata;
 
 namespace Memoryer.Messages.Events;
 
-public class WaitingRoomTitleEventData : IMessage
+public class WaitingRoomParamsEventData : IMessage
 {
-    public static Enum Command => EventCommand.WaitingTitleChanged;
+    public static Enum Command => EventCommand.WaitingRoomParamsChanged;
 
     [StringMessageField(order: 0, maxLength: 21)]
     public required string Title { get; init; }
