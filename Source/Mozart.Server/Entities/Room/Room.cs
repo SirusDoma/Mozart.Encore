@@ -253,8 +253,15 @@ public class Room : Broadcastable, IRoom
                 continue;
 
             _slots[i] = member;
-            if (i == 3)
-                member.Role = MemberRole.Challenger;
+            if (GameMode == GameMode.Live)
+            {
+                member.Role = i switch
+                {
+                    0 => MemberRole.Champion,
+                    3 => MemberRole.Challenger,
+                    _ => MemberRole.Spectator
+                };
+            }
 
             UserJoined?.Invoke(this, new RoomUserJoinedEventArgs
             {
@@ -307,15 +314,40 @@ public class Room : Broadcastable, IRoom
             var queueMembers = new List<MemberSlot>();
             for (int i = 0; i < _slots.Count; i++)
             {
-                if (_slots[i] is not MemberSlot m)
+                if (_slots[i] is not MemberSlot m || _slots[i] is LockedSlot)
                     continue;
 
-                if (index is 0 or 3 && _slots[index] is not MemberSlot)
+                if (i != 0 && index == 3 && _slots[index] is not MemberSlot)
+                {
                     _slots[index] = m;
+                    m.Role = MemberRole.Challenger;
+                }
+                else if (i == 3 && index == 0 && _slots[index] is not MemberSlot)
+                {
+                    _slots[index] = m;
+                    _slots[i] = new VacantSlot();
+                    m.Role = MemberRole.Champion;
+                }
                 else if (i >= 4)
-                    queueMembers.Add(m);
+                {
+                    if (_slots[3] is not MemberSlot)
+                    {
+                        _slots[3] = m;
+                        m.Role =  MemberRole.Challenger;
+                    }
+                    else if (_slots[0] is not MemberSlot)
+                    {
+                        _slots[0] = m;
+                        m.Role =  MemberRole.Champion;
+                    }
+                    else
+                    {
+                        m.Role = MemberRole.Spectator;
+                        queueMembers.Add(m);
 
-                _slots[i] = new VacantSlot();
+                        _slots[i] = new VacantSlot();
+                    }
+                }
             }
 
             int placed = 0;
@@ -338,6 +370,8 @@ public class Room : Broadcastable, IRoom
 
         if (!_slots.OfType<MemberSlot>().Any())
             _service.DeleteRoom(Channel, Id);
+
+        SaveMetadataChanges();
     }
 
     public bool IsMember(Session session)
