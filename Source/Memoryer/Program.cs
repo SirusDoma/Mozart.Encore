@@ -35,7 +35,7 @@ namespace Memoryer;
 
 public class Program
 {
-    public static Version Version        => new(6, 0, 0);
+    public static Version Version        => new(6, 1, 0);
     public static Version NetworkVersion => new(8, 0, 2);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
