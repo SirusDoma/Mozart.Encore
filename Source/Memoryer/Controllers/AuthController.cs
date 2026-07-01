@@ -91,14 +91,23 @@ public class AuthController(
         bool freeMusic = gameOptions.Value.FreeMusic;
         bool infinityRing = gameOptions.Value.InfinityRing;
 
+        if (freeMusic && actor.FreePass.Type == FreePassType.None)
+            actor.FreePass = new FreePass(FreePassType.AllMusic, DateTime.MaxValue);
+
+        if (infinityRing && !actor.InfinityRingPass)
+        {
+            actor.InfinityRingPass = true;
+            actor.InfinityRingExpiryDate = DateTime.MaxValue;
+        }
+
         manager.CancelExpiry(Session);
         return new AuthResponse
         {
             Result = AuthResult.Success,
             FreePass = new AuthResponse.FreePassInfo
             {
-                Type   = freeMusic ? FreePassType.AllMusic : actor.FreePass.Type,
-                Expiry = !freeMusic && actor.FreePass.Type != FreePassType.None
+                Type   = actor.FreePass.Type,
+                Expiry = actor.FreePass.Type != FreePassType.None
                     ? actor.FreePass.ExpiryDate.ToUniversalTime() - DateTime.UtcNow
                     : TimeSpan.Zero
             },
@@ -111,10 +120,10 @@ public class AuthController(
             },
             InfiniteRing = new AuthResponse.InfiniteRingInfo
             {
-                Active = infinityRing || actor.InfinityRingPass,
+                Active = actor.InfinityRingPass,
                 Expiry = actor.InfinityRingExpiryDate.HasValue
                     ? actor.InfinityRingExpiryDate.Value.ToUniversalTime() - DateTime.UtcNow
-                    : infinityRing ? TimeSpan.FromDays(31) : TimeSpan.Zero
+                    : TimeSpan.Zero
             }
         };
     }

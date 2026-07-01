@@ -275,9 +275,9 @@ public class WaitingController(
             Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active", request.Skills.Count, request.Skills.FirstOrDefault()
         );
 
-        Room.Skills = request.Skills.Where(s => s > 0).ToList();
-        Room.SkillsSeed = Room.Skills.Count > 0
-            ? Random.Shared.Next(0, int.MaxValue) // TODO: Crack how seed actually used in client
+        Room.Skills = request.Skills.ToList();
+        Room.SkillsSeed = Room.Skills.Any(s => s > 0)
+            ? Random.Shared.Next(0, int.MaxValue)
             : 0;
 
         Room.SaveMetadataChanges();
@@ -293,16 +293,19 @@ public class WaitingController(
             Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active", request.Skills.Count, request.Skills.FirstOrDefault()
         );
 
-        Room.Skills = request.Skills.Where(s => s > 0).ToList();
-        Room.SkillsSeed = Room.Skills.Count > 0
+        Room.Skills = request.Skills.ToList();
+        Room.SkillsSeed = Room.Skills.Any(s => s > 0)
             ? Random.Shared.Next(0, int.MaxValue)
             : 0;
+
+        var slots    = Room.Slots;
+        int superId  = slots.ToList().FindIndex(s => s is Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
 
         await Room.Broadcast(new WaitingSkillExChangedEventData
         {
             Skills                   = Room.Skills,
-            HasSuperRoomManager      = false,
-            SuperRoomManagerMemberId = 0
+            HasSuperRoomManager      = superId >= 0,
+            SuperRoomManagerMemberId = superId >= 0 ? (byte)superId : byte.MaxValue
         }, CancellationToken.None);
     }
 
@@ -459,7 +462,7 @@ public class WaitingController(
         skills.AddRange(Room.Skills.Where(s => s != 0));
         bool pendingChanges = false;
 
-        if (skills.Count > 0)
+        if (skills.Any(i => i > 0) && (!user.InfinityRing || (user.InfinityRing && (!user.InfinityRingExpiryDate.HasValue || user.InfinityRingExpiryDate.Value.ToUniversalTime() < DateTime.UtcNow))))
         {
             for (int i = 0; i < user.Inventory.Capacity; i++)
             {

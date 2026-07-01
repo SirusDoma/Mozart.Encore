@@ -437,11 +437,14 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
         {
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
+            var slots    = room.Slots.ToList();
+            int superId  = slots.FindIndex(s => s is Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
+
             await room.Broadcast(new WaitingSkillChangedEventData
             {
                 Skills                   = e.Skills,
-                HasSuperRoomManager      = false,
-                SuperRoomManagerMemberId = 0
+                HasSuperRoomManager      = superId >= 0,
+                SuperRoomManagerMemberId = superId >= 0 ? (byte)superId : byte.MaxValue
             }, CancellationToken.None);
 
             await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
