@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using Amadeus.CLI;
 using Amadeus.Controllers;
 using Amadeus.Controllers.Filters;
@@ -30,7 +30,7 @@ namespace Amadeus;
 
 public class Program
 {
-    public static Version Version        => new(2, 6, 0);
+    public static Version Version        => new(2, 6, 1);
     public static Version NetworkVersion => new(3, 82);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
