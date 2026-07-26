@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +31,7 @@ namespace Mozart;
 
 public class Program
 {
-    public static Version Version        => new(1, 16, 0);
+    public static Version Version        => new(1, 16, 1);
     public static Version NetworkVersion => new(3, 10);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
