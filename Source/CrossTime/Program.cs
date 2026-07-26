@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using CrossTime.CLI;
 using CrossTime.Controllers;
 using CrossTime.Controllers.Filters;
@@ -30,7 +30,7 @@ namespace CrossTime;
 
 public class Program
 {
-    public static Version Version        => new(3, 6, 0);
+    public static Version Version        => new(3, 6, 1);
     public static Version NetworkVersion => new(2, 33);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
