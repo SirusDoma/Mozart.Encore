@@ -213,11 +213,11 @@ public static class MusicListParser
             int p2 = reader.ReadInt16();
 
             // -- Unknown
-            // Unused, observed value is always 1243708 (0x12FABC)
+            // Unused, observed value is always 1243708 (0x12FA3C)
             int p3 = reader.ReadInt32();
 
             // -- Unknown
-            // Unused, observed value is always 4655611 (0x470DFB)
+            // Unused, observed value is always 4655611 (0x4709FB)
             int p4 = reader.ReadInt32();
 
             // -- Unknown
