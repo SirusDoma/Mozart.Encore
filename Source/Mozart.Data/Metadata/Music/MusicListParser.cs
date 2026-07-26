@@ -49,7 +49,7 @@ public static class MusicListParser
             // P2: Unknown, observed to be always 0
             int p2 = reader.ReadInt32();
 
-            // P3: Unknown, observed to be always 0
+            // P3: Unknown, observed to be always 1
             int p3 = reader.ReadInt32();
 
             // Regardless of parameters, it is marked as new (even if all parameters are 0)
@@ -69,7 +69,8 @@ public static class MusicListParser
             int id = reader.ReadInt32();
 
             // Difficulty: which difficulty to play for this song mission
-            var difficulty = (Difficulty)reader.ReadInt32();
+            // The value is 1-based (1 = EX, 2 = NX, 3 = HX), unlike the 0-based Difficulty enum
+            var difficulty = (Difficulty)(reader.ReadInt32() - 1);
 
             // P2: Unknown, no occurrence other than 0
             int p2 = reader.ReadInt32();
@@ -107,14 +108,14 @@ public static class MusicListParser
             // P2: Unknown, no occurrence other than 0
             byte p2 = reader.ReadByte();
 
-            // P3: Unknown, no occurrence other than 0
+            // P3: Unknown, observed always to be `2753084` (`0x2A023C`)
             //     It might be possible that it is not int32
             int p3 = reader.ReadInt32();
 
-            // P4: Unknown
+            // P4: Unknown, observed always to be `274` (`0x112`)
             int p4 = reader.ReadInt32();
 
-            // P5: Unknown
+            // P5: Unknown, observed always to be `61589` (`0xF095`)
             //     It might be possible that it is not int32
             int p5 = reader.ReadInt32();
 
