@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using Identity.CLI;
 using Identity.Controllers;
 using Identity.Controllers.Filters;
@@ -30,7 +30,7 @@ namespace Identity;
 
 public class Program
 {
-    public static Version Version        => new(4, 6, 0);
+    public static Version Version        => new(4, 6, 1);
     public static Version NetworkVersion => new(5, 89, 9);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
