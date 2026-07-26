@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using Encore.Hosting.Extensions;
 using Encore.Hosting.Logging;
 using Encore.Messaging;
@@ -35,7 +35,7 @@ namespace Memoryer;
 
 public class Program
 {
-    public static Version Version        => new(6, 1, 0);
+    public static Version Version        => new(6, 1, 1);
     public static Version NetworkVersion => new(8, 0, 2);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
