@@ -121,7 +121,7 @@ public static class MusicListParser
             int gem = reader.ReadInt32();
 
             // -- Unused/Unknown
-            // Unused, observed value is a constant value of 4379964 (0x42D53C)
+            // Unused, observed value is a constant value of 2010252407 (0x77D20477)
             int unused = reader.ReadInt32();
 
             if (headers.TryGetValue(id, out var header))
@@ -148,7 +148,7 @@ public static class MusicListParser
             int availability = reader.ReadInt32();
 
             // -- Unused
-            // Unused, observed value is always 0
+            // Unused, observed value is 0 or 1
             int unused = reader.ReadInt32();
         }
 
@@ -227,7 +227,7 @@ public static class MusicListParser
 
             // -- Key Mode
             // Defines the key mode of the song, only one key mode can be active at a time per music entry.
-            // 0x03 = 3K, 0x07 = 7K
+            // 0x03 = 3K, 0x05 = 5K, 0x07 = 7K
             byte mode = reader.ReadByte();
 
             // -- Unused
@@ -256,19 +256,19 @@ public static class MusicListParser
             string releaseDate = Encoding.UTF8.GetString(reader.ReadBytes(10)).Trim('\0');
 
             // -- Unknown
-            // Unused, observed value is always 0
+            // Unused, observed value is always 30464 (0x7700)
             int p2 = reader.ReadInt16();
 
             // -- Unknown
-            // Unused, observed value is always 1243708 (0x12FABC)
+            // Unused, observed value is always 1242928 (0x12F730)
             int p3 = reader.ReadInt32();
 
             // -- Unknown
-            // Unused, observed value is always 4655611 (0x470DFB)
+            // Unused, observed value is always 4474939 (0x44483B)
             int p4 = reader.ReadInt32();
 
             // -- Unknown
-            // Unused, observed value is always 0
+            // Unused, observed value is always 48401 (0xBD11)
             int p5 = reader.ReadInt32();
 
             if (headers.TryGetValue(id, out var header))
