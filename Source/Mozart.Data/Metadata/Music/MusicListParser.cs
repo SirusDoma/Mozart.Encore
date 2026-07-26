@@ -102,23 +102,25 @@ public static class MusicListParser
 
             // The exact payload is unknown, however it is confirmed they are:
             // - utf8 string timestamp (Format: yyyy-MM-dd)
-            // - 12 bytes payload
+            // - 13 bytes payload
 
             // P1: Unknown Date, presumably a music release date
-            //     Appears to be always have 11 bytes in length
-            //     But there's a chance that it is actually a null terminated string
+            //     Null terminated string within an 11 bytes field
             string p1 = Encoding.UTF8.GetString(reader.ReadBytes(11)).Trim('\0');
 
-            // P2: Unknown,no occurrence other than 0
-            int p2 = reader.ReadInt32();
+            // P2: Unknown, no occurrence other than 0
+            byte p2 = reader.ReadByte();
 
-            // P3: Unknown, observed always to be `1243692` (`0x12FA2C`)
-            //     It might be possible that it is not int32
+            // P3: Unknown, no occurrence other than 0
             int p3 = reader.ReadInt32();
 
-            // P4: Unknown, observed always to be `4540192` (`0x454720`)
+            // P4: Unknown, observed always to be `1243692` (`0x12FA2C`)
             //     It might be possible that it is not int32
             int p4 = reader.ReadInt32();
+
+            // P5: Unknown, observed always to be `4540192` (`0x454720`)
+            //     It might be possible that it is not int32
+            int p5 = reader.ReadInt32();
 
             if (headers.TryGetValue(id, out var header))
                 header.ReleaseDate = DateOnly.ParseExact(p1, "yyyy-MM-dd");
