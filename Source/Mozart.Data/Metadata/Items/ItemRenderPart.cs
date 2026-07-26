@@ -2,10 +2,10 @@ namespace Mozart.Metadata.Items;
 
 public enum ItemRenderPart
 {
-    SmallPreview,
     LargePreview,
+    SmallPreview,
     Body,
-    RightArm,
     LeftArm,
-    Head
+    RightArm,
+    Back
 }
