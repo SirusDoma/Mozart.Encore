@@ -117,7 +117,7 @@ public class Actor
 
     public List<CompletedMission> CompletedMissionList { get; set; }
 
-    public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
+    public IList<ushort> InstalledMusicIds { get; set; } = [];
 
     public override string ToString()
     {
