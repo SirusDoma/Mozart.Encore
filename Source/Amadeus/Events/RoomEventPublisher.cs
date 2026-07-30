@@ -43,7 +43,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Ready           = e.Member.IsReady,
                 IsAdministrator = e.Member.Actor.IsAdministrator,
                 Equipments      = e.Member.Actor.Equipments,
-                MusicIds        = e.Member.Actor.InstalledMusicIds
+                MusicIds        = e.Member.Actor.InstalledMusicIds.ToList()
             }, CancellationToken.None);
         }
         catch (Exception ex)

@@ -1,9 +1,11 @@
 using System.Text;
 using Amadeus.Controllers.Filters;
+using Amadeus.Messages.Requests;
 using Amadeus.Messages.Responses;
 using Encore.Server;
 using Microsoft.Extensions.Logging;
 using Mozart.Data.Repositories;
+using Mozart.Entities;
 using Mozart.Sessions;
 
 namespace Amadeus.Controllers;
@@ -15,6 +17,21 @@ public class MusicShopController(
     ILogger<MusicShopController> logger
 ) : CommandController<Session>(session)
 {
+    [CommandHandler]
+    public void SyncMusicDownload(SyncMusicDownloadRequest request)
+    {
+        logger.LogInformation((int)RequestCommand.SyncMusicDownload, "Sync music install state");
+
+        Session.Actor.InstalledMusicIds.Add(request.MusicId);
+        if (Session.Room != null)
+        {
+            var slots = Session.Room.Slots.ToList();
+            int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+
+            Session.Room.UpdateMusicState(Session, memberId);
+        }
+    }
+
     [CommandHandler(RequestCommand.SyncMusicPurchase)]
     public async Task<SyncMusicPurchaseResponse> SyncPurchase(CancellationToken cancellationToken)
     {

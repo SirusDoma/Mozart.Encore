@@ -117,7 +117,7 @@ public class MainRoomController(
         //
         // Why this over a new field? Go figure yourself, but it is stupid regardless!
 
-        Session.Actor.InstalledMusicIds = request.MusicIds;
+        Session.Actor.InstalledMusicIds = request.MusicIds.ToList();
     }
 
     [CommandHandler(RequestCommand.GetMusicList)]
@@ -288,7 +288,7 @@ public class MainRoomController(
                                 Ready           = m.IsReady,
                                 IsAdministrator = m.IsReady,
                                 Equipments      = m.Actor.Equipments,
-                                MusicIds        = m.Actor.InstalledMusicIds
+                                MusicIds        = m.Actor.InstalledMusicIds.ToList()
                             }
                         },
                         _ => throw new UnreachableException()
