@@ -13,6 +13,20 @@ namespace Mozart.Events;
 public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<GameOptions> gameOptions,
     ILogger<ScoreTrackerEventPublisher> logger) : IEventPublisher<ScoreTracker>
 {
+    public readonly int[] NextLevelXp =
+    [
+        884, 1819, 2839, 3978, 5270, 6749, 8449, 10404, 12648, 15215,
+        18139, 21454, 25194, 29393, 34085, 39304, 45084, 51459, 58463, 66130,
+        74494, 83589, 93449, 104108, 115600, 127959, 141219, 155414, 170578, 186745,
+        203949, 222224, 241604, 262123, 283815, 306714, 330854, 356269, 382993, 411060,
+        440504, 471359, 503659, 537438, 572730, 609569, 647989, 688024, 729708, 773075,
+        818159, 864994, 913614, 964053, 1016345, 1070524, 1126624, 1184679, 1244723, 1306790,
+        1370914, 1437129, 1505469, 1575968, 1648660, 1723579, 1800759, 1880234, 1962038, 2046205,
+        2132769, 2221764, 2313224, 2407183, 2503675, 2602734, 2704394, 2808689, 2915653, 3025320,
+        3137724, 3252899, 3370879, 3491698, 3615390, 3741989, 3871529, 4004044, 4139568, 4278135,
+        4419779, 4564534, 4712434, 4863513, 5017805, 5175344, 5336164, 5500299, 5667783
+    ];
+
     public void Monitor(ScoreTracker tracker)
     {
         tracker.UserTracked        += OnUserTracked;
@@ -20,7 +34,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         tracker.UserLifeUpdated    += OnUserLifeUpdated;
         tracker.UserJamIncreased   += OnUserJamIncreased;
         tracker.UserScoreSubmitted += OnUserScoreSubmitted;
-        tracker.GameCompleted      += OnGameCompleted;
+        tracker.ScoreCompleted     += OnScoreCompleted;
     }
 
     private async void OnUserTracked(object? sender, ScoreTrackEventArgs e)
@@ -120,21 +134,35 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
     }
 
 
-    private async void OnGameCompleted(object? sender, ScoreTrackedEventArgs e)
+    private async void OnScoreCompleted(object? sender, ScoreTrackedEventArgs e)
     {
         try
         {
-            // TODO: Implement proper OJNList
+            e.Room.Channel.GetMusicList().TryGetValue(e.MusicId, out var music);
+
+            int level = e.Difficulty switch
+            {
+                Difficulty.EX => music?.LevelEx,
+                Difficulty.NX => music?.LevelNx,
+                _             => music?.LevelHx,
+            } ?? 0;
+
+            int totalNotes = e.Difficulty switch
+            {
+                Difficulty.EX => music?.NoteCountEx,
+                Difficulty.NX => music?.NoteCountNx,
+                _             => music?.NoteCountHx,
+            } ?? 0;
+
             static int CountTotalNotes(ScoreTracker.UserScore score)
                 => score.Cool + score.Good + score.Bad + score.Miss;
 
             var scores = e.States;
-            if (scores.Where(s => s.Clear).GroupBy(CountTotalNotes).Count() > 1)
+            if ((totalNotes > 0 && scores.Where(s => s.Clear).Any(score => CountTotalNotes(score) > totalNotes)) || scores.Where(s => s.Clear).GroupBy(CountTotalNotes).Count() > 1)
                 throw new InvalidOperationException("Unbalance total notes"); // someone probably cheating?
 
-            var entries    = new List<GameCompletedEventData.ScoreEntry>();
-            bool safe      = scores.Any(s => s.Life > 0);
-            int totalNotes = scores.Max(CountTotalNotes);
+            var entries = new List<ScoreCompletedEventData.ScoreEntry>();
+            bool safe   = music != null && scores.Any(s => s.Life > 0);
 
             var room    = e.Room;
             var channel = e.Room.Channel;
@@ -146,10 +174,11 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 if (state == null)
                     continue;
 
+                var mission = ScoreCompletedEventData.MissionResult.None;
+
                 // Compute reward only when it is safe
-                // (because we have no information about total notes without OJNList)
                 int reward = 0;
-                if (safe && (room.Metadata.Mode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
+                if (safe && (e.Mode != GameMode.Single || options.SingleModeRewardLevelLimit == 0 || state.Session.Actor.Level < options.SingleModeRewardLevelLimit))
                 {
                     var user = await repository.Find(state.Session.Actor.UserId, CancellationToken.None);
                     if (user == null)
@@ -171,23 +200,37 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
                     reward = (int)(reward * channel.GemRates);
 
-                    int nextUserLevel = user.Level + 1;
-                    int xpNext = (int)(2.8333f * (2 * Math.Pow(nextUserLevel, 2.0f) + (3 * Math.Pow(nextUserLevel, 2.0f)
-                        + (307 * nextUserLevel))));
-
-                    const int level = 15; // music level
+                    int xpNext = user.Level >= 0 && user.Level < NextLevelXp.Length ? NextLevelXp[user.Level] : 0;
                     int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes);
 
                     user.Gem        += reward;
                     user.Experience += (int)(xpGain * channel.ExpRates);
-                    if (user.Experience > xpNext)
-                        user.Level++;
+
+                    if (xpNext != 0 && user.Experience >= xpNext)
+                    {
+                        mission = MissionEvaluator.Evaluate(music, e.Difficulty, room.Metadata.Speed, state);
+                        if (e.Mode == GameMode.Single && mission == ScoreCompletedEventData.MissionResult.Completed)
+                        {
+                            mission = ScoreCompletedEventData.MissionResult.Failed;
+                        }
+
+                        if (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed)
+                        {
+                            user.Level++;
+                        }
+                        else
+                        {
+                            // Neither experience value nor level can be upgraded
+                            // until the presented mission is accomplished
+                            user.Experience = xpNext;
+                        }
+                    }
 
                     await repository.Commit(CancellationToken.None);
                     state.Session.Actor.Sync(user);
                 }
 
-                entries.Add(new GameCompletedEventData.ScoreEntry
+                entries.Add(new ScoreCompletedEventData.ScoreEntry
                 {
                     MemberId   = (byte)id,
                     Active     = true,
@@ -202,10 +245,11 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     Level      = state.Session.Actor.Level,
                     Experience = state.Session.Actor.Experience,
                     Win        = scores.Max(s => s.Score) == state.Score,
+                    Mission    = mission
                 });
             }
 
-            await room.Broadcast(new GameCompletedEventData
+            await room.Broadcast(new ScoreCompletedEventData
             {
                 Scores = entries.OrderByDescending(s => s.Score).ToList()
             }, CancellationToken.None);

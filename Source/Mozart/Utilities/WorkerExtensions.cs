@@ -13,6 +13,15 @@ public static class WorkerExtensions
         {
             try
             {
+                _ = resolver.GetMusicList(channel);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to validate music list file");
+            }
+
+            try
+            {
                 _ = resolver.GetItemData(channel);
             }
             catch (Exception ex)

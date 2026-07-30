@@ -41,7 +41,10 @@ public class ScoreSubmitEventArgs : EventArgs
 public class ScoreTrackedEventArgs : EventArgs
 {
     public required IRoom Room { get; init; }
+    public int MusicId { get; init; }
+    public Difficulty Difficulty { get; init; }
     public required IReadOnlyList<ScoreTracker.UserScore> States { get; init; }
+    public required GameMode Mode { get; init; }
 }
 
 public class ScoreTracker : IScoreTracker
@@ -77,7 +80,7 @@ public class ScoreTracker : IScoreTracker
     public EventHandler<ScoreUpdateEventArgs>?  UserLifeUpdated;
     public EventHandler<ScoreUpdateEventArgs>?  UserJamIncreased;
     public EventHandler<ScoreSubmitEventArgs>?  UserScoreSubmitted;
-    public EventHandler<ScoreTrackedEventArgs>? GameCompleted;
+    public EventHandler<ScoreTrackedEventArgs>? ScoreCompleted;
 
     public IRoom Room { get; }
 
@@ -263,10 +266,13 @@ public class ScoreTracker : IScoreTracker
             foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
                 member.IsReady = member.IsMaster;
 
-            GameCompleted?.Invoke(this, new ScoreTrackedEventArgs
+            ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs
             {
-                Room    = Room,
-                States  = completedStates
+                Room       = Room,
+                MusicId    = Room.MusicId,
+                Difficulty = Room.Difficulty,
+                States     = completedStates,
+                Mode       = Room.Metadata.Mode
             });
 
             Room.CompleteGame();

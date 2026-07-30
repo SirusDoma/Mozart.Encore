@@ -1,4 +1,5 @@
 using Mozart.Metadata.Items;
+using Mozart.Metadata.Music;
 using Mozart.Sessions;
 
 namespace Mozart.Entities;
@@ -19,5 +20,6 @@ public interface IChannel : IBroadcastable
 
     void Remove(Session session);
 
+    IReadOnlyDictionary<int, MusicHeader> GetMusicList();
     IReadOnlyDictionary<int, ItemData> GetItemData();
 }

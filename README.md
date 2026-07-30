@@ -133,6 +133,7 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
 | `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
 | `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.10`. Default: (Empty) using global [Metadata](#Metadata)             |
 | `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.10`. Default: (Empty) using global [Metadata](#Metadata)            |
 
 ## Metadata
@@ -142,6 +143,10 @@ They are optional for running the server; however, missing certain files may dis
 
 Metadata can usually be overridden per channel.
 
+> [!NOTE]
+> You can obtain OJNList.dat by extracting it from Playing(1).opi.  
+> Unlike newer client version, OJNList.dat does not exist inside Image folder.
+
 > [!IMPORTANT]
 > Metadata files must be compatible with the client version supported by this build.  
 > Older format versions may work, but are not officially supported and may affect game features.  
@@ -150,12 +155,10 @@ Metadata can usually be overridden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-> [!WARNING]
-> Client v3.10 does not support `OJNList.dat`
-
-| Option     | Description                                                                              |
-|------------|------------------------------------------------------------------------------------------|
-| `ItemData` | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.10`. |
+| Option      | Description                                                                               |
+|-------------|-------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.10`.   |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.10`.  |
 
 ## Game settings
 Gameplay-specific settings.

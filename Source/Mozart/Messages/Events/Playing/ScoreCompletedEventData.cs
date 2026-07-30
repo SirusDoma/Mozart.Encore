@@ -2,9 +2,16 @@ using Encore.Messaging;
 
 namespace Mozart.Messages.Events;
 
-public class GameCompletedEventData : IMessage
+public class ScoreCompletedEventData : IMessage
 {
-    public static Enum Command => EventCommand.GameCompleted;
+    public static Enum Command => EventCommand.ScoreCompleted;
+
+    public enum MissionResult : byte
+    {
+        None      = 0,
+        Failed    = 1,
+        Completed = 2
+    }
 
     public class ScoreEntry : SubMessage
     {
@@ -49,8 +56,7 @@ public class GameCompletedEventData : IMessage
         public bool? Win { get; init; }
 
         [MessageField(order: 13)]
-        private byte? Unused => Active ? 0 : null;
-
+        public MissionResult? Mission { get; init; } = MissionResult.None;
     }
 
     [CollectionMessageField(order: 0, maxCount: 8, prefixSizeType: TypeCode.Int32)]

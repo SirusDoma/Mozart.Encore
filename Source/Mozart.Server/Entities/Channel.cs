@@ -1,5 +1,6 @@
 using Encore.Sessions;
 using Mozart.Metadata.Items;
+using Mozart.Metadata.Music;
 using Mozart.Options;
 using Mozart.Services;
 using Session = Mozart.Sessions.Session;
@@ -67,6 +68,18 @@ public class Channel : Broadcastable, IChannel
 
         _sessions.Remove(session);
         session.Disconnected -= OnSessionDisconnected;
+    }
+
+    public IReadOnlyDictionary<int, MusicHeader> GetMusicList()
+    {
+        try
+        {
+            return _metadataResolver.GetMusicList(this);
+        }
+        catch (Exception)
+        {
+            return new Dictionary<int, MusicHeader>();
+        }
     }
 
     public IReadOnlyDictionary<int, ItemData> GetItemData()

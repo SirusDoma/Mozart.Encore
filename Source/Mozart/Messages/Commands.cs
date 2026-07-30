@@ -101,7 +101,7 @@ public enum EventCommand : ushort
     MusicLoaded             = 0x0FAD, // 4013
     GameStatsUpdate         = 0x0FAF, // 4015
     ScoreSubmission         = 0x0FB1, // 4017
-    GameCompleted           = 0x0FB2, // 4018
+    ScoreCompleted          = 0x0FB2, // 4018
     UserLeaveGame           = 0x0FB6, // 4022
 }
 
