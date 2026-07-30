@@ -46,6 +46,7 @@ public enum RequestCommand : ushort
     EnterShop           = 0x138E, // 5006
     ExitShop            = 0x138F, // 5007
     SyncMusicPurchase   = 0x1392, // 5010
+    SyncMusicDownload   = 0x1394, // 5012
     SyncPoint           = 0x1395, // 5013
     StartPayment        = 0x1397, // 5015
     GetGiftMessageList  = 0x1399, // 5017

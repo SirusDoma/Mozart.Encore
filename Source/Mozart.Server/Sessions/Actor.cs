@@ -132,7 +132,7 @@ public class Actor
 
     public IReadOnlyList<ushort> AcquiredMusicIds { get; set; }
 
-    public IReadOnlyList<ushort> InstalledMusicIds { get; set; } = [];
+    public IList<ushort> InstalledMusicIds { get; set; } = [];
 
     public IReadOnlyList<int> Top100 { get; set; } = [];
 
