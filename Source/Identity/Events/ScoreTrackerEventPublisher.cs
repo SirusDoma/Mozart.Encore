@@ -171,7 +171,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             }
 
             var entries = new List<ScoreCompletedEventData.ScoreEntry>();
-            bool safe   = music != null && scores.Any(s => s.Life > 0);
+            bool safe   = music != null && scores.Any(s => s.Clear);
 
             var room    = e.Room;
             var channel = e.Room.Channel;
@@ -212,19 +212,46 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     reward = (int)(reward * channel.GemRates);
 
                     int xpNext = user.Level >= 0 && user.Level < NextLevelXp.Length ? NextLevelXp[user.Level] : 0;
-                    int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes);
+                    int xpGain = (int)((25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes) * channel.ExpRates);
 
-                    user.Gem        += reward;
-                    user.Experience += (int)(xpGain * channel.ExpRates);
+                    user.Gem += reward;
+                    if ((user.Level + 1) % 4 == 0 && user.Experience < xpNext && user.Experience + xpGain >= xpNext)
+                    {
+                        mission = ScoreCompletedEventData.MissionResult.None;
+                        user.Experience = xpNext;
+                    }
+                    else
+                    {
+                        user.Experience = xpNext != 0
+                            ? Math.Min(user.Experience + xpGain, xpNext)
+                            : user.Experience + xpGain;
 
-                    if (user.Experience > xpNext)
-                        mission = MissionEvaluator.Evaluate(music, e.Difficulty, skills, state);
+                        if (xpNext != 0 && user.Experience >= xpNext)
+                        {
+                            mission = MissionEvaluator.Evaluate(music, e.Difficulty, skills, state);
+                            if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                            {
+                                mission = ScoreCompletedEventData.MissionResult.Failed;
+                            }
 
-                    if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                            if (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed)
+                            {
+                                user.Level++;
+                            }
+                            else
+                            {
+                                // Neither experience value nor level can be upgraded
+                                // until the presented mission is accomplished
+                                user.Experience = xpNext;
+                            }
+                        }
+                    }
+                }
+                else if (user.Level >= 0 && user.Level < NextLevelXp.Length)
+                {
+                    int xpNext = NextLevelXp[user.Level];
+                    if ((user.Level + 1) % 4 == 0 && user.Experience >= xpNext)
                         mission = ScoreCompletedEventData.MissionResult.Failed;
-
-                    if (xpNext != 0 && user.Experience > xpNext && (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed))
-                        user.Level++;
                 }
 
                 user.Battle++;
