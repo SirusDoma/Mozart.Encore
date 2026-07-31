@@ -162,7 +162,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                 throw new InvalidOperationException("Unbalance total notes"); // someone probably cheating?
 
             var entries = new List<ScoreCompletedEventData.ScoreEntry>();
-            bool safe   = music != null && scores.Any(s => s.Life > 0);
+            bool safe   = music != null && scores.Any(s => s.Clear);
 
             var room    = e.Room;
             var channel = e.Room.Channel;
@@ -201,33 +201,49 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
                     reward = (int)(reward * channel.GemRates);
 
                     int xpNext = user.Level >= 0 && user.Level < NextLevelXp.Length ? NextLevelXp[user.Level] : 0;
-                    int xpGain = (int)(25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes);
+                    int xpGain = (int)((25 * (level + 3) * (state.Cool + (0.5 * state.Good)) / totalNotes) * channel.ExpRates);
 
-                    user.Gem        += reward;
-                    user.Experience += (int)(xpGain * channel.ExpRates);
-
-                    if (xpNext != 0 && user.Experience >= xpNext)
+                    user.Gem += reward;
+                    if ((user.Level + 1) % 4 == 0 && user.Experience < xpNext && user.Experience + xpGain >= xpNext)
                     {
-                        mission = MissionEvaluator.Evaluate(music, e.Difficulty, room.Metadata.Speed, state);
-                        if (e.Mode == GameMode.Single && mission == ScoreCompletedEventData.MissionResult.Completed)
-                        {
-                            mission = ScoreCompletedEventData.MissionResult.Failed;
-                        }
+                        mission = ScoreCompletedEventData.MissionResult.None;
+                        user.Experience = xpNext;
+                    }
+                    else
+                    {
+                        user.Experience = xpNext != 0
+                            ? Math.Min(user.Experience + xpGain, xpNext)
+                            : user.Experience + xpGain;
 
-                        if (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed)
+                        if (xpNext != 0 && user.Experience >= xpNext)
                         {
-                            user.Level++;
-                        }
-                        else
-                        {
-                            // Neither experience value nor level can be upgraded
-                            // until the presented mission is accomplished
-                            user.Experience = xpNext;
+                            mission = MissionEvaluator.Evaluate(music, e.Difficulty, room.Metadata.Speed, state);
+                            if (e.Mode == GameMode.Jam && mission == ScoreCompletedEventData.MissionResult.Completed)
+                            {
+                                mission = ScoreCompletedEventData.MissionResult.Failed;
+                            }
+
+                            if (mission is ScoreCompletedEventData.MissionResult.None or ScoreCompletedEventData.MissionResult.Completed)
+                            {
+                                user.Level++;
+                            }
+                            else
+                            {
+                                // Neither experience value nor level can be upgraded
+                                // until the presented mission is accomplished
+                                user.Experience = xpNext;
+                            }
                         }
                     }
 
                     await repository.Commit(CancellationToken.None);
                     state.Session.Actor.Sync(user);
+                }
+                else if (state.Session.Actor.Level >= 0 && state.Session.Actor.Level < NextLevelXp.Length)
+                {
+                    int xpNext = NextLevelXp[state.Session.Actor.Level];
+                    if ((state.Session.Actor.Level + 1) % 4 == 0 && state.Session.Actor.Experience >= xpNext)
+                        mission = ScoreCompletedEventData.MissionResult.Failed;
                 }
 
                 entries.Add(new ScoreCompletedEventData.ScoreEntry
