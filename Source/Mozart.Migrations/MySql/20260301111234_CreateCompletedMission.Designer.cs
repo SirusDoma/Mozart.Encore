@@ -155,18 +155,6 @@ namespace Mozart.Migrations.MySql.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("MembershipDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("vipdate")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("MembershipType")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("vip");
-
                     b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("longblob")
@@ -177,6 +165,16 @@ namespace Mozart.Migrations.MySql.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("userid");
+
+                    b.Property<short>("Vip")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("vip");
+
+                    b.Property<DateTime>("VipDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("vipdate");
 
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()

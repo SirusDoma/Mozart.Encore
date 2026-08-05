@@ -12,21 +12,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "member",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    userid = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    passwd = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    registdate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_member", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "t_o2jam_charinfo",
                 columns: table => new
                 {
@@ -46,6 +31,28 @@ namespace Mozart.Migrations.Sqlite.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_o2jam_charinfo", x => x.USER_INDEX_ID);
+                    table.UniqueConstraint("AK_t_o2jam_charinfo_USER_ID", x => x.USER_ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "member",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    userid = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    passwd = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    registdate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_member", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_member_t_o2jam_charinfo_userid",
+                        column: x => x.userid,
+                        principalTable: "t_o2jam_charinfo",
+                        principalColumn: "USER_ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

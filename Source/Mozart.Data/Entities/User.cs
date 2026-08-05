@@ -48,17 +48,20 @@ public class User
     public int Ranking => UserRanking.Ranking;
 
     [NotMapped]
-    public int MembershipType
+    public FreePass FreePass
     {
-        get => Member.MembershipType;
-        set => Member.MembershipType = value;
-    }
-
-    [NotMapped]
-    public DateTime MembershipDate
-    {
-        get => Member.MembershipDate;
-        set => Member.MembershipDate = value;
+        get
+        {
+            var type = (FreePassType)Member.Vip;
+            return type != FreePassType.None && Member.VipDate > DateTime.UtcNow
+                ? new FreePass(type, Member.VipDate)
+                : new FreePass(FreePassType.None, DateTime.UtcNow);
+        }
+        set
+        {
+            Member.Vip = (short)(uint)value.Type;
+            Member.VipDate = value.ExpiryDate;
+        }
     }
 
     private Member Member { get; init; } = new() { Username = string.Empty, Password = [] };

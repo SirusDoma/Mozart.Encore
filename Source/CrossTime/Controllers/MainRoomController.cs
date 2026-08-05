@@ -33,14 +33,14 @@ public class MainRoomController(
         logger.LogInformation((int)RequestCommand.GetCharacterInfo, "Get character info: [{User}]",
             actor.Nickname);
 
-        await Session.WriteMessage(new SyncMembershipEventData
+        await Session.WriteMessage(new SyncFreePassEventData
         {
             Gem             = actor.Gem,
             Point           = actor.Point,
             O2Cash          = 0,
             ItemCash        = 0,
             MusicCash       = 0,
-            MembershipType  = actor.MembershipType
+            FreePass        = actor.FreePass.Type
         }, cancellationToken);
 
         var giftBox = BuildGiftBoxResponse(actor);

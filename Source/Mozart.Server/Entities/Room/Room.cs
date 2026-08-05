@@ -1,4 +1,5 @@
 using Encore.Sessions;
+using Mozart.Data.Entities;
 using Mozart.Metadata;
 using Mozart.Metadata.Room;
 using Mozart.Options;
@@ -407,7 +408,7 @@ public class Room : Broadcastable, IRoom
         if (!_options.FreeMission)
         {
             if (Channel.GetMusicList().TryGetValue(MusicId, out _)
-                && member.Actor.MembershipType == 0
+                && member.Actor.FreePass.Type == FreePassType.None
                 && !member.Actor.AcquiredMusicIds.Contains((ushort)MusicId))
             {
                 state = MusicState.NoAccess;

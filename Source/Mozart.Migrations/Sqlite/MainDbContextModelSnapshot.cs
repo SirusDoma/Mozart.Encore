@@ -375,18 +375,6 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("MembershipDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("vipdate")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("MembershipType")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0)
-                        .HasColumnName("vip");
-
                     b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("BLOB")
@@ -397,6 +385,16 @@ namespace Mozart.Migrations.Sqlite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
                         .HasColumnName("userid");
+
+                    b.Property<short>("Vip")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("vip");
+
+                    b.Property<DateTime>("VipDate")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("vipdate");
 
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()

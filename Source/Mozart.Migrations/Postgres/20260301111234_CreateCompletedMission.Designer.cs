@@ -162,18 +162,6 @@ namespace Mozart.Migrations.Postgres.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime>("MembershipDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("vipdate")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("MembershipType")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("vip");
-
                     b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("bytea")
@@ -184,6 +172,16 @@ namespace Mozart.Migrations.Postgres.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("userid");
+
+                    b.Property<short>("Vip")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("vip");
+
+                    b.Property<DateTime>("VipDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vipdate");
 
                     b.Property<DateTime>("registdate")
                         .ValueGeneratedOnAdd()

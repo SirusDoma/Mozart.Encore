@@ -363,6 +363,16 @@ namespace Mozart.Migrations.SqlServer.Migrations
                         .HasForeignKey("Mozart.Data.Entities.UserRanking", "UserId");
                 });
 
+            modelBuilder.Entity("Mozart.Data.Entities.Member", b =>
+                {
+                    b.HasOne("Mozart.Data.Entities.User", null)
+                        .WithOne("Member")
+                        .HasForeignKey("Mozart.Data.Entities.Member", "Username")
+                        .HasPrincipalKey("Mozart.Data.Entities.User", "Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mozart.Data.Entities.Wallet", b =>
                 {
                     b.HasOne("Mozart.Data.Entities.User", null)
@@ -372,6 +382,9 @@ namespace Mozart.Migrations.SqlServer.Migrations
 
             modelBuilder.Entity("Mozart.Data.Entities.User", b =>
                 {
+                    b.Navigation("Member")
+                        .IsRequired();
+
                     b.Navigation("Loadout")
                         .IsRequired();
 

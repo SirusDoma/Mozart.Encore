@@ -211,13 +211,12 @@ public sealed class MainDbContext(
                     );
             }
 
-            entity.Property(e => e.MembershipType)
+            entity.Property(e => e.Vip)
                 .HasColumnName("vip")
-                .HasDefaultValue(0);
+                .HasDefaultValue((short)0);
 
-            entity.Property(e => e.MembershipDate)
-                .HasColumnName("vipdate")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.VipDate)
+                .HasColumnName("vipdate");
 
             entity.Property<DateTime>("registdate")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Original is GetDate(), but this work across different RDBMS

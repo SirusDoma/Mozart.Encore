@@ -137,7 +137,7 @@ public enum EventCommand : ushort
     MusicStateChanged       = 0x0FBA, // 4026
     WaitingAlbumChanged     = 0x0FBC, // 4028
     AlbumScoreCompleted     = 0x0FBD, // 4029
-    SyncMembership          = 0x13A2, // 5026
+    SyncFreePass            = 0x13A2, // 5026
 }
 
 public enum GatewayCommand : ushort

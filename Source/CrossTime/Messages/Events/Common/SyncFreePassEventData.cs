@@ -1,10 +1,11 @@
 using Encore.Messaging;
+using Mozart.Data.Entities;
 
 namespace CrossTime.Messages.Events;
 
-public class SyncMembershipEventData : IMessage
+public class SyncFreePassEventData : IMessage
 {
-    public static Enum Command => EventCommand.SyncMembership;
+    public static Enum Command => EventCommand.SyncFreePass;
 
     [MessageField(order: 0)]
     public int Gem { get; init; }
@@ -22,5 +23,5 @@ public class SyncMembershipEventData : IMessage
     public int MusicCash { get; init; }
 
     [MessageField(order: 5)]
-    public int MembershipType { get; init; }
+    public FreePassType FreePass { get; init; } = FreePassType.None;
 }

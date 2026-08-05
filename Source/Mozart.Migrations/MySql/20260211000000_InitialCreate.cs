@@ -16,22 +16,6 @@ namespace Mozart.Migrations.MySql.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "member",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    userid = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    passwd = table.Column<byte[]>(type: "longblob", nullable: false),
-                    registdate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_member", x => x.id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "t_o2jam_charinfo",
                 columns: table => new
                 {
@@ -51,6 +35,29 @@ namespace Mozart.Migrations.MySql.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_t_o2jam_charinfo", x => x.USER_INDEX_ID);
+                    table.UniqueConstraint("AK_t_o2jam_charinfo_USER_ID", x => x.USER_ID);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "member",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    userid = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    passwd = table.Column<byte[]>(type: "longblob", nullable: false),
+                    registdate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_member", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_member_t_o2jam_charinfo_userid",
+                        column: x => x.userid,
+                        principalTable: "t_o2jam_charinfo",
+                        principalColumn: "USER_ID",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 

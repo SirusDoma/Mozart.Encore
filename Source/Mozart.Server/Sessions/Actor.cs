@@ -22,8 +22,7 @@ public class Actor
         Ranking              = user.Ranking;
         GemStar              = user.GemStar;
         Ticket               = user.Ticket;
-        MembershipType       = user.MembershipType;
-        MembershipDate       = user.MembershipDate;
+        FreePass             = user.FreePass;
         IsAdministrator      = user.IsAdministrator;
         Equipments           = user.Equipments.ToDictionary(
             e => e.Key,
@@ -49,8 +48,7 @@ public class Actor
         Ranking               = user.Ranking;
         GemStar               = user.GemStar;
         Ticket                = user.Ticket;
-        MembershipType        = user.MembershipType;
-        MembershipDate        = user.MembershipDate;
+        FreePass              = user.FreePass;
         Equipments            = user.Equipments.ToDictionary(
             e => e.Key,
             e => (int)e.Value
@@ -97,9 +95,7 @@ public class Actor
 
     public int GemStar { get; set; }
 
-    public int MembershipType { get; set; }
-
-    public DateTime MembershipDate { get; set; }
+    public FreePass FreePass { get; set; }
 
     public bool IsAdministrator { get; init; }
 

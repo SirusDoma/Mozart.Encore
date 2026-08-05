@@ -125,7 +125,7 @@ public class AuthController(
             Id             = Session.Actor.UserId,
             Username       = Session.Actor.Username,
             GemStar        = Session.Actor.GemStar,
-            MembershipType = Session.Actor.MembershipType,
+            FreePass       = Session.Actor.FreePass.Type,
             Nickname       = Session.Actor.Nickname,
             Unknown1       = Session.Actor.Gem,
             Unknown2       = Session.Actor.Point,

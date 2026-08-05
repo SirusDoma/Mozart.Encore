@@ -1,4 +1,5 @@
 using Encore.Messaging;
+using Mozart.Data.Entities;
 
 namespace CrossTime.Messages.Responses;
 
@@ -30,7 +31,7 @@ public class AuthResponse : IMessage
     public int GemStar { get; set; }
 
     [MessageField(order: 4)]
-    public int MembershipType { get; set; }
+    public FreePassType FreePass { get; set; } = FreePassType.None;
 
     [StringMessageField(order: 5)]
     public string Nickname { get; init; } = "\0";
