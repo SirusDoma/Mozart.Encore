@@ -34,7 +34,7 @@ namespace CrossTime;
 
 public class Program
 {
-    public static Version Version        => new(3, 6, 3);
+    public static Version Version        => new(7, 0, 0);
     public static Version NetworkVersion => new(2, 33);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
