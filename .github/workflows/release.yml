@@ -8,31 +8,31 @@ on:
         required: true
         type: string
       bump_version:
-        description: 'Update and commit all server versions from the release tag'
+        description: 'Bump version'
         default: true
         type: boolean
       mozart:
-        description: 'Mozart.Encore — v3.10 (O2Jam Original)'
+        description: 'Mozart.Encore'
         default: true
         type: boolean
       amadeus:
-        description: 'Amadeus.Encore — v3.82 (O2Jam NX)'
+        description: 'Amadeus.Encore'
         default: true
         type: boolean
       crosstime:
-        description: 'CrossTime.Encore — v2.33 (O2Jam X2)'
+        description: 'CrossTime.Encore'
         default: true
         type: boolean
       identity:
-        description: 'Identity.Encore — v5.89 (O2JamO2 Beta)'
+        description: 'Identity.Encore'
         default: true
         type: boolean
       identityp2:
-        description: 'IdentityP2.Encore — v5.89 (O2JamO2 Final)'
+        description: 'IdentityP2.Encore'
         default: true
         type: boolean
       memoryer:
-        description: 'Memoryer.Encore — v8.02 (O2Jam Classic)'
+        description: 'Memoryer.Encore'
         default: true
         type: boolean
 
