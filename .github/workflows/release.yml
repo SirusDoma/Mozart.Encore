@@ -12,27 +12,27 @@ on:
         default: true
         type: boolean
       mozart:
-        description: 'Mozart.Encore'
+        description: 'Build Mozart.Encore'
         default: true
         type: boolean
       amadeus:
-        description: 'Amadeus.Encore'
+        description: 'Build Amadeus.Encore'
         default: true
         type: boolean
       crosstime:
-        description: 'CrossTime.Encore'
+        description: 'Build CrossTime.Encore'
         default: true
         type: boolean
       identity:
-        description: 'Identity.Encore'
+        description: 'Build Identity.Encore'
         default: true
         type: boolean
       identityp2:
-        description: 'IdentityP2.Encore'
+        description: 'Build IdentityP2.Encore'
         default: true
         type: boolean
       memoryer:
-        description: 'Memoryer.Encore'
+        description: 'Build Memoryer.Encore'
         default: true
         type: boolean
 
