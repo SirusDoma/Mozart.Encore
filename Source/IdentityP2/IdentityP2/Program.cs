@@ -35,7 +35,7 @@ namespace Identity;
 public class Program
 {
     public static Version Version        => new(7, 0, 0);
-    public static Version NetworkVersion => new(5, 89, 9);
+    public static Version NetworkVersion => new(6, 65);
     public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
 
     private static async Task<int> Main(string[] args)

@@ -3,7 +3,7 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v5.89\* (O2JamO2 Final)**  
+Supported client version: **v6.65\* (O2JamO2)**
 <sub>* Non-beta client that has 3K Mode. Compatible with O2Solista v0.3, v0.5 and v0.6</sub>
 
 ### Other Builds
@@ -169,8 +169,8 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 | `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                                 |
 | `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                          |
 | `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                          |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)   |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`5.89` (O2JamO2 **Final**).  Default: (Empty) using global [Metadata](#Metadata)  |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`6.65` (O2JamO2). Default: (Empty) using global [Metadata](#Metadata)   |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`6.65` (O2JamO2). Default: (Empty) using global [Metadata](#Metadata)  |
 
 ## Metadata
 Metadata files act as source of truth of particular game data outside the database.  
@@ -190,8 +190,8 @@ Use `--Metadata:<Option>` to configure these settings via command-line arguments
 
 | Option      | Description                                                                                                   |
 |-------------|---------------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).   |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`5.89` (O2JamO2 **Final**).  |
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`6.65` (O2JamO2). |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`6.65` (O2JamO2).  |
 
 ## Game settings
 Gameplay-specific settings.

@@ -14,7 +14,7 @@ This project is inspired by the _Mozart Project 0.028_.
 | [Amadeus.Encore](Source/Amadeus/)       | v3.82 (O2Jam NX)         |
 | [CrossTime.Encore](Source/CrossTime/)   | v2.33 (O2Jam X2)         |
 | [Identity.Encore](Source/Identity/)     | v5.89 (O2JamO2 Beta)     |
-| [IdentityP2.Encore](Source/IdentityP2/) | v5.89 (O2JamO2 Final)    |
+| [IdentityP2.Encore](Source/IdentityP2/) | v6.65 (O2JamO2)          |
 | [Memoryer.Encore](Source/Memoryer/)     | v8.02 (O2Jam Classic)    |
 
 ## Features

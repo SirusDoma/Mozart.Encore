@@ -12,7 +12,7 @@ Supported client version: **v3.10 (O2Jam Original)**
 | [Amadeus.Encore](../Amadeus/)                | v3.82 (O2Jam NX)         |
 | [CrossTime.Encore](../CrossTime/)            | v2.33 (O2Jam X2)         |
 | [Identity.Encore](../Identity/)              | v5.89 (O2JamO2 Beta)     |
-| [IdentityP2.Encore](../IdentityP2/)          | v5.89 (O2JamO2 Final)    |
+| [IdentityP2.Encore](../IdentityP2/)          | v6.65 (O2JamO2)          |
 | [Memoryer.Encore](../Memoryer/)              | v8.02 (O2Jam Classic)    |
 
 ## Features
