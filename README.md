@@ -224,6 +224,5 @@ The server applications include utilities for local play and server maintenance.
 - `metadata:import [<dir>]`: Import supported metadata from an O2Jam installation. Directory defaults to the current working directory.
 - `game:start <username> <password> [<dir>]`: Authorize a user and launch the game. Directory defaults to the current working directory.
 - `ranking:upsert`: Generate or update user rankings where supported.
-- `encdec <param>`: Encrypt or decrypt authentication parameters in Memoryer.
 
 Run the CLI with `--help` for more details.
