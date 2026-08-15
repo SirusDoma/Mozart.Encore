@@ -1,0 +1,40 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Mozart.Migrations.MySql.Migrations
+{
+    /// <inheritdoc />
+    public partial class CreateUserPenalty : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "t_o2jam_penalty",
+                columns: table => new
+                {
+                    USER_INDEX_ID = table.Column<int>(type: "int", nullable: false),
+                    LEVEL = table.Column<int>(type: "int", nullable: false),
+                    COUNT = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_t_o2jam_penalty", x => x.USER_INDEX_ID);
+                    table.ForeignKey(
+                        name: "FK_t_o2jam_penalty_t_o2jam_charinfo_USER_INDEX_ID",
+                        column: x => x.USER_INDEX_ID,
+                        principalTable: "t_o2jam_charinfo",
+                        principalColumn: "USER_INDEX_ID");
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "t_o2jam_penalty");
+        }
+    }
+}

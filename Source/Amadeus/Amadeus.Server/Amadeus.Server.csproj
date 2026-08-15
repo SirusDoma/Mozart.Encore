@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86;x64</Platforms>
+        <RootNamespace>Mozart</RootNamespace>
+        <AssemblyName>Amadeus.Server</AssemblyName>
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <OutputPath>..\..\..\Build\$(Configuration)\Amadeus\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Amadeus.Data\Amadeus.Data.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+    </ItemGroup>
+
+    <Import Project="..\..\Encore\Encore.Framework\Encore.Framework.projitems" Label="Shared" />
+    <Import Project="..\..\Encore\Encore.Server\Encore.Server.projitems" Label="Shared" />
+
+</Project>

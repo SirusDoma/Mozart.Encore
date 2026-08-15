@@ -1,0 +1,30 @@
+using Encore.Messaging;
+using Encore.Metadata.Items;
+
+namespace Amadeus.Messages.Responses;
+
+public class EquipItemResponse : IMessage
+{
+    public static Enum Command => ResponseCommand.EquipItem;
+
+    public class EquipmentInfo : SubMessage
+    {
+        [MessageField(order: 0)]
+        public ItemType ItemType { get; init; }
+
+        [MessageField(order: 1)]
+        public int NewEquippedItemId { get; init; }
+
+        [MessageField(order: 2)]
+        public int InventorySlotIndex { get; init; }
+
+        [MessageField(order: 3)]
+        public int PreviousEquippedItemId { get; init; }
+    }
+
+    [MessageField<MessageFieldCodec<int>>(order: 0)]
+    public bool Invalid { get; init; } = false;
+
+    [MessageField(order: 1)]
+    public EquipmentInfo? Info { get; init; }
+}

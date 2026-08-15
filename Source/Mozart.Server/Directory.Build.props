@@ -1,5 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <BaseIntermediateOutputPath>..\..\Temp\Mozart.Server\</BaseIntermediateOutputPath>
-    </PropertyGroup>
-</Project>

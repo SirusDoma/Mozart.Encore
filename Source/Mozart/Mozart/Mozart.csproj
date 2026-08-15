@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- Uncomment these to go native
+             You have to completely use function handler entirely without controllers
+
+            <PublishAot>true</PublishAot>
+            <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+            <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
+        -->
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86;x64</Platforms>
+        <AssemblyName>Mozart.Encore</AssemblyName>
+        <ApplicationIcon>..\..\Encore\Mozart.ico</ApplicationIcon>
+        <PackageId>Mozart.Encore</PackageId>
+        <Authors>Mozart.Encore</Authors>
+        <Company>Mozart.Encore</Company>
+        <Product>Mozart.Encore</Product>
+        <RootNamespace>Mozart</RootNamespace>
+        <OutputPath>..\..\..\Build\$(Configuration)\Mozart\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Configuration.Ini" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="System.CommandLine" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="config.ini">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Itemdata.dat">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Mozart.Server\Mozart.Server.csproj" />
+      <ProjectReference Include="..\Mozart.Data\Mozart.Data.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\Postgres\Mozart.Migrations.Postgres.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\Sqlite\Mozart.Migrations.Sqlite.csproj" />
+      <ProjectReference Include="..\Mozart.Migrations\SqlServer\Mozart.Migrations.SqlServer.csproj" />
+      <ProjectReference Include="..\Mozart.Web\Mozart.Web.csproj" />
+    </ItemGroup>
+
+    <Import Project="..\..\Encore\Encore.CLI\Encore.CLI.projitems" Label="Shared" />
+</Project>

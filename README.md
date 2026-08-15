@@ -1,36 +1,29 @@
-# Memoryer.Encore
+# Mozart.Encore
 
-A cross-platform re-implementation of O2Jam game server in C#.  
+A cross-platform O2Jam game server re-implementation in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v8.02 (O2Jam Classic)**
-
-### Other Builds
-
-| Build                                       | Supported client version |
-|---------------------------------------------|--------------------------|
-| [Mozart.Encore](../../tree/mozart)          | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../../tree/amadeus)        | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../../tree/cross-time)   | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../../tree/identity)      | v5.89 (O2JamO2 Beta)     |
-| [IdentityP2.Encore](../../tree/identity-p2) | v5.89 (O2JamO2 Final)    |
+## Server Builds
 
 > [!IMPORTANT]
-> **O2Jam Classic requires game client modifications and/or client-side hosts file and IP table configuration to run and connect to a custom server.**   
->
-> Common issues:
-> - The game connects to several web endpoints during startup. 
->   Failure to connect to `http://o2jam.nopp.co.kr/client/event/2009/06_moa/hot_time.php` will result in crash.
-> - There are 3 hardcoded IP addresses inside the client that are assigned to each game server, which act as UDP+TCP relay servers.
->   Live mode will disabled when the game cannot to connect to the both TCP and UDP relay server. See [Live Mode](#live-mode) to learn more.
+> See a build's README below for setup requirements, compatibility notes and client-specific configuration.
+
+| Build                                   | Supported client version |
+|-----------------------------------------|--------------------------|
+| [Mozart.Encore](Source/Mozart/)         | v3.10 (O2Jam Original)   |
+| [Amadeus.Encore](Source/Amadeus/)       | v3.82 (O2Jam NX)         |
+| [CrossTime.Encore](Source/CrossTime/)   | v2.33 (O2Jam X2)         |
+| [Identity.Encore](Source/Identity/)     | v5.89 (O2JamO2 Beta)     |
+| [IdentityP2.Encore](Source/IdentityP2/) | v5.89 (O2JamO2 Final)    |
+| [Memoryer.Encore](Source/Memoryer/)     | v8.02 (O2Jam Classic)    |
 
 ## Features
 
 > [!IMPORTANT]
-> This project is free from copyrighted materials. All codes are original work written from scratch.  
+> This project is free from copyrighted materials. All code is original work written from scratch.  
 > No copyrighted game assets, binaries, or master data are distributed in this repository.
 >
-> You will have to obtain and provide the metadata files in order to enable all functionalities.  
+> You must obtain and provide the required metadata files in order to enable all functionality.  
 > See [Metadata files](#metadata) to learn more.
 
 - Zero-Configuration for quick start.
@@ -40,177 +33,116 @@ Supported client version: **v8.02 (O2Jam Classic)**
 - Support multi planet and channels deployment.
 - Highly customizable with high-level network protocol implementation.
 
-<sub>* FTP and In-game web server features are not included.</sub>
+<sub>* FTP and in-game website features are not included.</sub>
+
+## Quick Start
+
+Download and extract the appropriate server binary from [here](https://github.com/SirusDoma/Mozart.Encore/releases/latest).
+
+| Build      | Binary                    | Default client directory                  |
+|------------|---------------------------|-------------------------------------------|
+| Mozart     | `Mozart.Encore.exe`       | `"C:\Program Files (x86)\e-Games\O2Jam\"` |
+| Amadeus    | `Amadeus.Encore.exe`      | `"C:\Program Files (x86)\e-Games\O2Jam\"` |
+| CrossTime  | `CrossTime.Encore.exe`    | `"C:\Program Files (x86)\O2Jam\O2JamX2\"` |
+| Identity   | `Identity.Encore.exe`     | `"C:\Program Files (x86)\O2Jam\O2JamO2\"` |
+| IdentityP2 | `IdentityP2.Encore.exe`   | `"C:\Program Files (x86)\O2Jam\O2JamO2\"` |
+| Memoryer   | `Memoryer.Encore.exe`     | `"C:\Program Files (x86)\NOWCOM\O2Jam\"`  |
+
+### First-Time Setup
+
+Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+
+```powershell
+.\<server>.exe metadata:import "<client-directory>"
+.\<server>.exe user:register <username> <password>
+```
+
+### Start the Game
+
+Start the server in the first terminal (or double-click it) and leave it running:
+
+```powershell
+.\<server>.exe
+```
+
+Open a second terminal in the same server directory, then use the same username, password, and client directory to launch the game:
+
+```powershell
+.\<server>.exe game:start <username> <password> "<client-directory>"
+```
 
 ## Project Structure
 
-| Project                                        | Description                                       |
-|------------------------------------------------|---------------------------------------------------|
-| [Encore](Source/Encore/)                       | Custom TCP server framework                       |
-| [Mozart.Server](Source/Mozart.Server/)         | Core O2Jam server implementation                  |
-| [Mozart.Data](Source/Mozart.Data/)             | Data persistent implementation                    |
-| [Mozart.Migrations](Source/Mozart.Migrations/) | Database migrations with various drivers          |
-| [Memoryer.Web](Source/Memoryer.Web/)           | Lightweight HTTP Web server                       |
-| [Memoryer](Source/Memoryer/)                   | Game server implementation for O2Jam client v8.02 |
+| Shared project                                                  | Description                                                    |
+|-----------------------------------------------------------------|----------------------------------------------------------------|
+| [Encore.Framework](Source/Encore/Encore.Framework/)             | TCP/UDP networking, messaging, and hosting framework           |
+| [Encore.Server](Source/Encore/Encore.Server/)                   | Shared sessions, services, channels, and room lifecycle logic  |
+| [Encore.Data](Source/Encore/Encore.Data/)                       | Shared entities, metadata, options, and repositories           |
+| [Encore.CLI](Source/Encore/Encore.CLI/)                         | Shared CLI infrastructure and common commands                  |
+| [Encore.Web](Source/Encore/Encore.Web/)                         | Shared HTTP server and authentication/registration endpoints   |
+
+| Project                 | Description                                            |
+|-------------------------|--------------------------------------------------------|
+| `{Build}`               | Executable, controllers, messages, and CLI tasks       |
+| `{Build}.Web`           | HTTP host that compiles the shared `Encore.Web` source |
+| `{Build}.Server`        | Build-specific game and protocol logic                 |
+| `{Build}.Data`          | Build-specific EF Core data model and metadata parsers |
+| `{Build}.Migrations`    | Database migrations organized by provider              |
+
+## Build and Run
+
+Build the complete solution:
+
+```shell
+dotnet build Mozart.Encore.sln -c Release -p:Platform=x64
+```
+
+Run a server by replacing `<Build>` with one of the build names listed above:
+
+```shell
+dotnet run --project Source/<Build>/<Build>
+```
 
 # Configuration
 
-The server can be configured either with `config.ini` or command-line arguments.
-See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to set up command-line config.
+Servers can be configured with `config.ini` or command-line arguments.  
+Command-line values can be passed using `--Section:Option=Value` syntax.
 
-## Server
-Server deployment mode and TCP connection setting.
+For example:
 
-Use `--Server:<Option>` to configure these settings via command-line arguments (e.g, `--Server:Port=15010`)
+```shell
+dotnet run --project Source/<Build>/<Build> -- --Server:Port=15010
+```
 
-| Option             | Description                                                                                                                                                                                                                                                                                                                                                                                              |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Mode`             | Server deployment mode. Supported values: <ul><li>`Full`<br/>Act as a full-package server: One gateway with one or more channels.</li><br/><li>`Gateway`<br/>Handle authentication and end-user TCP connections, relaying them to the `Channel` servers.</li><br/><li>`Channel`<br/>Manage users persistent and non-persistent in-game states/logic of one particular channel.</li></ul> Default: `Full` |
-| `Address`          | <ul><li>In `Full`/`Gateway` mode:<br/>TCP address to listen incoming connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In `Channel` mode:<br/>The local endpoint address for the TCP client.</li></ul> Default: `127.0.0.1`                                                                                                                                                          |
-| `Port`             | <ul><li>In `Full`/`Gateway` mode:<br/>TCP port to listen incoming connection.</li><br/><li>In `Channel` mode:<br/>The local endpoint address for the TCP client.</li></ul> Default: `15010`                                                                                                                                                                                                              |
-| `MaxConnections`   | The maximum number of clients connecting to the server. Default: `10000`                                                                                                                                                                                                                                                                                                                                 |
-| `PacketBufferSize` | The maximum number of bytes per [message frame](https://blog.stephencleary.com/2009/04/message-framing.html) that can be processed by the server. Default: `4096` bytes                                                                                                                                                                                                                                  |                                                          
-
-## HTTP
-Lightweight HTTP web server settings.
-
-Use `--Http:<Option>` to configure these settings via command-line arguments (e.g, `--Http:Port=15000`)
-
-| Option    | Description                                                                                                       |
-|-----------|-------------------------------------------------------------------------------------------------------------------|
-| `Enabled` | Determine whether the web server is enabled.  Default: `false`                                                    |
-| `Address` | Web server address to listen incoming requests. Using `0.0.0.0` may require admin privilege. Default: `127.0.0.1` |
-| `Port`    | HTTP port to listen incoming requests. Default: `15000`                                                           |
-
-## Relay Server
-UDP and TCP Relay server for Live Mode.
-
-Use `--Relay:<Option>` &amp; `--Relay:Endpoints:<N>:<Option>` to configure these settings via command-line arguments (e.g, `--Relay:Endpoints:0:Address="127.0.0.1"`).
-`<N>` is the index of relay endpoint table.
-
-The index (`<N>`) represents an array index and must always start from 0, ordered and with no gap in-between.
-
-> [!IMPORTANT]
-> For more information, see [Live Mode](#live-mode).
-
-| Option                      | Description                                                                                                                                                                       |
-|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Enabled`                   | Determine whether the fallback relay server (TCP) is enabled.  Default: `false`                                                                                                   |
-| `P2PEnabled`                | Determine whether the primary relay server (UDP) is enabled. The fallback relay server must be `Enabled` in order to turn on the primary relay server.  Default: `true`           |
-| `MaxConnections`            | The maximum number of clients connecting to the relay server. Default: `10000`                                                                                                    |
-| `PacketBufferSize`          | The maximum number of bytes per [message frame](https://blog.stephencleary.com/2009/04/message-framing.html) that can be processed by the TCP relay server. Default: `4096` bytes |
-| `RetransmissionInterval`    | The wait time (in seconds) for the client peer need to reply before the UDP packet retransmission triggered by the UDP relay server. Default: 100ms                               |                                                                                                                                                                         |
-| `MaxRetransmissionAttempts` | The maximum number of retransmission attempts before the UDP reliability channel drop a packet. Default: `0` (Always retry)                                                         |                                                                                                                                                                         |
-
-### Relay Endpoints
-
-These options can be configured under `Relay:Endpoints:<N>` section as explained above.
-
-| Option    | Description                                                                                                                                                                                                                                   |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Address` | <ul><li>In `Relay` mode:<br/>Inbound TCP/UDP address to listen incoming relay client connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In other modes:<br/>Outbound TCP address to connect to the Relay server.</li></ul> |
-| `Port`    | <ul><li>In `Relay` mode:<br/>Inbound TCP/UDP port to listen incoming relay client connection.</li><br/><li>In other modes:<br/>Outbound TCP port to connect to the Relay server.</li></ul>                                                    |
-
-## Database
-Database connection setting.
-
-Use `--Db:<Option>` to configure these settings via command-line arguments
-
-| Option           | Description                                                                                                                                                                                                            |
-|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Driver`         | Specify database provider. <br/>Supported drivers:<ul><li>`Memory` (NOT Recommended)</li><li>`Sqlite` (Recommended for local server)</li><li>`SqlServer`</li><li>`MySql`</li><li>`Postgres`</li></ul>Default: `Sqlite` |
-| `Name`           | Database name. Default: `O2JAM`                                                                                                                                                                                        |
-| `Url`            | Database Url, also known as Connection String. Default: `Data Source=O2JAM.db`                                                                                                                                         |
-| `MinBatchSize`   | Minimum number of statements that are needed for a multi-statement command sent to the database. Default: (not configured)                                                                                             |                                                          
-| `MaxBatchSize`   | Maximum number of statements that are needed for a multi-statement command sent to the database. Default: (not configured)                                                                                             |                                                          
-| `CommandTimeout` | The wait time (in seconds) before terminating the attempt to execute a command and generating an error. Default: (not configured)                                                                                      |                                                          
-
-## Auth
-Determine auth behavior
-
-Use `--Auth:<Option>` to configure these settings via command-line arguments.
-
-| Option            | Description                                                                                                                                                                                                                                                                                                                                |
-|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Mode`            | Determine the authentication scheme. Both `Default` and `Foreign` read from `member` table.<br/><ul><li>`Default`: Store one way hashed `passwd`</li><li>`Foreign`: Store plaintext `passwd` (Compatible with existing v1.8 database schema)</li></ul>`9you` and `GAMANIA` are aliases for `Foreign`.                                      |
-| `SessionExpiry`   | Determine the number of minutes before the session gets deleted from `t_o2jam_login` after the connection terminated.<br/><br/>Set `0` to never expired which is recommended for single player or online server with custom session implementation. Otherwise, It is recommended to set between 2-5 minutes.<br/><br/>Default: `5` minutes |
-| `RevokeOnStartup` | Clear login tables on start-up. Recommended to disable for local server. Default: `true`                                                                                                                                                                                                                                                   |
-
-## Gateway &amp; Channels
-Gateway &amp; Channels network and economy rating configuration. There must be at least one channel for the server to work properly.  
-
-Use `--Gateway:<Option>` &amp; `--Gateway:Channels:<N>:<Option>` to configure these settings via command-line arguments (e.g, `--Gateway:Channels:0:Id=0`). 
-`<N>` is the index of channel table (not to be confused with channel id!).  
-
-The index (`<N>`) represents an array index and must always start from 0, ordered and with no gap in-between. The `Id` however, can be un-ordered and with gaps in-between.
-
-### Gateway
-These options can be configured under `Gateway` section.
-
-> [!TIP]
-> This configuration is ignored in the `Full` deployment mode.
-
-| Option    | Description                                                                                                                                                                                                                                                             |
-|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Address` | <ul><li>In `Gateway` mode:<br/>Inbound TCP address to listen incoming channel server connection. Using `0.0.0.0` may require admin privilege.</li><br/><li>In `Channel` mode:<br/>Outbound TCP address to connect to the Gateway server.</li></ul> Default: `127.0.0.1` |
-| `Port`    | <ul><li>In `Gateway` mode:<br/>Inbound TCP port to listen incoming channel server connection.</li><br/><li>In `Channel` mode:<br/>Outbound TCP port to connect to the Gateway server.</li></ul> Default: `15047`                                                        |
-| `Timeout` | The maximum wait time (in seconds) for establishing connection between the gateway and the channel. Default: `30` seconds                                                                                                                                               |
-
-### Channels
-These options can be configured under `Gateway:Channels:<N>` section as explained above.
-
-> [!TIP]
-> This configuration is ignored in the `Gateway` deployment mode.
-
-> [!IMPORTANT]
-> You can only have exactly one channel in the `Channel` deployment mode.
-
-| Option      | Description                                                                                                                                                            |
-|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                              |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                               |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                        |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                        |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`8.02` (O2Jam Classic).  Default: (Empty) using global [Metadata](#Metadata)  |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`8.02` (O2Jam Classic).  Default: (Empty) using global [Metadata](#Metadata) |
+See [Command-line configuration provider](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-providers#command-line-configuration-provider) to learn more about setting up command-line config.  
+Refer to the build's README and `config.ini` for the complete set of options.
 
 ## Metadata
+
 Metadata files act as source of truth of particular game data outside the database.  
 
 They are optional for running the server; however, missing certain files may disable one or more features such as play rewards, ranking, and equipment.
-**Note that `MusicList`is specifically required for core gameplay to function.**
 
-Metadata can usually be overridden per channel.
+Metadata can usually be overridden per channel. Refer to build's README for more information.
 
 > [!IMPORTANT]
-> Metadata files must be compatible with the client version supported by this build.  
-> Older format versions may work, but are not officially supported and may affect game features.  
-> 
+> Metadata files must be compatible with the client version supported by the build you are running.  
+> Older format versions may work, but are not officially supported and may affect game features.
+>
 > The server will continue to run even if one or more Metadata files are invalid or use an incompatible format, though the affected features will behave as if the file were not present.
 
-Use `--Metadata:<Option>` to configure these settings via command-line arguments.
-
-| Option      | Description                                                                                                 |
-|-------------|-------------------------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`8.02` (O2Jam Classic).  |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`8.02` (O2Jam Classic). |
-
-## Game settings
-Gameplay-specific settings.
-
-Use `--Game:<Option>` to configure these settings via command-line arguments.
-
-| Option                       | Description                                                                                                                                                                                                                                                                                                  |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `AllowSoloInVersus`          | Specify whether playing solo is eligible in VS Mode. Default: `true`                                                                                                                                                                                                                                         |
-| `SingleModeRewardLevelLimit` | The maximum level limit of gaining reward in Single mode. Default: Level `10`                                                                                                                                                                                                                                |
-| `FreeMusic`                  | Unlock all premium music based on the provided `MusicList`. Default: `true`                                                                                                                                                                                                                                  |
-| `MusicLoadTimeout`           | The maximum wait time (in seconds) before terminating unresponsive client sessions when loading the game music.<br/><br/>Note: when one or more clients are timed out, the remaining clients will still likely stuck for a certain amount of time regardless of this setting.<br/><br/>Default: `60` seconds |
+| Option      | Description                                                                                                     |
+|-------------|-----------------------------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path to the build's supported music list file (usually `OJNList.dat`, or `X2OJNList.dat`). |
+| `ItemData`  | Relative or absolute path to `Itemdata.dat`.                                                                    |
+| `AlbumList` | Relative or absolute path to `AlbumList.ojs`, when supported by the build.                                      |
 
 # Database Migration
 
-Use Entity Framework tools to run the database migration.
-See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.
+Use Entity Framework tools to run the database migration.  
+See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/) to learn more about the CLI installation.  
+
+Refer to the build's README for details about adding a new migration or executing the database migration.
 
 >[!IMPORTANT]
 > You may notice that the database schema look funky with premature normalizations here and there.  
@@ -221,22 +153,6 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 >
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
-## Add Migration
-
-The migration files are divided by [projects based on provider](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/providers?tabs=dotnet-core-cli).
-Use the following command to create a new migration:
-
-```shell
- # Replace "MySql" with your preferred database driver
- dotnet ef migrations add --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                             --startup-project Source\Memoryer\Memoryer.csproj \
-                             --context Mozart.Data.Contexts.MainDbContext \
-                             <migration name>
-                             -- Auth:Mode=<auth mode> \
-                             Db:Driver=<driver> \
-                             Db:Url="<connection string>"
-```
-
 >[!IMPORTANT]
 > Database migration is automatically executed every start-up as long as the `Auth:Mode` equals to `Default`.  
 > This is because `Auth:Mode=Foreign` is a compatibility mode that enables Mozart to continue to work with an existing foreign database that has different auth schema than the original e-Games clients (such as 9you or GAMANIA).
@@ -246,132 +162,42 @@ Use the following command to create a new migration:
 > <sub>* The server will likely raise an exception with [`PendingModelChangesWarning`](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-9.0/breaking-changes#exception-is-thrown-when-applying-migrations-if-there-are-pending-model-changes) when running database migration with `Foreign` mode.
 > The errors can be suppressed, but there's no guarantee that migration will continue to work using foreign auth schema for the future releases.</sub>
 
->[!TIP]
-> The `--` token directs `dotnet ef` to treat everything that follows as an argument and not try to parse them as options.
-> Any extra arguments not used by dotnet ef are forwarded to the Mozart.
-
->[!TIP]
-> You can place the configured `config.ini` in your working directory to configure the database configuration
-> instead of passing them via CLI.
-
-## Execute Migration
-Run the following command to execute the migration:
-
-```shell
- dotnet ef database update --project Source\Mozart.Migrations\MySql\Mozart.Migrations.MySql.csproj \
-                           --startup-project Source\Memoryer\Memoryer.csproj \
-                           --context Mozart.Data.Contexts.MainDbContext \
-                           -- Auth:Mode=<auth mode> \
-                           Db:Driver=<driver> \
-                           Db:Url="<connection string>"
-```
-
 # Web Server
 
-By default, the server exposes user registration and login APIs used to generate the authentication tokens required to run the game.
+Each build includes a lightweight HTTP server for the authentication and registration endpoints implemented by the project. 
+Original server files are not included and in-game web functionality is outside the scope of this project.
 
-The original web server files (ASP Classic) are not included and cannot be hosted within this project.
-This functionality considered out-of-scope, and unlikely to be added in the future.
-
-> [!WARNING]
-> Official NOWCOM clients does not allow custom web server url by default.
-> The game simply does not respect the web server address in the launch argument.
->
-> Therefore, even if the original web server is ported into this Web Server module,
-> enabling in-game shop functionality still requires either modifying the game client or configuring client-side host settings.
+Endpoint availability and integration requirements vary by build. Refer to the selected build's README for details.
 
 # Scaling
 
 > [!WARNING]
-> Scaling is a feature that **99% users won’t ever need**.  
-> 
-> It’s intended for niche scenarios—such as replicating the original server’s scaling infrastructure—or for deployments across constrained hardware 
+> Scaling is a feature that **99% users won’t ever need**.
+>
+> It’s intended for niche scenarios—such as replicating the original server’s scaling infrastructure—or for deployments across constrained hardware
 > (e.g., deploying servers into multiple microcontrollers).
 
 Like many traditional MMOs, O2Jam shards its network traffic across multiple servers known as `Planet`s, each of which hosts several `Channel`s.
 To support this design, you must run Mozart.Encore in separate instances:
 
 - **Gateway**
-  - One instance per `Planet`
-  - Listens for all incoming end-user client connections
-  - Keeps track of its Planet’s Channel instances
+    - One instance per `Planet`
+    - Listens for all incoming end-user client connections
+    - Keeps track of its Planet’s Channel instances
 
 - **Channel**
-  - One instance per `Channel`
-  - Handles persistent and non-persistent in-game states for its assigned Channel
+    - One instance per `Channel`
+    - Handles persistent and non-persistent in-game states for its assigned Channel
 
-There can only be one "node" of `Gateway` or `Channel` instance at a time, and it cannot be horizontally scaled.
+There can only be one "node" of `Gateway` or `Channel` instance at a time, and it cannot be horizontally scaled.  
 You cannot run multiple instances to represent a single `Gateway` or `Channel`, because each instance is the scaling unit of the horizontal scaling itself.
-
-See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configuration section above to configure the `Gateway` and `Channel` instances.
-
-# Live Mode
-
-Live Mode is a new mode exclusive to O2Jam Classic where two players play against each other while showing both player lanes.
-The game use [UDP Hole Punching](https://en.wikipedia.org/wiki/UDP_hole_punching) as the first option to communicate directly to the opponent client. 
-If that fails, the game will fallback to relay server provided by the server via TCP connection.
-
-Refer to the [relay server configuration](#relay-server) to enable Live Mode.
-
-> [!NOTE]
-> Memoryer.Encore will try to start both TCP and UDP servers using the `Relay:Endpoints:N` configuration by default.
-> When `Relay:Enabled` is enabled or the deployment mode is set to `Relay`, at least one TCP relay server must start successfully.
-> The UDP relay is controlled by `Relay:P2PEnabled` and it is optional. However, the game treat UDP relay as a primary connection for Live mode and will likely to fall back to TCP relay instead of peer-to-peer when UDP server is not available.
-> 
-> **When using TCP relay fallback, there will be significant delay and/or freeze every time the room master start the game.**
-
-> [!IMPORTANT]
-> The server IP addresses for Live Mode are hardcoded into the client. 
-> You will have to either modify the computer IP tables/routing or modify the game client to change these IP.
-> 
-> Make sure that your firewall allow the incoming connection of the relay ports for both TCP and UDP.
 
 ## Service Discovery
 
-### Gateway
+Most of the time, the command-line arguments specify all available Gateways when launching O2Jam via `OTwo.exe`.  
+The syntax of command-lines is vary to each client version. Refer to the build's README to learn more.
 
-Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
-
-```shell
-OTwo.exe <encrypted_parameters> \
-  |test|??|<gateway_address_1>|<gateway_port_1>\
-  |test|??|<gateway_address_2>|<gateway_port_2>\
-  …\
-  |test|??|<gateway_address_n>|<gateway_port_n>
-```
-> [!CAUTION]
-> If you are using batch or terminal directly, make sure that the pipe (`|`) are escaped using `^`.  
-> For example: `^|test^|??^|127.0.0.1^|15010`
-
-> [!NOTE]
-> `\` is an escape character for line break. 
-> Please remove it if you are running the command in one single line / without line-break.
-
-> [!NOTE]
-> The number of servers are not explicitly specified.  
-> See [AuthParameters](Source/Memoryer/Utilities/AuthParameters.cs) and [AuthParameterRsaChiper](Source/Memoryer/Utilities/AuthParameterRsaCipher.cs) to view the details on how encode or decode the `encrypted_parameters` works.
->
-> Use [`user:authorize`](#cli-command) command to generate the session and the encrypted parameters.
-
-For example, if you have three Planets (three Gateways), you might use:
-
-```shell 
-OTwo.exe 00C70200E85000DF8E00E..... \
-  |test|??|192.168.10.1|15010\
-  |test|??|192.168.10.2|15011\
-  |test|??|192.168.10.3|15012\
-```
-
-> [!TIP]
-> You may mirror one gateway instance for multiple planets by reusing the same IP and port multiple times.
-> For example:
->
-> ```shell 
-> OTwo.exe 00C70200E85000DF8E00E..... \
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
-> |test|??|192.168.10.1|15010\
-> ```
+Note that some clients may store the gateway addresses directly within the client executable itself.
 
 ### Channel
 
@@ -385,13 +211,19 @@ When the `Channel` lost its connection to its `Gateway`, it will automatically s
 It might be possible to host and scale `Mozart.Encore` in kubernetes via [agones](https://agones.dev/). However, it may require code changes.
 Please refer to their [documentation](https://agones.dev/site/docs/) and [third-party examples](https://agones.dev/site/docs/third-party-content/examples/) to learn more.
 
-# CLI Command
+# CLI Commands
 
-The server application has built-in utilities to help local player usage or server maintenance.
+The server applications include utilities for local play and server maintenance. Available commands vary by build.
 
-- `db:migrate`: Execute database migration within the configured database.
-- `user:register`: Register a new user.
-- `user:authorize`: Authorize user credential. Display encoded auth parameters that can be used to launch the game.
-- `ranking:upsert`: Generates or updates user rankings. This command is intended to be executed periodically using a scheduled cron job.
+- `db:migrate`: Execute database migration using the configured database.
+- `user:register`: Register a user.
+- `user:authorize`: Authorize user credentials and generate the authentication parameters supported by the build.
+- `user:equip <username> <item id>`: Equip an item that match with the specified item id. The previously equipped item is moved to the bag.
+- `user:stash <username> <item id>`: Add an item that match with the specified item id to a user's bag.
+- `user:deposit <username> <gem> [<point>]`: Add gems and points to a user. Point defaults to `0`.
+- `metadata:import [<dir>]`: Import supported metadata from an O2Jam installation. Directory defaults to the current working directory.
+- `game:start <username> <password> [<dir>]`: Authorize a user and launch the game. Directory defaults to the current working directory.
+- `ranking:upsert`: Generate or update user rankings where supported.
+- `encdec <param>`: Encrypt or decrypt authentication parameters in Memoryer.
 
-Run the CLI with `--help` flag for more details.
+Run the CLI with `--help` for more details.

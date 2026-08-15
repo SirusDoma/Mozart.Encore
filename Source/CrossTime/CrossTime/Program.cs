@@ -1,0 +1,334 @@
+using System.Net.Sockets;
+using CrossTime.CLI;
+using CrossTime.Controllers;
+using CrossTime.Controllers.Filters;
+using CrossTime.Controllers.Internal;
+using CrossTime.Events;
+using CrossTime.Workers.Channels;
+using CrossTime.Workers.Gateway;
+using Encore.CLI;
+using Encore.Contexts;
+using Encore.Data.Repositories;
+using Encore.Events;
+using Encore.Hosting.Extensions;
+using Encore.Hosting.Logging;
+using Encore.Messaging;
+using Encore.Metadata;
+using Encore.Options;
+using Encore.Server;
+using Encore.Server.Sessions;
+using Encore.Services;
+using Encore.Web;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Mozart.Data.Contexts;
+using Mozart.Entities;
+using Mozart.Options;
+using Mozart.Services;
+
+namespace CrossTime;
+
+public class Program
+{
+    public static Version Version        => new(3, 6, 3);
+    public static Version NetworkVersion => new(2, 33);
+    public static string RepositoryUrl   => "https://github.com/SirusDoma/Mozart.Encore";
+
+    private static async Task<int> Main(string[] args)
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Server:Mode"]                     = "Full",
+                ["Server:Address"]                  = "127.0.0.1",
+                ["Server:Port"]                     = "15010",
+                ["Server:MaxConnections"]           = ((int)SocketOptionName.MaxConnections).ToString(),
+                ["Server:PacketBufferSize"]         = "4096",
+                ["Http:Enabled"]                    = "true",
+                ["Http:Address"]                    = "127.0.0.1",
+                ["Http:Port"]                       = "15000",
+                ["Db:Driver"]                       = "Sqlite",
+                ["Db:Name"]                         = "O2JAM",
+                ["Db:Url"]                          = "Data Source=O2JAM.db",
+                ["Game:AllowSoloInVersus"]          = "true",
+                ["Metadata:ItemData"]               = "Itemdata.dat",
+                ["Metadata:MusicList"]              = "X2OJNList.dat",
+                ["Gateway:Channels:0:Id"]           = "0",
+                ["Auth:Mode"]                       = "Default",
+                ["Auth:RevokeOnStartp"]             = "true",
+                ["Score:Gem"]                       = "1.0",
+                ["Score:Exp"]                       = "1.0"
+            })
+            .AddIniFile("config.ini", true, true)
+            .AddIniFile("mozart.ini", true, true)
+            .AddCommandLine(args)
+            .Build();
+
+        var hostBuilder = CreateHostBuilder(args, config);
+
+        // Execute custom command if any
+        int? code = await ExecuteCommandLine(hostBuilder, args);
+        if (code != null)
+            return code.Value;
+
+        // Otherwise configure the rest of server and start it
+        hostBuilder = hostBuilder
+            .ConfigureTcpFramer((context, builder) =>
+            {
+                builder.AddFramerFactory<SizePrefixedMessageFramer<short>>();
+            })
+            .ConfigureTcpSessions((context, provider) =>
+            {
+                provider.UseTcpSession<Session>()
+                    .AddFactory<ISessionFactory>(svc => new SessionFactory(svc))
+                    .AddManager<ISessionManager>(_ => new SessionManager());
+            })
+            .ConfigureFilters((context, builder) =>
+            {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                builder.AddExceptionHandler<DefaultExceptionHandler>()
+                    .AddExceptionLogger<DefaultExceptionLogger>()
+                    .AddFilter<SessionScopeLoggerFilter>();
+
+                if (options.Mode == DeploymentMode.Gateway)
+                    builder.AddFilter<GatewayFilter>();
+            })
+            .ConfigureRoutes((context, provider) =>
+            {
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                // Controller-based routing: Not safe with AOT
+                var routes = provider.UseCodec<DefaultMessageCodec>()
+                    .Map<AuthController>()
+                    .Map<PlanetController>()
+                    .Map<MessagingController>()
+                    .Map<MainRoomController>()
+                    .Map<MissionController>()
+                    .Map<MyRoomController>()
+                    .Map<ItemShopController>()
+                    .Map<MusicShopController>()
+                    .Map<WaitingController>()
+                    .Map<PlayingController>();
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Gateway:
+                        routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                    case DeploymentMode.Channel:
+                        routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
+                        break;
+                }
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSingleton<IMozartServer, MozartServer>();
+
+                var options = context.Configuration
+                    .GetSection(ServerOptions.Section)
+                    .Get<ServerOptions>() ?? new ServerOptions();
+
+                switch (options.Mode)
+                {
+                    case DeploymentMode.Channel:
+                        services.AddSingleton<IGatewayClient, GatewayClient>()
+                            .AddSingleton<IUserSessionFactory, UserSessionFactory>()
+                            .AddHostedService<ChannelWorker>();
+
+                        break;
+                    case DeploymentMode.Gateway:
+                        services.AddSingleton<IClientServer, ClientServer>()
+                            .AddSingleton<IGatewayServer, GatewayServer>()
+                            .AddSingleton<IChannelAggregator, ChannelAggregator>()
+                            .AddSingleton<IClientSessionFactory, ClientSessionFactory>()
+                            .AddSingleton<IChannelSessionFactory, ChannelSessionFactory>()
+                            .AddSingleton<IChannelSessionManager, ChannelSessionManager>()
+                            .AddHostedService<GatewayWorker>();
+
+                        break;
+                    case DeploymentMode.Full:
+                        services.AddHostedService<DefaultWorker>();
+
+                        break;
+                }
+            });
+
+        IHost host;
+        if (config.GetSection(HttpOptions.Section).Get<HttpOptions>()?.Enabled ?? false)
+        {
+            host = hostBuilder
+                .ConfigureWebHost(WebServer.Build)
+                .Build();
+        }
+        else
+        {
+            host = hostBuilder.Build();
+        }
+
+        await host.RunAsync();
+        return 0;
+    }
+
+    private static async Task<int?> ExecuteCommandLine(IHostBuilder hostBuilder, string[] args)
+    {
+        return await CommandLineTaskProcessor.CreateDefaultProcessor(hostBuilder)
+            .ConfigureCommandTasks(builder =>
+            {
+                builder.AddCommandLineTask<DatabaseInitCommandTask>()
+                    .AddCommandLineTask<RegisterUserCommandTask>()
+                    .AddCommandLineTask<EquipUserCommandTask>()
+                    .AddCommandLineTask<StashUserCommandTask>()
+                    .AddCommandLineTask<DepositUserCommandTask>()
+                    .AddCommandLineTask<AuthorizeUserCommandTask>()
+                    .AddCommandLineTask<ImportMetadataCommandTask>()
+                    .AddCommandLineTask<StartGameCommandTask>()
+                    .AddCommandLineTask<UpsertUserRankingCommandTask>()
+                    .AddCommandLineTask<VersionCommandTask>();
+            })
+            .ExecuteAsync(args);
+    }
+
+    public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration config)
+    {
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, builder) =>
+            {
+                builder
+                    .AddConfiguration(config)
+                    .AddIniFile($"config.{context.HostingEnvironment}.ini", true, true);
+            })
+            .ConfigureLogging((context, builder) =>
+            {
+                builder.ClearProviders()
+                    .AddConsole(options => options.FormatterName = "EncoreLoggerFormatter")
+                    .AddConsoleFormatter<EncoreConsoleFormatter, EncoreConsoleFormatterOptions>()
+                    .AddFilter("Microsoft.*", LogLevel.None)
+                    .SetMinimumLevel(LogLevel.Debug);
+            })
+            .ConfigureServices((context, services) =>
+            {
+                // Configurations
+                services.AddOptions<MetadataOptions>()
+                    .BindConfiguration(MetadataOptions.Section);
+                services.AddOptions<DatabaseOptions>()
+                    .BindConfiguration(DatabaseOptions.Section);
+                services.AddOptions<TcpOptions>()
+                    .BindConfiguration(TcpOptions.Section);
+                services.AddOptions<ServerOptions>()
+                    .BindConfiguration(ServerOptions.Section);
+                services.AddOptions<HttpOptions>()
+                    .BindConfiguration(HttpOptions.Section);
+                services.AddOptions<GatewayOptions>()
+                    .BindConfiguration(GatewayOptions.Section);
+                services.AddOptions<AuthOptions>()
+                    .BindConfiguration(AuthOptions.Section);
+                services.AddOptions<GameOptions>()
+                    .BindConfiguration(GameOptions.Section);
+
+                // Database contexts
+                services.AddDbContextFactory<MainDbContext>((provider, builder) =>
+                {
+                    var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+                    _ = options.Driver switch
+                    {
+                        DatabaseDriver.Memory =>
+                            builder.UseInMemoryDatabase(options.Name),
+
+                        DatabaseDriver.Sqlite =>
+                            builder.UseSqlite(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("CrossTime.Migrations.Sqlite");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.SqlServer =>
+                            builder.UseSqlServer(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("CrossTime.Migrations.SqlServer");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.MySql =>
+                            builder.UseMySQL(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("CrossTime.Migrations.MySql");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.Postgres =>
+                            builder.UseNpgsql(options.Url, ctx =>
+                            {
+                                ctx.MigrationsAssembly("CrossTime.Migrations.Postgres");
+                                if (options.CommandTimeout != null)
+                                    ctx.CommandTimeout(options.CommandTimeout.Value);
+
+                                if (options.MaxBatchSize != null)
+                                    ctx.MaxBatchSize(options.MaxBatchSize.Value);
+
+                                if (options.MinBatchSize != null)
+                                    ctx.MinBatchSize(options.MinBatchSize.Value);
+                            }),
+
+                        DatabaseDriver.MongoDb =>
+                            builder.UseMongoDB(options.Url, options.Name),
+
+                        _ => throw new ArgumentOutOfRangeException(nameof(options), options.Driver, "Invalid driver")
+                    };
+                });
+
+                // Repositories
+                services.AddScoped<IUserRepository, UserRepository>()
+                    .AddScoped<IMemberRepository, MemberRepository>()
+                    .AddScoped<ISessionRepository, SessionRepository>();
+
+                // Application contexts
+                services.AddSingleton<Encore.Services.IAuthSessionTokenGenerator,
+                    Encore.Services.GuidAuthSessionTokenGenerator>();
+                services.AddScoped<IAuthContext, AuthContext>();
+
+                // Event subscribers
+                // Note: The subscriber lifetime is mostly tied to the object that it's subscribing
+                //       (e.g, Use singleton when subscribing events from singleton service)
+                services.AddScoped<IEventPublisher<Room>, RoomEventPublisher>();
+                services.AddScoped<IEventPublisher<ScoreTracker>, ScoreTrackerEventPublisher>();
+                services.AddSingleton<IEventPublisher<RoomService>, RoomServiceEventPublisher>();
+
+                // Services
+                services.AddSingleton<IMetadataResolver, MetadataResolver>()
+                    .AddSingleton<IChannelService, ChannelService>()
+                    .AddSingleton<IRoomService, RoomService>()
+                    .AddSingleton<IMissionTracker, MissionTracker>()
+                    .AddScoped<IAuthService, AuthService>();
+            });
+    }
+}

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>x86;x64</Platforms>
+        <RootNamespace>Memoryer.Relay</RootNamespace>
+        <AssemblyName>Memoryer.Relay</AssemblyName>
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <OutputPath>..\..\..\Build\$(Configuration)\Memoryer\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Memoryer.Server\Memoryer.Server.csproj" />
+        <ProjectReference Include="..\Memoryer.Data\Memoryer.Data.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Messages\Responses\" />
+    </ItemGroup>
+
+</Project>

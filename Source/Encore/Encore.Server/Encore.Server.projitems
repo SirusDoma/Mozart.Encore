@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>7a92d5e1-4c3b-4f68-b7d9-2e8a0c5f1b46</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Contexts\Context.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Contexts\AuthContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\Broadcastable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\Channel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\IChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\IRoomLifecycle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\Room.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Events\IEventPublisher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\AuthService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\AuthSessionTokenGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\ChannelService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\IMetadataResolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\RoomService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\Session.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\SessionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sessions\SessionManager.cs" />
+  </ItemGroup>
+</Project>

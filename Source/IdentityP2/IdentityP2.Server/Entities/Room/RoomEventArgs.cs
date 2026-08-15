@@ -1,0 +1,86 @@
+using Encore.Metadata;
+using Encore.Metadata.Room;
+using Mozart.Metadata;
+
+namespace Mozart.Entities;
+
+public class RoomUserJoinedEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+
+    public required Room.MemberSlot Member { get; init; }
+}
+
+public class RoomUserLeftEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+
+    public required Room.MemberSlot Member { get; init; }
+
+    public required int RoomMasterMemberId { get; init; }
+}
+
+public class RoomTitleChangedEventArgs : EventArgs
+{
+    public required string Title { get; init; }
+}
+
+public class RoomMusicChangedEventArgs : EventArgs
+{
+    public required int MusicId           { get; init; }
+    public required GameSpeed Speed       { get; init; }
+    public required Difficulty Difficulty { get; init; }
+}
+
+public class RoomAlbumChangedEventArgs : EventArgs
+{
+    public required int AlbumId  { get; init; }
+    public required GameSpeed Speed { get; init; }
+}
+
+public class RoomArenaChangedEventArgs : EventArgs
+{
+    public required int Arena { get; init; }
+}
+
+public class RoomStateChangedEventArgs : EventArgs
+{
+    public required RoomState PreviousState { get; init; }
+    public required RoomState CurrentState  { get; init; }
+}
+
+public class RoomUserReadyStateChangedEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+    public required Room.MemberSlot Member { get; init; }
+    public required bool Ready             { get; init; }
+}
+
+public class RoomUserTeamChangedEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+    public required Room.MemberSlot Member { get; init; }
+    public required RoomTeam Team          { get; init; }
+}
+
+public class RoomUserMusicStateChangedEventArgs : EventArgs
+{
+    public required int MemberId           { get; init; }
+    public required Room.MemberSlot Member { get; init; }
+    public required MusicState State     { get; init; }
+}
+
+public class RoomSlotChangedEventArgs : EventArgs
+{
+    public required int SlotId                    { get; init; }
+    public required Room.ISlot PreviousSlot       { get; init; }
+    public required Room.ISlot CurrentSlot        { get; init; }
+    public required RoomSlotActionType ActionType { get; init; }
+    public required int Capacity                  { get; init; }
+    public required int UserCount                 { get; init; }
+}
+
+public class RoomSkillChangedEventArgs : EventArgs
+{
+    public required IList<int> Skills { get; init; }
+}

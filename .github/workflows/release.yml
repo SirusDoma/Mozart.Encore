@@ -3,15 +3,38 @@ name: Draft Release
 on:
   workflow_dispatch:
     inputs:
-      all_branches:
-        description: 'Build all ("main" and "dev/*" branches are excluded)'
-        required: false
-        default: true
-        type: boolean
       tag:
         description: 'Release tag name'
         required: true
         type: string
+      bump_version:
+        description: 'Update and commit all server versions from the release tag'
+        default: true
+        type: boolean
+      mozart:
+        description: 'Mozart.Encore — v3.10 (O2Jam Original)'
+        default: true
+        type: boolean
+      amadeus:
+        description: 'Amadeus.Encore — v3.82 (O2Jam NX)'
+        default: true
+        type: boolean
+      crosstime:
+        description: 'CrossTime.Encore — v2.33 (O2Jam X2)'
+        default: true
+        type: boolean
+      identity:
+        description: 'Identity.Encore — v5.89 (O2JamO2 Beta)'
+        default: true
+        type: boolean
+      identityp2:
+        description: 'IdentityP2.Encore — v5.89 (O2JamO2 Final)'
+        default: true
+        type: boolean
+      memoryer:
+        description: 'Memoryer.Encore — v8.02 (O2Jam Classic)'
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -22,29 +45,122 @@ jobs:
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
-        if: ${{ inputs.all_branches }}
-        with:
-          fetch-depth: 0
-
       - id: set
-        name: Detect build mode
+        name: Build server matrix
         run: |
-          if [ "${{ inputs.all_branches }}" == "true" ]; then
-            BRANCHES=$(git branch -r --format='%(refname:short)' \
-              | sed 's|^origin/||' \
-              | grep -v -E '^(HEAD|main|dev/)' \
-              | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          else
-            BRANCHES='["${{ github.ref_name }}"]'
+          SELECTED=()
+          [ "${{ inputs.mozart }}"     = "true" ] && SELECTED+=("Mozart")
+          [ "${{ inputs.amadeus }}"    = "true" ] && SELECTED+=("Amadeus")
+          [ "${{ inputs.crosstime }}"  = "true" ] && SELECTED+=("CrossTime")
+          [ "${{ inputs.identity }}"   = "true" ] && SELECTED+=("Identity")
+          [ "${{ inputs.identityp2 }}" = "true" ] && SELECTED+=("IdentityP2")
+          [ "${{ inputs.memoryer }}"   = "true" ] && SELECTED+=("Memoryer")
+
+          if [ ${#SELECTED[@]} -eq 0 ]; then
+            echo "::error::No server build selected"
+            exit 1
           fi
+
+          echo "Selected: ${SELECTED[*]}"
+          SERVERS=$(printf '"%s",' "${SELECTED[@]}")
+          SERVERS="[${SERVERS%,}]"
+
           # Each rid runs on its matching host OS so the published binary can be
-          # executed later (to resolve the per-branch Version via `<exe> version`).
+          # executed later (to resolve the per-server Version via `<exe> version`).
           INCLUDE='[{"rid":"win-x86","os":"windows-latest"},{"rid":"linux-x64","os":"ubuntu-latest"}]'
-          echo "matrix={\"branch\":$BRANCHES,\"rid\":[\"win-x86\",\"linux-x64\"],\"include\":$INCLUDE}" >> "$GITHUB_OUTPUT"
+          echo "matrix={\"server\":$SERVERS,\"rid\":[\"win-x86\",\"linux-x64\"],\"include\":$INCLUDE}" >> "$GITHUB_OUTPUT"
+
+  bump_version:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.revision.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Bump server versions
+        shell: bash
+        env:
+          ENABLED: ${{ inputs.bump_version }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$ENABLED" != "true" ]]; then
+            echo "Version bump disabled"
+            exit 0
+          fi
+
+          VERSION="${TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+){0,2}$ ]]; then
+            echo "::warning::Tag '$TAG' is not a valid System.Version; skipping version bump"
+            exit 0
+          fi
+
+          IFS='.' read -ra COMPONENTS <<< "$VERSION"
+          NORMALIZED=()
+          for COMPONENT in "${COMPONENTS[@]}"; do
+            COMPONENT="${COMPONENT#"${COMPONENT%%[!0]*}"}"
+            COMPONENT="${COMPONENT:-0}"
+            if (( ${#COMPONENT} > 10 )) || \
+               { (( ${#COMPONENT} == 10 )) && [[ "$COMPONENT" > "2147483647" ]]; }; then
+              echo "::warning::Tag '$TAG' is not a valid System.Version; skipping version bump"
+              exit 0
+            fi
+            NORMALIZED+=("$COMPONENT")
+          done
+
+          printf -v VERSION '%s.' "${NORMALIZED[@]}"
+          VERSION="${VERSION%.}"
+          printf -v ARGUMENTS '%s, ' "${NORMALIZED[@]}"
+          ARGUMENTS="${ARGUMENTS%, }"
+
+          if [[ "$GITHUB_REF_TYPE" != "branch" ]]; then
+            echo "::error::Version bumps must be dispatched from a branch"
+            exit 1
+          fi
+
+          PATHS=(
+            'Source/Mozart/Mozart/Program.cs'
+            'Source/Amadeus/Amadeus/Program.cs'
+            'Source/CrossTime/CrossTime/Program.cs'
+            'Source/Identity/Identity/Program.cs'
+            'Source/IdentityP2/IdentityP2/Program.cs'
+            'Source/Memoryer/Memoryer/Program.cs'
+          )
+
+          PATTERN='^[[:space:]]*public static Version Version[[:space:]]*=>[[:space:]]*new\([^)]*\);[[:space:]]*$'
+          for FILE in "${PATHS[@]}"; do
+            MATCHES=$(grep -Ec "$PATTERN" "$FILE" || true)
+            if [[ "$MATCHES" -ne 1 ]]; then
+              echo "::error::Expected one Program.Version declaration in '$FILE'"
+              exit 1
+            fi
+
+            sed -E -i "s|^([[:space:]]*public static Version Version[[:space:]]*=>[[:space:]]*new\\()[^)]*(\\);[[:space:]]*)$|\\1$ARGUMENTS\\2|" "$FILE"
+          done
+
+          git diff --check -- "${PATHS[@]}"
+          git add -- "${PATHS[@]}"
+
+          if git diff --cached --quiet; then
+            echo "All server versions are already $VERSION"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Bump version: $VERSION"
+          git push
+
+      - name: Resolve build revision
+        id: revision
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
-    needs: prepare
+    needs: [prepare, bump_version]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
@@ -52,19 +168,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ matrix.branch }}
+          ref: ${{ needs.bump_version.outputs.sha }}
 
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
-      - name: Detect project
+      - name: Resolve project
         id: project
         shell: bash
         run: |
-          PROJECT=$(grep -rl '<OutputType>Exe</OutputType>' Source/*/*.csproj | head -1)
-          if [ -z "$PROJECT" ]; then
-            echo "::error::No executable project found"
+          SERVER="${{ matrix.server }}"
+          PROJECT="Source/$SERVER/$SERVER/$SERVER.csproj"
+          if [ ! -f "$PROJECT" ]; then
+            echo "::error::Project $PROJECT not found"
             exit 1
           fi
           ASSEMBLY=$(sed -n 's|.*<AssemblyName>\([^<]*\)</AssemblyName>.*|\1|p' "$PROJECT" | head -1)
@@ -107,7 +224,7 @@ jobs:
           fi
 
           # Invoke VersionCommandTask (registered as subcommand "version") to
-          # obtain the per-branch Program.Version — not the release input tag.
+          # obtain the per-server Program.Version — not the release input tag.
           OUTPUT=$("$EXE" version)
           echo "$OUTPUT"
 
@@ -173,7 +290,7 @@ jobs:
           path: ${{ steps.project.outputs.assembly }}-${{ matrix.rid }}-${{ steps.version.outputs.value }}.zip
 
   release:
-    needs: build
+    needs: [build, bump_version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v7
@@ -200,5 +317,6 @@ jobs:
           gh release create "$TAG" \
             --draft \
             --title "Draft Release $TAG" \
+            --target "${{ needs.bump_version.outputs.sha }}" \
             --generate-notes \
             artifacts/*.zip

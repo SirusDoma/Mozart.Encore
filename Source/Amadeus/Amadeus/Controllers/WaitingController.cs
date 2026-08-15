@@ -1,0 +1,303 @@
+using Amadeus.Controllers.Filters;
+using Amadeus.Messages.Events;
+using Amadeus.Messages.Requests;
+using Amadeus.Messages.Responses;
+using Encore.Data.Repositories;
+using Encore.Events;
+using Encore.Metadata;
+using Encore.Server;
+using Encore.Server.Sessions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Mozart.Data.Entities;
+using Mozart.Entities;
+using Mozart.Metadata;
+using Mozart.Options;
+using Mozart.Services;
+
+namespace Amadeus.Controllers;
+
+[RoomAuthorize]
+public class WaitingController(
+    Session session,
+    IUserRepository repository,
+    IEventPublisher<ScoreTracker> publisher,
+    IOptions<GameOptions> options,
+    ILogger<WaitingController> logger
+) : CommandController<Session>(session)
+{
+    private IRoom Room => Session.Room!;
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomMusic(SetRoomMusicRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] music settings: [{Difficulty} / {Speed} / o2ma{MusicId}]",
+            Room.Id, request.Difficulty, request.Speed, request.MusicId
+        );
+
+        Room.MusicId = request.MusicId;
+        Room.Difficulty = request.Difficulty;
+        Room.Speed = request.Speed;
+        Room.SaveMetadataChanges();
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomAlbum(SetRoomAlbumRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomMusic,
+            "Update room [{RoomId:000}] album settings: [{Speed} / {AlbumId}]",
+            Room.Id, request.Speed, request.AlbumId
+        );
+
+        Room.MusicId = request.AlbumId;
+        Room.Speed = request.Speed;
+        Room.SaveMetadataChanges();
+    }
+
+    [CommandHandler]
+    public void UpdateMusicState(UpdateMusicStateRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.UpdateMusicState,
+            "Update room [{RoomId:000}] [{Member:00}] music state",
+            Room.Id, request.MemberId
+        );
+
+        Room.UpdateMusicState(Session, request.MemberId);
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomTitle(SetRoomTitleRequest request)
+    {
+        logger.LogInformation((int)RequestCommand.SetRoomTitle,
+            "Update room [{RoomId:000}] title: [{Title}]", Room.Id, request.Title);
+
+        Room.Title = request.Title;
+        Room.SaveMetadataChanges();
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomArena(SetRoomArenaRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomArena,
+            "Update room [{RoomId:000}] arena: [{Arena}] ({Seed})",
+            Room.Id, ArenaId.Id(request.Arena), ArenaId.Seed(request.Arena)
+        );
+
+        Room.Arena = request.Arena;
+        Room.SaveMetadataChanges();
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void SetRoomSkill(SetRoomSkillRequest request)
+    {
+        logger.LogInformation(
+            (int)RequestCommand.SetRoomSkill,
+            "Update room [{RoomId:000}] skill settings: {Status}",
+            Room.Id, request.Skills.Count == 0 || request.Skills is [<= 0] ? "inactive" : "active"
+        );
+
+        Room.Skills = request.Skills.Where(s => s > 0).ToList();
+        Room.SkillsSeed = Room.Skills.Count > 0
+            ? Random.Shared.Next(0, int.MaxValue) // TODO: Crack how seed actually used in client
+            : 0;
+
+        Room.SaveMetadataChanges();
+    }
+
+    [CommandHandler]
+    public void SetRoomPlayerTeam(SetTeamRequest request)
+    {
+        logger.LogInformation((int)RequestCommand.SetRoomTeam,
+            "Update room [{RoomId:000}] [{User}] team: [{Team}]", Room.Id, Session.Actor.Nickname, request.Team);
+
+        Room.UpdateTeam(Session, request.Team);
+    }
+
+    [CommandHandler]
+    public void SetPlayerInstrument(SetInstrumentRequest request)
+    {
+        // Do not reply to this command:
+        // The game was supposed to send "InstrumentId" but instead, it always sends us 0
+        // return new PlayerInstrumentChangedEventData()
+        // {
+        //     MemberId     = 0,
+        //     InstrumentId = request.InstrumentId
+        // };
+    }
+
+    [RoomMasterAuthorize]
+    [CommandHandler]
+    public void UpdateSlot(UpdateSlotRequest request)
+    {
+        logger.LogInformation((int)RequestCommand.UpdateSlot,
+            "Update room [{RoomId:000}] slot: [{MemberId}]", Room.Id, request.MemberId);
+
+        Room.UpdateSlot(Session, request.MemberId);
+    }
+
+    [CommandHandler(RequestCommand.StartGame)]
+    [RoomMasterAuthorize]
+    public async Task StartGame(CancellationToken cancellationToken)
+    {
+        logger.LogInformation((int)RequestCommand.StartGame,
+            "Start game: [{RoomId:000}]", Room.Id);
+
+        if (Room.Metadata.Mode == GameMode.Versus && Room.UserCount == 1 && !options.Value.AllowSoloInVersus)
+        {
+            await Session.WriteMessage(new StartGameEventData
+            {
+                Result = StartGameEventData.StartResult.InsufficientPlayers
+            }, cancellationToken);
+            return;
+        }
+
+        var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
+        if (Room.UserCount > 1)
+        {
+            var counts = slots.Select(s => s.Team)
+                .GroupBy(t => t)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            if (counts.Count == 1 || counts.Values.Max() - counts.Values.Min() != 0)
+            {
+                await Session.WriteMessage(new StartGameEventData
+                {
+                    Result = StartGameEventData.StartResult.TeamUnbalanced
+                }, cancellationToken);
+                return;
+            }
+
+            if (slots.Any(m => !m.IsReady))
+            {
+                await Session.WriteMessage(new StartGameEventData
+                {
+                    Result = StartGameEventData.StartResult.NotReady
+                }, cancellationToken);
+                return;
+            }
+        }
+
+        var user = (await repository.Find(Session.Actor.UserId, cancellationToken))!;
+        bool pendingChanges = false;
+        {
+            var skills = new List<int>();
+            skills.AddRange(Room.Skills.Where(s => s != 0));
+
+            if (skills.Count > 0)
+            {
+                for (int i = 0; i < user.Inventory.Capacity; i++)
+                {
+                    var item = user.Inventory[i];
+                    if (skills.Any(s => item.Id == s))
+                    {
+                        int rc = skills.RemoveAll(s => s == item.Id);
+                        if (item.Count > 0)
+                        {
+                            user.Inventory[i] = new Inventory.BagItem
+                            {
+                                Id = item.Id,
+                                Count = item.Count - 1
+                            };
+                        }
+                        else
+                        {
+                            if (item.Count == 0)
+                                skills.AddRange(Enumerable.Repeat((int)item.Id, rc)); // Something strange happened
+
+                            user.Inventory[i] = Inventory.BagItem.Empty;
+                        }
+                    }
+                }
+
+                if (skills.Count > 0)
+                {
+                    // Host doesn't have insufficient attributive items in their inventory. Desync or forged?
+                    Room.SkillsSeed = 0;
+                }
+                else
+                {
+                    await repository.Update(user, cancellationToken);
+                    pendingChanges = true;
+                }
+            }
+        }
+
+        bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
+        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        if (!freeMusic && Room.Metadata.Mode == GameMode.Jam)
+        {
+            if (Session.Channel!.GetAlbumList().TryGetValue(Room.MusicId, out var album))
+            {
+                var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+                foreach (var member in members)
+                {
+                    var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;
+                    if (memberUser.Gem < album.Price)
+                    {
+                        await Session.WriteMessage(new StartGameEventData
+                        {
+                            Result = StartGameEventData.StartResult.GenericError,
+                        }, cancellationToken);
+                        return;
+                    }
+
+                    memberUser.Gem -= album.Price;
+                    await repository.Update(memberUser, cancellationToken);
+                    memberUsers.Add((member, memberUser));
+                }
+                pendingChanges = true;
+            }
+        }
+
+        if (pendingChanges)
+        {
+            await repository.Commit(cancellationToken);
+
+            foreach (var (member, memberUser) in memberUsers)
+                member.Actor.Sync(memberUser);
+
+            Session.Actor.Sync(user);
+        }
+
+        Room.StartGame();
+
+        publisher.Monitor((ScoreTracker)Room.ScoreTracker);
+    }
+
+    [CommandHandler(RequestCommand.Ready)]
+    public void Ready()
+    {
+        logger.LogInformation((int)RequestCommand.Ready,
+            "Update room [{RoomId:000}] ready state", Room.Id);
+
+        Room.UpdateReadyState(Session);
+    }
+
+    [CommandHandler(RequestCommand.ExitWaiting)]
+    public ExitWaitingResponse ExitRoom()
+    {
+        logger.LogInformation(
+            (int)RequestCommand.ExitWaiting,
+            "Exit room: [{RoomId:000}]",
+            Room.Id
+        );
+
+        var room = Room;
+        Session.Exit(room);
+
+        return new ExitWaitingResponse
+        {
+            Failed = false
+        };
+    }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a4f9ab1c-5c75-4fd9-ae57-16e83b8c12e1</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore.CLI</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLinePath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLineTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLineTaskProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DatabaseInitCommandTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RegisterUserCommandTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DepositUserCommandTask.cs" />
+  </ItemGroup>
+</Project>

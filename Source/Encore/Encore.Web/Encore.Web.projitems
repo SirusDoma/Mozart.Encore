@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b78390b0-0c8b-469d-bbb4-9d7c4c014a73</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore.Web</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)WebServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Endpoints\AuthenticateEndpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Endpoints\PingEndpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Endpoints\RegisterEndpoint.cs" />
+  </ItemGroup>
+</Project>

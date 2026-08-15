@@ -1,0 +1,51 @@
+using Encore.Entities;
+using Encore.Metadata;
+using Encore.Server.Sessions;
+using Mozart.Metadata;
+using Mozart.Metadata.Room;
+using Mozart.Services;
+
+namespace Mozart.Entities;
+
+public interface IRoom : IBroadcastable
+{
+    int Id { get; }
+    IChannel Channel { get; }
+    RoomState State { get; }
+    RoomMetadata Metadata { get; }
+    int Capacity { get; }
+    int UserCount { get; }
+    int PlayingUserCount { get; }
+    string Title { get; set; }
+    string Password { get; set; }
+    int MusicId { get; set; }
+    KeyMode KeyMode { get; set; }
+    GameMode GameMode { get; set; }
+    Difficulty Difficulty { get; set; }
+    GameSpeed Speed { get; set; }
+    int Arena { get; set; }
+    int MinLevelLimit { get; set; }
+    int MaxLevelLimit { get; set; }
+    IList<int> Skills { get; set; }
+    int SkillsSeed { get; set; }
+    bool IsSelectingMusic { get; set; }
+    bool IsRelaySessionCreated { get; set; }
+    Session Master { get; }
+    IReadOnlyList<Room.ISlot> Slots { get; }
+    IScoreTracker ScoreTracker { get; }
+
+    void Register(Session session);
+    void Remove(Session session);
+    void SaveMetadataChanges();
+
+    void UpdateReadyState(Session session);
+    void UpdateTeam(Session session, RoomTeam team);
+    void UpdateMusicState(Session session, MusicState state);
+    void UpdateSlot(Session session, int slotId);
+    void UpdateSlotPositions(bool newChampion);
+
+    void StartGame();
+    void CompleteGame();
+
+    void Disconnect(Session session);
+}

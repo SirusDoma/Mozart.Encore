@@ -1,0 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+
+namespace Encore.Contexts;
+
+public interface IContext
+{
+    Task<int> Commit();
+}
+
+public class SharedDbContextFactory<TContext>(IDbContextFactory<TContext> factory): IDbContextFactory<TContext>
+    where TContext : DbContext
+{
+    private readonly TContext _context = factory.CreateDbContext();
+
+    public TContext CreateDbContext()
+    {
+        return _context;
+    }
+}

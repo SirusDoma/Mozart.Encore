@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3f1c2b4d-8a6e-4d29-9c17-5b0a1e6f2d83</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\AcquiredMusic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\AttributiveItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\AuthSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\CredentialRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\FreePass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\FreePassType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\GiftBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\GiftItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\GiftMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\GiftMusic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\UserMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\UserRanking.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\ArenaId.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Currency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Difficulty.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\GameModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\GameModifierType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\GameUpdateStatsType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Gender.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\GiftType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\Instrument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemDataParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemKind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemPart.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemPriceInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemRenderFrame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemRenderPart.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Items\ItemType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Music\AlbumHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Music\AlbumListParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Music\Genre.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Music\MusicHeaderParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\MusicState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\PlayingState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\MemberRole.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Planet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\Room\RoomSlotActionType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\RoomState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\RoomTeam.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Options\AuthOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Options\ChannelOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Options\DatabaseOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Options\HttpOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Options\MetadataOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Repositories\MemberRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Repositories\Repository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Repositories\SessionRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Repositories\UserRepository.cs" />
+  </ItemGroup>
+</Project>
