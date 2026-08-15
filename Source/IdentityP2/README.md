@@ -40,10 +40,11 @@ Download and extract the IdentityP2 server binary from [here](https://github.com
 
 ### First-Time Setup
 
-Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+Extract the archive, import the client metadata from the O2Jam directory, migrate the database and register a user using credentials of your choice:
 
 ```powershell
 .\IdentityP2.Encore.exe metadata:import "C:\Program Files (x86)\O2Jam\O2JamO2\"
+.\IdentityP2.Encore.exe db:migrate
 .\IdentityP2.Encore.exe user:register <username> <password>
 ```
 

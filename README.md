@@ -50,10 +50,11 @@ Download and extract the appropriate server binary from [here](https://github.co
 
 ### First-Time Setup
 
-Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+Extract the archive, import the client metadata from the O2Jam directory, migrate the database and register a user using credentials of your choice:
 
 ```powershell
 .\<server>.exe metadata:import "<client-directory>"
+.\<server>.exe db:migrate
 .\<server>.exe user:register <username> <password>
 ```
 

@@ -39,10 +39,11 @@ Download and extract the Mozart server binary from [here](https://github.com/Sir
 
 ### First-Time Setup
 
-Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+Extract the archive, import the client metadata from the O2Jam directory, migrate the database and register a user using credentials of your choice:
 
 ```powershell
 .\Mozart.Encore.exe metadata:import "C:\Program Files (x86)\e-Games\O2Jam\"
+.\Mozart.Encore.exe db:migrate
 .\Mozart.Encore.exe user:register <username> <password>
 ```
 

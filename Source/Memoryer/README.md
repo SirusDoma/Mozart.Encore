@@ -48,10 +48,11 @@ Download and extract the Memoryer server binary from [here](https://github.com/S
 
 ### First-Time Setup
 
-Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+Extract the archive, import the client metadata from the O2Jam directory, migrate the database and register a user using credentials of your choice:
 
 ```powershell
 .\Memoryer.Encore.exe metadata:import "C:\Program Files (x86)\NOWCOM\O2Jam\"
+.\Memoryer.Encore.exe db:migrate
 .\Memoryer.Encore.exe user:register <username> <password>
 ```
 

@@ -75,10 +75,11 @@ Download and extract the CrossTime server binary from [here](https://github.com/
 
 ### First-Time Setup
 
-Extract the archive, import the client metadata from O2Jam directory and register a user using credential of your choice:
+Extract the archive, import the client metadata from the O2Jam directory, migrate the database and register a user using credentials of your choice:
 
 ```powershell
 .\CrossTime.Encore.exe metadata:import "C:\Program Files (x86)\O2Jam\O2JamX2\"
+.\CrossTime.Encore.exe db:migrate
 .\CrossTime.Encore.exe user:register <username> <password>
 ```
 
