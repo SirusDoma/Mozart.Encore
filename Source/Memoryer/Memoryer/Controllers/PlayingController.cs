@@ -41,7 +41,7 @@ public class PlayingController(
     [CommandHandler(RequestCommand.ConfirmRelay, ResponseCommand.ConfirmRelay)]
     public void ConfirmRelay()
     {
-        logger.LogInformation((int)RequestCommand.ConfirmMusicLoaded,
+        logger.LogInformation((int)RequestCommand.ConfirmRelay,
             "User confirm relay connection: [{RoomId:000}]", Room.Id);
     }
 
@@ -49,7 +49,7 @@ public class PlayingController(
     public void ReportPunchHole()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetLiveState,
+            (int)RequestCommand.ReportUdpPunchHole,
             "Report UDP hole punching [{RoomId:000}]",
             Room.Id
         );

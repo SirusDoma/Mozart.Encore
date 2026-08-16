@@ -334,7 +334,7 @@ public class WaitingController(
     public P2PListResponse GetPeerList()
     {
         logger.LogInformation(
-            (int)RequestCommand.GetLiveState,
+            (int)RequestCommand.GetP2PList,
             "Get peer list [{RoomId:000}]",
             Room.Id
         );

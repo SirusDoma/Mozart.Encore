@@ -134,7 +134,7 @@ public class WaitingController(
     [CommandHandler(RequestCommand.ToggleTeamMode)]
     public void ToggleTeamMode()
     {
-        logger.LogInformation((int)RequestCommand.SetRoomTeam,
+        logger.LogInformation((int)RequestCommand.ToggleTeamMode,
             "Toggle team mode room [{RoomId:000}]", Room.Id);
 
         Room.TeamEnabled = !Room.TeamEnabled;

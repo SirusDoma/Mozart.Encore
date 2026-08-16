@@ -36,7 +36,7 @@ public class ItemShopController(
     public async Task<SyncPointResponse> ChargePoint(CancellationToken cancellationToken)
     {
         var actor = Session.Actor;
-        logger.LogInformation((int)RequestCommand.StartPayment,
+        logger.LogInformation((int)RequestCommand.SyncPoint,
             "Charge point");
 
         // The actual topup happen within the web page, we only need to sync the latest user info

@@ -24,7 +24,7 @@ public class RankingController(
     public async Task<MusicPlayRankingResponse> GetMusicPlayRanking(CancellationToken cancellationToken)
     {
         var actor = Session.GetAuthorizedToken<Actor>();
-        logger.LogInformation((int)RequestCommand.GetCharacterInfo, "Get music play ranking: [{User}]",
+        logger.LogInformation((int)RequestCommand.GetMusicPlayRanking, "Get music play ranking: [{User}]",
             actor.Nickname);
 
         var entries = await context.UserRankingsExtended

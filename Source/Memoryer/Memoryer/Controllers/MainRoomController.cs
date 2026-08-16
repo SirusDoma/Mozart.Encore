@@ -473,7 +473,7 @@ public class MainRoomController(
     public FreeMusicResponse GetFreeMusicStatus()
     {
         logger.LogInformation(
-            (int)RequestCommand.ChannelLogout,
+            (int)RequestCommand.GetFreeMusicStatus,
             "Free music: [{channelId:00}]",
             Channel.Id
         );
