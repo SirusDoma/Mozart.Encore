@@ -270,12 +270,13 @@ jobs:
             fi
           done
 
-          # Copy README.md
-          if [ ! -f "README.md" ]; then
-            echo "::error::README.md not found in repository root"
+          # Copy server README.md
+          README="Source/${{ matrix.server }}/README.md"
+          if [ ! -f "$README" ]; then
+            echo "::error::$README not found"
             exit 1
           fi
-          cp README.md staging/
+          cp "$README" staging/
 
           echo "Package contents:"
           ls -1 staging
