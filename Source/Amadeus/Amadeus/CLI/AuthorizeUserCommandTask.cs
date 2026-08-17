@@ -1,14 +1,16 @@
 using System.CommandLine;
 using System.Net;
 using System.Text;
+using Amadeus.Messages.Requests;
 using Encore.CLI;
 using Encore.Data.Entities;
+using Encore.Data.Repositories;
 using Encore.Services;
 
 namespace Amadeus.CLI;
 
 
-public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTask
+public class AuthorizeUserCommandTask(IAuthService authService, IUserRepository userRepository) : ICommandLineTask
 {
     public static string Name => "user:authorize";
     public static string Description => "Authorize the user for a game session";
@@ -52,9 +54,13 @@ public class AuthorizeUserCommandTask(IAuthService authService) : ICommandLineTa
                 Address  = IPAddress.Any
             }, CancellationToken.None);
 
+            var user = (await userRepository.FindByUsername(username, CancellationToken.None))!;
+            int split = Math.Min(AuthRequest.GamaniaCredential.TokenSplitLength, token.Length);
+
             Console.WriteLine();
             Console.WriteLine($"  Token: {token}");
-            Console.WriteLine($"  Launch Token: {Convert.ToBase64String(Encoding.BigEndianUnicode.GetBytes(token))}");
+            Console.WriteLine($"  Launch Token (e-Games): {Convert.ToBase64String(Encoding.BigEndianUnicode.GetBytes(token))}");
+            Console.WriteLine($"  Launch Arguments (GAMANIA): {token[..split]} {user.Id} {token[split..]}");
             return 0;
         }
         catch (ArgumentException ex)

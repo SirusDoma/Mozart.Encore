@@ -2,7 +2,6 @@ using Encore.Metadata;
 using Encore.Server.Sessions;
 using Mozart.Entities;
 using Mozart.Metadata;
-using Room = Encore.Entities.Room;
 
 namespace Mozart.Services;
 
@@ -267,7 +266,7 @@ public class ScoreTracker : IScoreTracker
 
         if (Completed)
         {
-            foreach (var member in Room.Slots.OfType<Room.MemberSlot>())
+            foreach (var member in Room.Slots.OfType<Encore.Entities.Room.MemberSlot>())
                 member.IsReady = member.IsMaster;
 
             ScoreCompleted?.Invoke(this, new ScoreTrackedEventArgs

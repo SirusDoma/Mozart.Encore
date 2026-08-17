@@ -6,6 +6,7 @@ using Encore.Server;
 using Encore.Server.Sessions;
 using Encore.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Mozart.Sessions;
 
 namespace Amadeus.Controllers;
@@ -25,7 +26,7 @@ public class AuthController(
         try
         {
             logger.LogInformation((int)RequestCommand.Authorize,
-                "Authorize session (ClientID: {ClientId})", request.ClientId);
+                "Authorize session (Client: v{Version}, ClientID: {ClientId})", request.ClientVersion, request.Credential is AuthRequest.GamaniaCredential g ? g.Unknown : request.ClientId);
 
             const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
             var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(request.Token, comparison));
@@ -78,7 +79,7 @@ public class AuthController(
         return new AuthResponse
         {
             Result = AuthResult.Success,
-            Subscription = new AuthResponse.SubscriptionInfo
+            Subscription = request.ClientId.IsNullOrEmpty() ? null : new AuthResponse.SubscriptionInfo
             {
                 Billing                   = BillingCode.HB,
                 CurrentTimestamp          = DateTime.Now,

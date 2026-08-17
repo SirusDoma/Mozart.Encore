@@ -12,7 +12,6 @@ using Mozart.Messages.Responses;
 using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
-using Room = Encore.Entities.Room;
 
 namespace Mozart.Controllers;
 
@@ -116,7 +115,7 @@ public class WaitingController(
 
         if (Room.UserCount > 1)
         {
-            var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
+            var slots = Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().ToList();
             var counts = slots.Select(s => s.Team)
                 .GroupBy(t => t)
                 .ToDictionary(g => g.Key, g => g.Count());

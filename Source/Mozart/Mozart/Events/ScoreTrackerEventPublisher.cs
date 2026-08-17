@@ -7,7 +7,6 @@ using Mozart.Messages.Events;
 using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
-using Room = Encore.Entities.Room;
 
 namespace Mozart.Events;
 
@@ -180,7 +179,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             var channel = e.Room.Channel;
             var options = gameOptions.Value;
 
-            for (int id = 0; id < Room.MaxCapacity; id++)
+            for (int id = 0; id < Encore.Entities.Room.MaxCapacity; id++)
             {
                 var state = scores.SingleOrDefault(m => m.MemberId == id);
                 if (state == null)

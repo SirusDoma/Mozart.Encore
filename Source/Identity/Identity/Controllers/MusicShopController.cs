@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Entities;
 using Mozart.Options;
-using Room = Encore.Entities.Room;
 
 namespace Identity.Controllers;
 
@@ -31,7 +30,7 @@ public class MusicShopController(
         if (Session.Room != null)
         {
             var slots = Session.Room.Slots.ToList();
-            int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+            int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
 
             Session.Room.UpdateMusicState(Session, memberId);
         }

@@ -317,8 +317,7 @@ public class Program
                     .AddScoped<ISessionRepository, SessionRepository>();
 
                 // Application contexts
-                services.AddSingleton<Encore.Services.IAuthSessionTokenGenerator,
-                    Encore.Services.CompactGuidAuthSessionTokenGenerator>();
+                services.AddSingleton<IAuthSessionTokenGenerator, CompactGuidAuthSessionTokenGenerator>();
                 services.AddScoped<IAuthContext, AuthContext>();
 
                 // Event subscribers

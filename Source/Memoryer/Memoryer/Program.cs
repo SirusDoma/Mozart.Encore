@@ -369,8 +369,7 @@ public class Program
                     .AddScoped<ISessionRepository, SessionRepository>();
 
                 // Application contexts
-                services.AddSingleton<Encore.Services.IAuthSessionTokenGenerator,
-                    Encore.Services.NumericAuthSessionTokenGenerator>();
+                services.AddSingleton<IAuthSessionTokenGenerator, NumericAuthSessionTokenGenerator>();
                 services.AddScoped<IAuthContext, AuthContext>();
 
                 // Event subscribers

@@ -2,7 +2,6 @@ using Encore.Metadata;
 using Encore.Server.Sessions;
 using Mozart.Entities;
 using Mozart.Metadata;
-using Room = Encore.Entities.Room;
 
 namespace Mozart.Services;
 

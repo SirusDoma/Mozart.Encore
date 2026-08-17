@@ -3,7 +3,7 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.82\* (O2Jam NX)**  
+Supported client version: **v3.82\* (O2Jam NX)** and **v3.00 (O2Jam GAMANIA)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
 ### Other Builds
@@ -223,10 +223,10 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
 >[!CAUTION]
-> A breaking change was introduced to the database schema and its migrations starting with Mozart v1.10.0.
-> Manual adjustments to existing database schemas may be required when upgrading from Mozart v1.8.0.
+> Amadeus now supports handling dual-client: v3.83 e-Games and v3.00 GAMANIA.
+> Do NOT use the same account across both clients. An account used with one client should not be used with the other.
 > 
-> Foreign database schema remain supported with proper `Auth:Mode` configuration.
+> Otherwise the client may crash due to account data loaded with incompatible MusicList or ItemData table.
 
 ## Add Migration
 
@@ -346,6 +346,28 @@ OTwo.exe myEncodedBase64Token my-ftp-server:1234 O2Jam 3 \
 > 192.168.10.1 15010
 > ```
 
+In addition to O2Jam NX from e-Games, Amadeus also supports running O2Jam NX from GAMANIA distribution. 
+The client can be launched using the following syntax:
+
+```shell
+OTwo.exe <token[0..18)> <user_id> <token[18..)> <unused> <rank> <web_server> <ftp_server> O2Jam <gateway_count> \
+  <gateway_address_1> <gateway_port_1> \
+  … \
+  <gateway_address_n> <gateway_port_n>
+```
+
+> [!NOTE]
+> The first and third arguments is actually unrelated:
+> - The first argument is username
+> - The third argument is unknown
+> 
+> However, each of these argument could only hold about 23 characters.  
+> Since Amadeus token is 36 characters, you have to split it into these 2 fields.
+
+> [!WARNING]
+> O2Jam v3.00 GAMANIA only support 3 gateways.  
+> Specifying more than 3 gateways in the launch arguments may cause the client to crash silently on launch.
+
 ### Channel
 
 Upon start-up, the `Channel` instances will register themselves to the configured `Gateway` instance via TCP network.
@@ -369,7 +391,7 @@ The server application includes utilities for local play and server maintenance.
 - `user:stash <username> <item id>`: Add an item that match with the specified item id to a user's bag using its configured ItemData quantity.
 - `user:deposit <username> <gem> [<point>]`: Add gems and points to a user. Point defaults to `0`.
 - `metadata:import [<dir>]`: Import supported metadata from an O2Jam installation. Directory defaults to the current working directory.
-- `game:start <username> <password> [<dir>]`: Authorize a user and launch the game. Directory defaults to the current working directory.
+- `game:start <username> <password> [<dir>] [--client-version <3.82|3.00>]`: Authorize a user and launch the game. Directory defaults to the current working directory; the client version is detected from `VersionInfo.dat` when omitted.
 - `ranking:upsert`: Generate or update user rankings. This command is intended for periodic execution by a scheduler.
 
 Run the CLI with `--help` for more details.
