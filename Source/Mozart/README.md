@@ -65,7 +65,7 @@ Open a second terminal in the same server directory, then use the registered cre
 
 | Shared project                                      | Description                                                    |
 |-----------------------------------------------------|----------------------------------------------------------------|
-| [Encore.Framework](../Encore/Encore.Framework/)     | TCP/UDP networking, messaging, and hosting framework           |
+| [Encore.Framework](../Encore/Encore.Framework/)     | Custom TCP/UDP networking, messaging, and hosting framework    |
 | [Encore.Server](../Encore/Encore.Server/)           | Shared sessions, services, channels, and room lifecycle logic  |
 | [Encore.Data](../Encore/Encore.Data/)               | Shared entities, metadata, options, and repositories           |
 | [Encore.CLI](../Encore/Encore.CLI/)                 | Shared CLI infrastructure and common commands                  |

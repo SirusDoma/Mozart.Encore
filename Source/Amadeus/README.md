@@ -70,13 +70,13 @@ Open a second terminal in the same server directory, then use the registered cre
 
 ## Project Structure
 
-| Shared project                                      | Description                                                    |
-|-----------------------------------------------------|----------------------------------------------------------------|
-| [Encore.Framework](../Encore/Encore.Framework/)     | TCP/UDP networking, messaging, and hosting framework           |
-| [Encore.Server](../Encore/Encore.Server/)           | Shared sessions, services, channels, and room lifecycle logic  |
-| [Encore.Data](../Encore/Encore.Data/)               | Shared entities, metadata, options, and repositories           |
-| [Encore.CLI](../Encore/Encore.CLI/)                 | Shared CLI infrastructure and common commands                  |
-| [Encore.Web](../Encore/Encore.Web/)                 | Shared HTTP server and authentication/registration endpoints   |
+| Shared project                                      | Description                                                   |
+|-----------------------------------------------------|---------------------------------------------------------------|
+| [Encore.Framework](../Encore/Encore.Framework/)     | Custom TCP/UDP networking, messaging, and hosting framework   |
+| [Encore.Server](../Encore/Encore.Server/)           | Shared sessions, services, channels, and room lifecycle logic |
+| [Encore.Data](../Encore/Encore.Data/)               | Shared entities, metadata, options, and repositories          |
+| [Encore.CLI](../Encore/Encore.CLI/)                 | Shared CLI infrastructure and common commands                 |
+| [Encore.Web](../Encore/Encore.Web/)                 | Shared HTTP server and authentication/registration endpoints  |
 
 | Project                                    | Description                                            |
 |--------------------------------------------|--------------------------------------------------------|

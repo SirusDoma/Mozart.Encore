@@ -74,13 +74,13 @@ Open a second terminal in the same server directory, then use the same username,
 
 ## Project Structure
 
-| Shared project                                                  | Description                                                    |
-|-----------------------------------------------------------------|----------------------------------------------------------------|
-| [Encore.Framework](Source/Encore/Encore.Framework/)             | TCP/UDP networking, messaging, and hosting framework           |
-| [Encore.Server](Source/Encore/Encore.Server/)                   | Shared sessions, services, channels, and room lifecycle logic  |
-| [Encore.Data](Source/Encore/Encore.Data/)                       | Shared entities, metadata, options, and repositories           |
-| [Encore.CLI](Source/Encore/Encore.CLI/)                         | Shared CLI infrastructure and common commands                  |
-| [Encore.Web](Source/Encore/Encore.Web/)                         | Shared HTTP server and authentication/registration endpoints   |
+| Shared project                                                  | Description                                                   |
+|-----------------------------------------------------------------|---------------------------------------------------------------|
+| [Encore.Framework](Source/Encore/Encore.Framework/)             | Custom TCP/UDP networking, messaging, and hosting framework   |
+| [Encore.Server](Source/Encore/Encore.Server/)                   | Shared sessions, services, channels, and room lifecycle logic |
+| [Encore.Data](Source/Encore/Encore.Data/)                       | Shared entities, metadata, options, and repositories          |
+| [Encore.CLI](Source/Encore/Encore.CLI/)                         | Shared CLI infrastructure and common commands                 |
+| [Encore.Web](Source/Encore/Encore.Web/)                         | Shared HTTP server and authentication/registration endpoints  |
 
 | Project                 | Description                                            |
 |-------------------------|--------------------------------------------------------|
