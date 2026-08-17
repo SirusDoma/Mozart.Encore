@@ -295,7 +295,7 @@ public class MainRoomController(
                                     IsRoomMaster    = m.IsMaster,
                                     Team            = m.Team,
                                     Ready           = m.IsReady,
-                                    IsAdministrator = m.Actor.IsAdministrator,
+                                    MusicState      = m.MusicState,
                                     Equipments      = m.Actor.Equipments,
                                     MusicIds        = m.Actor.InstalledMusicIds.ToList()
                                 }

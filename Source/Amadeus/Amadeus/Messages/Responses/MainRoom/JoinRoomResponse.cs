@@ -48,7 +48,7 @@ public class JoinRoomResponse : IMessage
         public bool Ready { get; init; }
 
         [MessageField(order: 6)]
-        public bool IsAdministrator { get; init; }
+        public MusicState MusicState { get; init; } = MusicState.Ready;
 
         [MessageField<CharacterEquipmentInfoCodec>(order: 7)]
         public Dictionary<ItemType, int> Equipments { get; init; } = [];

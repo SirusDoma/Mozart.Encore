@@ -41,7 +41,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Gender          = e.Member.Actor.Gender,
                 Team            = e.Member.Team,
                 Ready           = e.Member.IsReady,
-                IsAdministrator = e.Member.Actor.IsAdministrator,
+                MusicState      = e.Member.MusicState,
                 Equipments      = e.Member.Actor.Equipments,
                 MusicIds        = e.Member.Actor.InstalledMusicIds.ToList()
             }, CancellationToken.None);
