@@ -3,7 +3,6 @@ using Encore.Data.Repositories;
 using Encore.Events;
 using Encore.Metadata;
 using Microsoft.Extensions.Logging;
-using Mozart.Entities;
 using Mozart.Metadata;
 using Mozart.Services;
 
@@ -95,8 +94,8 @@ public class ScoreTrackerEventPublisher(
             {
                 MemberId = byte.MaxValue,
                 Score    = -1
-            }, Room.MaxCapacity))
-            .Take(Room.MaxCapacity)
+            }, Encore.Entities.Room.MaxCapacity))
+            .Take(Encore.Entities.Room.MaxCapacity)
             .ToList();
     }
 
@@ -199,7 +198,7 @@ public class ScoreTrackerEventPublisher(
             var room    = e.Room;
             var channel = e.Room.Channel;
 
-            for (int id = 0; id < Room.MaxCapacity; id++)
+            for (int id = 0; id < Encore.Entities.Room.MaxCapacity; id++)
             {
                 var state = scores.SingleOrDefault(m => m.MemberId == id);
                 if (state == null)

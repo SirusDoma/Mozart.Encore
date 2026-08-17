@@ -69,7 +69,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 MemberId              = (byte)e.MemberId,
                 NewRoomMasterMemberId = (byte)e.RoomMasterMemberId,
                 Premium               = room.Premium,
-                HasSuperRoomManager   = room.Slots.OfType<Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
+                HasSuperRoomManager   = room.Slots.OfType<Encore.Entities.Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
                 LiveMode              = room.GameMode != GameMode.Live ? null : new UserLeaveWaitingEventData.LiveState
                 {
                     Invalid   = false,
@@ -78,7 +78,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                     {
                         return slot switch
                         {
-                            Room.MemberSlot member => new UserLeaveWaitingEventData.MemberLiveState
+                            Encore.Entities.Room.MemberSlot member => new UserLeaveWaitingEventData.MemberLiveState
                             {
                                 State      = UserLeaveWaitingEventData.RoomSlotState.Occupied,
                                 MemberInfo = new UserLeaveWaitingEventData.MemberInfo
@@ -101,7 +101,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                                     WinStreak       = member.WinStreak,
                                 }
                             },
-                            Room.LockedSlot => new UserLeaveWaitingEventData.MemberLiveState
+                            Encore.Entities.Room.LockedSlot => new UserLeaveWaitingEventData.MemberLiveState
                             {
                                 State      = UserLeaveWaitingEventData.RoomSlotState.Locked,
                                 MemberInfo = null
@@ -219,7 +219,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 MusicId       = (ushort)e.MusicId,
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParamsChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomParamsChangedEventData
             {
                 Number        = room.Id,
                 Title         = e.Title,
@@ -252,7 +252,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 Speed      = room.Speed,
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
                 Parameter = new RoomParameterChangedEventData.MusicParameter
@@ -282,7 +282,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 Speed = e.Speed
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
                 Parameter = new RoomParameterChangedEventData.AlbumParameter
@@ -339,7 +339,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                         _ = relayService.CreateSession(new CreateRelaySessionRequest
                         {
                             Members = room.Slots
-                                .OfType<Room.MemberSlot>()
+                                .OfType<Encore.Entities.Room.MemberSlot>()
                                 .Select(m => m.Actor.RelaySessionInfo)
                                 .Where(info => info != null)
                                 .Select(info => new CreateRelaySessionRequest.RoomMember
@@ -366,7 +366,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                         _ = relayService.DeleteSession(new DeleteRelaySessionRequest
                         {
                             Members = room.Slots
-                                .OfType<Room.MemberSlot>()
+                                .OfType<Encore.Entities.Room.MemberSlot>()
                                 .Select(m => m.Actor.RelaySessionInfo)
                                 .Where(info => info != null)
                                 .Select(info => new DeleteRelaySessionRequest.RoomMember
@@ -385,7 +385,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 }
             }
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
             {
                 Number = room.Id,
                 State  = room.State
@@ -406,7 +406,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
         
             switch (e.ActionType)
             {
-                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Room.MemberSlot member:
+                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Encore.Entities.Room.MemberSlot member:
                     await member.Session.WriteMessage(new KickEventData(), CancellationToken.None);
                     break;
             }
@@ -417,7 +417,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 Type  = e.ActionType
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
             {
                 Number    = room.Id,
                 Capacity  = (byte)e.Capacity,
@@ -439,7 +439,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
             var room = sender as Room ?? throw new ArgumentException(null, nameof(sender));
 
             var slots    = room.Slots.ToList();
-            int superId  = slots.FindIndex(s => s is Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
+            int superId  = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
 
             await room.Broadcast(new WaitingSkillChangedEventData
             {
@@ -448,7 +448,7 @@ public class RoomEventPublisher(IRelayService relayService, ILogger<RoomEventPub
                 SuperRoomManagerMemberId = superId >= 0 ? (byte)superId : byte.MaxValue
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
             {
                 Number = room.Id,
                 Skills = e.Skills

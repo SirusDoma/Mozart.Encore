@@ -9,7 +9,6 @@ using Memoryer.Messages.Requests;
 using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mozart.Entities;
 using Mozart.Options;
 
 namespace Memoryer.Controllers;
@@ -34,8 +33,8 @@ public class MusicShopController(
             Session.Room.UpdateMusicState(Session, MusicState.Ready);
 
             var slots = Session.Room.Slots.ToList();
-            int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
-            var member = (Room.MemberSlot)slots[memberId];
+            int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
+            var member = (Encore.Entities.Room.MemberSlot)slots[memberId];
 
             await Session.Room.Broadcast(new MemberStateChangedEventData
             {

@@ -6,7 +6,6 @@ using Identity.Messages.Events;
 using Identity.Messages.Requests;
 using Identity.Messages.Responses;
 using Microsoft.Extensions.Logging;
-using Mozart.Entities;
 using Mozart.Sessions;
 
 namespace Identity.Controllers;
@@ -72,7 +71,7 @@ public class MessagingController(
                 Sender   = actor.Nickname,
                 Content  = request.Content,
                 MemberId = (byte)room.Slots.ToList().FindIndex(s =>
-                    s is Room.MemberSlot m && m.Session == Session)
+                    s is Encore.Entities.Room.MemberSlot m && m.Session == Session)
             };
 
             await room.Broadcast(message, cancellationToken);

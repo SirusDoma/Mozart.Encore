@@ -31,7 +31,7 @@ public interface IRoom : IBroadcastable
     bool IsSelectingMusic { get; set; }
     bool IsRelaySessionCreated { get; set; }
     Session Master { get; }
-    IReadOnlyList<Room.ISlot> Slots { get; }
+    IReadOnlyList<Encore.Entities.Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }
 
     void Register(Session session);

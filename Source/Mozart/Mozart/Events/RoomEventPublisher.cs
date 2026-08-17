@@ -232,7 +232,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         
             switch (e.ActionType)
             {
-                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Room.MemberSlot member:
+                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Encore.Entities.Room.MemberSlot member:
                     await member.Session.WriteMessage(new KickEventData(), CancellationToken.None);
                     break;
             }

@@ -9,7 +9,7 @@ public abstract class CommandExceptionHandler : ICommandExceptionHandler
 {
     Task ICommandExceptionHandler.HandleAsync(CommandExceptionHandlerContext context, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(context.ExceptionContext, nameof(context));
 
         if (!ShouldHandle(context.ExceptionContext))
@@ -32,7 +32,7 @@ public abstract class CommandExceptionHandler : ICommandExceptionHandler
 
     public virtual bool ShouldHandle(CommandExceptionContext context)
     {
-        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
         return true;
     }
 }

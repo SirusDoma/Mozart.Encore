@@ -88,7 +88,6 @@ public class ScoreTracker : IScoreTracker
     private bool _started = false;
 
     private readonly List<UserScore> _states = [];
-    private readonly Dictionary<int, List<UserScore>> _scores = [];
 
     public EventHandler<ScoreTrackEventArgs>? UserTracked;
     public EventHandler? AllUserSynced;
@@ -112,8 +111,8 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateLife(Session session, int sequence, int life, uint score, int lnScore = 0)
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000, nameof(life));
-        ArgumentOutOfRangeException.ThrowIfNegative(life, nameof(life));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000);
+        ArgumentOutOfRangeException.ThrowIfNegative(life);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -137,7 +136,7 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateJamCombo(Session session, int sequence, int jamCombo, uint score, int lnScore = 0)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo, nameof(jamCombo));
+        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -171,7 +170,7 @@ public class ScoreTracker : IScoreTracker
 
         for (int i = 0; i < Room.Slots.Count; i++)
         {
-            if (Room.Slots[i] is not Room.MemberSlot member)
+            if (Room.Slots[i] is not Encore.Entities.Room.MemberSlot member)
                 continue;
 
             if (session != member.Session)
@@ -227,14 +226,14 @@ public class ScoreTracker : IScoreTracker
 
         // The room members might already been re-arranged at this point (See ScoreTrackerEventPublisher.OnScoreCompleted)
         // Do NOT rely on state.MemberId directly
-        int memberId = Room.Slots.ToList().FindIndex(s => s is Room.MemberSlot m && m.Session == session);
+        int memberId = Room.Slots.ToList().FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == session);
         if (memberId < 0)
             return;
 
         if (memberId != state.MemberId)
             state.MemberId = memberId;
 
-        if (Room.Slots[state.MemberId] is Room.MemberSlot member)
+        if (Room.Slots[state.MemberId] is Encore.Entities.Room.MemberSlot member)
             member.PlayingState = PlayingState.None;
 
         UserUntracked?.Invoke(this, new ScoreTrackEventArgs
@@ -338,7 +337,7 @@ public class ScoreTracker : IScoreTracker
         });
 
         // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
-        // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+        // However, performing early cleanup increase robustness. e.g, less room stuck due to network issue
         // TODO: Invoke this in ScoreCompleted instead
         Room.CompleteGame();
     }

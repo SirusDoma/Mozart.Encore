@@ -3,16 +3,14 @@ using Encore.Events;
 using Encore.Metadata;
 using Memoryer.Messages.Events;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
-using Mozart.Entities;
 using Mozart.Metadata;
-using Mozart.Options;
 using Mozart.Services;
 
 namespace Memoryer.Events;
 
-public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<GameOptions> gameOptions,
+public class ScoreTrackerEventPublisher(
+    IUserRepository repository,
     ILogger<ScoreTrackerEventPublisher> logger) : IEventPublisher<ScoreTracker>
 {
     private readonly SemaphoreSlim _mutex = new(1, 1);
@@ -46,8 +44,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         return states
             .OrderByDescending(s => s.Score)
             .Select(s => (byte)s.MemberId)
-            .Concat(Enumerable.Repeat(byte.MaxValue, Room.MaxCapacity))
-            .Take(Room.MaxCapacity)
+            .Concat(Enumerable.Repeat(byte.MaxValue, Encore.Entities.Room.MaxCapacity))
+            .Take(Encore.Entities.Room.MaxCapacity)
             .ToList();
     }
 
@@ -66,7 +64,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
             }
             else
             {
-                foreach (var session in tracker.Room.Slots.OfType<Room.MemberSlot>().Select(s => s.Session))
+                foreach (var session in tracker.Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().Select(s => s.Session))
                 {
                     await session.WriteMessage(new RoomMembersLatencySyncedEventData
                     {
@@ -230,11 +228,10 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
             var room    = e.Room;
             var channel = e.Room.Channel;
-            var options = gameOptions.Value;
 
             bool championWon = false;
-            int winnerId = room.Slots.ToList().FindIndex(s => s is Room.MemberSlot { IsMaster: true });
-            for (int id = 0; id < Room.MaxCapacity; id++)
+            int winnerId = room.Slots.ToList().FindIndex(s => s is Encore.Entities.Room.MemberSlot { IsMaster: true });
+            for (int id = 0; id < Encore.Entities.Room.MaxCapacity; id++)
             {
                 var state = scores.SingleOrDefault(m => m.MemberId == id);
                 if (state == null)
@@ -322,7 +319,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
                 if (e.GameMode == GameMode.Live)
                 {
-                    if (room.Slots[state.MemberId] is Room.MemberSlot { Role: MemberRole.Champion })
+                    if (room.Slots[state.MemberId] is Encore.Entities.Room.MemberSlot { Role: MemberRole.Champion })
                     {
                         championWon = win;
                     }
@@ -367,7 +364,7 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
                 default:            await room.Broadcast(new ScoreCompletedEventData
                                     {
-                                        RoomMasterMemberId = (byte)room.Slots.ToList().FindIndex(s => s is Room.MemberSlot { IsMaster: true }),
+                                        RoomMasterMemberId = (byte)room.Slots.ToList().FindIndex(s => s is Encore.Entities.Room.MemberSlot { IsMaster: true }),
                                         Scores             = entries
                                     }, CancellationToken.None);
 

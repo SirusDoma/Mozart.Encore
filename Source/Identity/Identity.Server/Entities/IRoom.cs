@@ -25,7 +25,7 @@ public interface IRoom : IBroadcastable
     IList<int> Skills { get; set; }
     int SkillsSeed { get; set; }
     Session Master { get; }
-    IReadOnlyList<Room.ISlot> Slots { get; }
+    IReadOnlyList<Encore.Entities.Room.ISlot> Slots { get; }
     IScoreTracker ScoreTracker { get; }
 
     void Register(Session session);

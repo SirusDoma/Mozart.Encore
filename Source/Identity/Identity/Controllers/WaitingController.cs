@@ -161,7 +161,7 @@ public class WaitingController(
             return;
         }
 
-        var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
+        var slots = Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().ToList();
         if (Room.UserCount > 1)
         {
             var counts = slots.Select(s => s.Team)
@@ -233,10 +233,10 @@ public class WaitingController(
         }
 
         bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
-        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        var memberUsers = new List<(Encore.Entities.Room.MemberSlot Member, User User)>();
         if (!freeMusic)
         {
-            var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+            var members = Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().ToList();
 
             if (Room.Metadata.Mode == GameMode.Jam)
             {

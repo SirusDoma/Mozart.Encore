@@ -100,8 +100,8 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateLife(Session session, int life)
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000, nameof(life));
-        ArgumentOutOfRangeException.ThrowIfNegative(life, nameof(life));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000);
+        ArgumentOutOfRangeException.ThrowIfNegative(life);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -121,7 +121,7 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateJamCombo(Session session, int jamCombo)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo, nameof(jamCombo));
+        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -151,7 +151,7 @@ public class ScoreTracker : IScoreTracker
 
         for (int i = 0; i < Room.Slots.Count; i++)
         {
-            if (Room.Slots[i] is not Room.MemberSlot member)
+            if (Room.Slots[i] is not Encore.Entities.Room.MemberSlot member)
                 continue;
 
             if (session != member.Session)
@@ -185,11 +185,11 @@ public class ScoreTracker : IScoreTracker
                 Session = member.Session
             });
 
-            if (_states.Count == Room.Slots.OfType<Room.MemberSlot>().Count())
+            if (_states.Count == Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().Count())
             {
-                for (int j = 0; j < Entities.Room.MaxCapacity; j++)
+                for (int j = 0; j < Encore.Entities.Room.MaxCapacity; j++)
                 {
-                    if (Room.Slots[j] is Room.MemberSlot m)
+                    if (Room.Slots[j] is Encore.Entities.Room.MemberSlot m)
                     {
                         UserTracked?.Invoke(this, new ScoreTrackEventArgs
                         {
@@ -356,7 +356,7 @@ public class ScoreTracker : IScoreTracker
             }
 
             // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
-            // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+            // However, performing early cleanup increase robustness. e.g, less room stuck due to network issue
             if (finalized)
             {
                 foreach (var member in Room.Slots.OfType<Room.MemberSlot>())

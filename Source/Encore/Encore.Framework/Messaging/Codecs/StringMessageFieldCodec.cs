@@ -105,14 +105,14 @@ public class StringMessageFieldCodec : MessageFieldCodec
             if (string.IsNullOrEmpty(format))
                 return DateTime.Parse(value);
 
-            return DateTime.ParseExact(value, format!, null);
+            return DateTime.ParseExact(value, format, null);
         }
         if (targetType.IsAssignableTo(typeof(TimeSpan)))
         {
             if (string.IsNullOrEmpty(format))
                 return TimeSpan.Parse(value);
 
-            return TimeSpan.ParseExact(value, format!, null);
+            return TimeSpan.ParseExact(value, format, null);
         }
         if (targetType == typeof(string))
         {

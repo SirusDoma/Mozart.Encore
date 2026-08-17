@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mozart.Entities;
 using Mozart.Options;
+using Room = Encore.Entities.Room;
 
 namespace Identity.Controllers;
 

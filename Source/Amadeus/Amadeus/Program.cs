@@ -134,7 +134,7 @@ public class Program
             })
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IMozartServer, MozartServer>();
+                services.AddSingleton<IMozartServer, AmadeusServer>();
 
                 var options = context.Configuration
                     .GetSection(ServerOptions.Section)

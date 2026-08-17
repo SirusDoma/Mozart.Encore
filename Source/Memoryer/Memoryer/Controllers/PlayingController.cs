@@ -27,11 +27,11 @@ public class PlayingController(
             "User music loaded: [{RoomId:000}] - {PowerSkill} / {Speed}", Room.Id, request.PowerSkillId, request.Speed);
 
         var slots = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+        int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
         if (memberId < 0)
             return; // request forged?
 
-        if (slots[memberId] is not Room.MemberSlot member || member.Session != Session)
+        if (slots[memberId] is not Encore.Entities.Room.MemberSlot member || member.Session != Session)
             return; // request forged?
 
         Tracker.Track(Session, request.Speed);

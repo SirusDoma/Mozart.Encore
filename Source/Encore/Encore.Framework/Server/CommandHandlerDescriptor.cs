@@ -27,7 +27,7 @@ public sealed class CommandHandlerDescriptor
     public CommandHandlerDescriptor(MethodInfo method, CommandHandlerAttribute attribute,
         params IEnumerable<ICommandFilter> prioritizedFilters)
     {
-        ArgumentNullException.ThrowIfNull(method, nameof(method));
+        ArgumentNullException.ThrowIfNull(method);
         ArgumentOutOfRangeException.ThrowIfEqual(method.IsStatic, true, nameof(method));
         ArgumentOutOfRangeException.ThrowIfEqual(method.ContainsGenericParameters, true, nameof(method));
 

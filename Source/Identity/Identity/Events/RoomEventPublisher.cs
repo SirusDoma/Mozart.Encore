@@ -162,7 +162,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Title  = room.Title
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomTitleChangedEventData
             {
                 Number = room.Id,
                 Title  = room.Title
@@ -188,7 +188,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Speed      = room.Speed,
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
                 Parameter = new RoomParameterChangedEventData.MusicParameter
@@ -218,7 +218,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Speed = e.Speed
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomParameterChangedEventData
             {
                 Number = room.Id,
                 Parameter = new RoomParameterChangedEventData.AlbumParameter
@@ -269,7 +269,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 }, CancellationToken.None);
             }
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomStateChangedEventData
             {
                 Number = room.Id,
                 State  = room.State
@@ -290,7 +290,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
         
             switch (e.ActionType)
             {
-                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Room.MemberSlot member:
+                case RoomSlotActionType.PlayerKicked when e.PreviousSlot is Encore.Entities.Room.MemberSlot member:
                     await member.Session.WriteMessage(new KickEventData(), CancellationToken.None);
                     break;
             }
@@ -301,7 +301,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Type  = e.ActionType
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomUserCountChangedEventData
             {
                 Number    = room.Id,
                 Capacity  = (byte)e.Capacity,
@@ -326,7 +326,7 @@ public class RoomEventPublisher(ILogger<RoomEventPublisher> logger) : IEventPubl
                 Skills = e.Skills
             }, CancellationToken.None);
 
-            await room.Channel!.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
+            await room.Channel.Broadcast(session => !room.IsMember(session), new RoomSkillChangedEventData
             {
                 Number = room.Id,
                 Skills = e.Skills

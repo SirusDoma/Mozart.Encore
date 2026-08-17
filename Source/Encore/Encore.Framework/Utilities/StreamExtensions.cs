@@ -23,9 +23,9 @@ public static class StreamExtensions
     public static string ReadString(this BinaryReader reader, Encoding encoding, TypeCode prefix = TypeCode.Empty,
         bool nullTerminated = true, int maxCount = ushort.MaxValue)
     {
-        ArgumentNullException.ThrowIfNull(reader, nameof(reader));
-        ArgumentNullException.ThrowIfNull(encoding, nameof(encoding));
-        ArgumentOutOfRangeException.ThrowIfNegative(maxCount, nameof(maxCount));
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(encoding);
+        ArgumentOutOfRangeException.ThrowIfNegative(maxCount);
 
         if (reader.BaseStream.Length == reader.BaseStream.Position)
             return string.Empty;
@@ -66,10 +66,10 @@ public static class StreamExtensions
     public static int Write(this BinaryWriter writer, string value, Encoding encoding, TypeCode prefix = TypeCode.Empty,
         bool terminateWithNull = true, int maxCount = short.MaxValue)
     {
-        ArgumentNullException.ThrowIfNull(writer, nameof(writer));
-        ArgumentNullException.ThrowIfNull(value, nameof(value));
-        ArgumentNullException.ThrowIfNull(encoding, nameof(encoding));
-        ArgumentOutOfRangeException.ThrowIfNegative(maxCount, nameof(maxCount));
+        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(encoding);
+        ArgumentOutOfRangeException.ThrowIfNegative(maxCount);
 
         byte[] bytes = encoding.GetBytes(value);
         if (bytes.Length > maxCount)

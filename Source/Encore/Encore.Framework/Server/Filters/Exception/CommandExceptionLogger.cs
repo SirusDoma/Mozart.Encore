@@ -13,7 +13,7 @@ public abstract class CommandExceptionLogger : ICommandExceptionLogger
 
     Task ICommandExceptionLogger.LogAsync(CommandExceptionLoggerContext context, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(context.ExceptionContext, nameof(context));
 
         if (!ShouldLog(context.ExceptionContext))
@@ -36,7 +36,7 @@ public abstract class CommandExceptionLogger : ICommandExceptionLogger
 
     public virtual bool ShouldLog(CommandExceptionContext context)
     {
-        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
 
         var data = context.Exception.Data;
         if ((IDictionary?)data == null || data.IsReadOnly)

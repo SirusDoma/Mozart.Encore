@@ -289,8 +289,8 @@ public class MainRoomController(
                 throw new ArgumentOutOfRangeException(nameof(request));
 
             Session.Register(room);
-            int index  = room.Slots.ToList().FindIndex(r => r is Room.MemberSlot m && m.Session == Session);
-            var member = (room.Slots[index] as Room.MemberSlot)!;
+            int index  = room.Slots.ToList().FindIndex(r => r is Encore.Entities.Room.MemberSlot m && m.Session == Session);
+            var member = (room.Slots[index] as Encore.Entities.Room.MemberSlot)!;
             member.MusicState = request.MusicState;
 
             return new JoinRoomResponse
@@ -313,23 +313,23 @@ public class MainRoomController(
                     {
                         return slot switch
                         {
-                            Room.VacantSlot => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.VacantSlot => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Unoccupied
                             },
-                            Room.LockedSlot => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.LockedSlot => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Locked
                             },
-                            Room.MemberSlot when i == index => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.MemberSlot when i == index => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Occupied,
                                 MemberInfo = null
                             },
-                            Room.MemberSlot m => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.MemberSlot m => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Occupied,

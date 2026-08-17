@@ -278,8 +278,8 @@ public class MainRoomController(
                 throw new ArgumentOutOfRangeException(nameof(request));
 
             Session.Register(room);
-            int index  = room.Slots.ToList().FindIndex(r => r is Room.MemberSlot m && m.Session == Session);
-            var member = (room.Slots[index] as Room.MemberSlot)!;
+            int index  = room.Slots.ToList().FindIndex(r => r is Encore.Entities.Room.MemberSlot m && m.Session == Session);
+            var member = (room.Slots[index] as Encore.Entities.Room.MemberSlot)!;
             member.MusicState = request.MusicState;
 
             return new JoinRoomResponse
@@ -299,30 +299,30 @@ public class MainRoomController(
                     UserCount           = room.UserCount,
                     Premium             = room.Premium,
                     Skills              = room.Skills.ToList(),
-                    HasSuperRoomManager = room.Slots.OfType<Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
+                    HasSuperRoomManager = room.Slots.OfType<Encore.Entities.Room.MemberSlot>().Any(m => m.Actor.InfinityRingPass),
                     ChampionMemberId    = room.GameMode == GameMode.Live ? 0 : null,
-                    ChampionWinStreak   = room.GameMode == GameMode.Live ? ((Room.MemberSlot)room.Slots[0]).WinStreak : null,
+                    ChampionWinStreak   = room.GameMode == GameMode.Live ? ((Encore.Entities.Room.MemberSlot)room.Slots[0]).WinStreak : null,
                     Slots               = room.Slots.Select((slot, i) =>
                     {
                         return slot switch
                         {
-                            Room.VacantSlot => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.VacantSlot => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Unoccupied
                             },
-                            Room.LockedSlot => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.LockedSlot => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Locked
                             },
-                            Room.MemberSlot when i == index => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.MemberSlot when i == index => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Occupied,
                                 MemberInfo = null
                             },
-                            Room.MemberSlot m => new JoinRoomResponse.RoomSlotInfo
+                            Encore.Entities.Room.MemberSlot m => new JoinRoomResponse.RoomSlotInfo
                             {
                                 Index = (byte)i,
                                 State = JoinRoomResponse.RoomSlotState.Occupied,

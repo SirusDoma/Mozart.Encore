@@ -468,8 +468,8 @@ public sealed partial class CommandDispatcher : ICommandDispatcher
 
     public async Task Dispatch(ISession session, byte[] payload, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(session, nameof(session));
-        ArgumentNullException.ThrowIfNull(payload, nameof(payload));
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(payload);
 
         IMessage? request;
         try

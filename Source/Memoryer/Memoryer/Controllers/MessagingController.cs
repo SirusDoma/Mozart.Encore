@@ -6,7 +6,6 @@ using Memoryer.Messages.Events;
 using Memoryer.Messages.Requests;
 using Memoryer.Messages.Responses;
 using Microsoft.Extensions.Logging;
-using Mozart.Entities;
 using Mozart.Sessions;
 
 namespace Memoryer.Controllers;
@@ -62,7 +61,7 @@ public class MessagingController(
                 Sender   = actor.Nickname,
                 Content  = request.Content,
                 MemberId = (byte)room.Slots.ToList().FindIndex(s =>
-                    s is Room.MemberSlot m && m.Session == Session)
+                    s is Encore.Entities.Room.MemberSlot m && m.Session == Session)
             };
 
             await room.Broadcast(message, cancellationToken);
@@ -74,7 +73,7 @@ public class MessagingController(
                 Sender   = actor.Nickname,
                 Content  = request.Content,
                 MemberId = (byte)room.Slots.ToList().FindIndex(s =>
-                    s is Room.MemberSlot m && m.Session == Session)
+                    s is Encore.Entities.Room.MemberSlot m && m.Session == Session)
             };
 
             await room.Broadcast(message, cancellationToken);

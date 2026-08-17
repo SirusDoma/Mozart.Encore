@@ -6,9 +6,9 @@ namespace Amadeus;
 
 public interface IMozartServer : ITcpServer<Session>;
 
-public class MozartServer : TcpServer<Session>, IMozartServer
+public class AmadeusServer : TcpServer<Session>, IMozartServer
 {
-    public MozartServer(ISessionFactory factory, IOptions<TcpOptions> options)
+    public AmadeusServer(ISessionFactory factory, IOptions<TcpOptions> options)
         : base(factory, options)
     {
     }

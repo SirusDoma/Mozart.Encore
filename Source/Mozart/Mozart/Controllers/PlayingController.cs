@@ -6,6 +6,7 @@ using Mozart.Controllers.Filters;
 using Mozart.Entities;
 using Mozart.Messages.Requests;
 using Mozart.Services;
+using Room = Encore.Entities.Room;
 
 namespace Mozart.Controllers;
 
@@ -23,7 +24,7 @@ public class PlayingController(Session session, ILogger<WaitingController> logge
             "User music loaded: [{RoomId:000}]", Room.Id);
 
         var slots = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+        int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
         if (memberId < 0)
             return; // request forged?
 

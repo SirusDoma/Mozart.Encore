@@ -4,10 +4,10 @@ using Encore.Events;
 using Encore.Metadata;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mozart.Entities;
 using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
+using Room = Encore.Entities.Room;
 
 namespace Amadeus.Events;
 

@@ -9,7 +9,6 @@ using Identity.Messages.Requests;
 using Identity.Messages.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mozart.Entities;
 using Mozart.Options;
 
 namespace Identity.Controllers;
@@ -34,12 +33,12 @@ public class MusicShopController(
             Session.Room.UpdateMusicState(Session, MusicState.Ready);
 
             var slots = Session.Room.Slots.ToList();
-            int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+            int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
 
             await Session.Room.Broadcast(new MusicStateChangedEventData
             {
                 MemberId = (byte)memberId,
-                State    = ((Room.MemberSlot)slots[memberId]).MusicState
+                State    = ((Encore.Entities.Room.MemberSlot)slots[memberId]).MusicState
             }, cancellationToken);
         }
     }

@@ -250,7 +250,7 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
         Type type
     )
     {
-        ArgumentNullException.ThrowIfNull(type, nameof(type));
+        ArgumentNullException.ThrowIfNull(type);
 
         if (type == typeof(bool))    return false;
         if (type == typeof(char))    return '\0';
@@ -276,7 +276,7 @@ public sealed class CollectionMessageFieldCodec : MessageFieldCodec
     private static IList Resize(IList list, int minCount, int maxCount, object? padValue)
     {
         ArgumentNullException.ThrowIfNull(list);
-        ArgumentOutOfRangeException.ThrowIfNegative(minCount, nameof(minCount));
+        ArgumentOutOfRangeException.ThrowIfNegative(minCount);
         ArgumentOutOfRangeException.ThrowIfNegative(maxCount, nameof(minCount));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minCount, maxCount, nameof(maxCount));
 

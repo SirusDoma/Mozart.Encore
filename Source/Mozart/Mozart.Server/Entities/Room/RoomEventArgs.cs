@@ -8,14 +8,14 @@ public class RoomUserJoinedEventArgs : EventArgs
 {
     public required int MemberId           { get; init; }
 
-    public required Room.MemberSlot Member { get; init; }
+    public required Encore.Entities.Room.MemberSlot Member { get; init; }
 }
 
 public class RoomUserLeftEventArgs : EventArgs
 {
     public required int MemberId           { get; init; }
 
-    public required Room.MemberSlot Member { get; init; }
+    public required Encore.Entities.Room.MemberSlot Member { get; init; }
 
     public required int RoomMasterMemberId { get; init; }
 }
@@ -46,22 +46,22 @@ public class RoomStateChangedEventArgs : EventArgs
 public class RoomUserReadyStateChangedEventArgs : EventArgs
 {
     public required int MemberId           { get; init; }
-    public required Room.MemberSlot Member { get; init; }
+    public required Encore.Entities.Room.MemberSlot Member { get; init; }
     public required bool Ready             { get; init; }
 }
 
 public class RoomUserTeamChangedEventArgs : EventArgs
 {
     public required int MemberId           { get; init; }
-    public required Room.MemberSlot Member { get; init; }
+    public required Encore.Entities.Room.MemberSlot Member { get; init; }
     public required RoomTeam Team          { get; init; }
 }
 
 public class RoomSlotChangedEventArgs : EventArgs
 {
     public required int SlotId                    { get; init; }
-    public required Room.ISlot PreviousSlot       { get; init; }
-    public required Room.ISlot CurrentSlot        { get; init; }
+    public required Encore.Entities.Room.ISlot PreviousSlot       { get; init; }
+    public required Encore.Entities.Room.ISlot CurrentSlot        { get; init; }
     public required RoomSlotActionType ActionType { get; init; }
     public required int Capacity                  { get; init; }
     public required int UserCount                 { get; init; }

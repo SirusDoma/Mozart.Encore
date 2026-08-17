@@ -1,7 +1,6 @@
 using Encore.Metadata;
 using Encore.Server;
 using Encore.Server.Sessions;
-using Mozart.Entities;
 
 namespace Memoryer.Controllers.Filters;
 
@@ -12,7 +11,7 @@ public class RoomMasterAuthorizeAttribute: RoomAuthorizeAttribute
         base.OnActionExecuting(context);
 
         var session = (Session)context.Session;
-        var role    = session.Room!.Slots.OfType<Room.MemberSlot>().Single(m => m.Session == session).Role;
+        var role    = session.Room!.Slots.OfType<Encore.Entities.Room.MemberSlot>().Single(m => m.Session == session).Role;
         if (session != session.Room!.Master && role != MemberRole.Champion && role != MemberRole.Challenger)
             throw new InvalidOperationException("Unauthorized");
     }

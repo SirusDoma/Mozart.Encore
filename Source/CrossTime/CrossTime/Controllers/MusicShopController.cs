@@ -5,7 +5,6 @@ using Encore.Data.Repositories;
 using Encore.Server;
 using Encore.Server.Sessions;
 using Microsoft.Extensions.Logging;
-using Mozart.Entities;
 
 namespace CrossTime.Controllers;
 
@@ -25,7 +24,7 @@ public class MusicShopController(
         if (Session.Room != null)
         {
             var slots = Session.Room.Slots.ToList();
-            int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+            int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
 
             Session.Room.UpdateMusicState(Session, memberId);
         }

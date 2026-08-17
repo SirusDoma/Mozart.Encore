@@ -68,7 +68,7 @@ public class ChannelService : Broadcastable, IChannelService
 
     public IChannel GetChannel(int id)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(id, nameof(id));
+        ArgumentOutOfRangeException.ThrowIfNegative(id);
         if (!_channels.TryGetValue(id, out var channel))
             throw new ArgumentOutOfRangeException(nameof(id));
 
@@ -88,7 +88,7 @@ public class ChannelService : Broadcastable, IChannelService
 
     public void DeleteChannel(int id)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(id, nameof(id));
+        ArgumentOutOfRangeException.ThrowIfNegative(id);
 
         _channels.Remove(id, out _);
     }

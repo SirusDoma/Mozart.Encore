@@ -12,6 +12,7 @@ using Mozart.Messages.Responses;
 using Mozart.Metadata;
 using Mozart.Options;
 using Mozart.Services;
+using Room = Encore.Entities.Room;
 
 namespace Mozart.Controllers;
 

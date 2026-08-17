@@ -98,18 +98,18 @@ public class WaitingController(
         );
 
         var slots    = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+        int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
 
         return new LiveStateResponse
         {
             MemberId  = (byte)memberId,
             UserCount = Room.UserCount,
-            WinStreak = ((Room.MemberSlot)slots[memberId]).WinStreak,
+            WinStreak = ((Encore.Entities.Room.MemberSlot)slots[memberId]).WinStreak,
             Members   = slots.Select((slot, i) =>
             {
                 return slot switch
                 {
-                    Room.MemberSlot member => new LiveStateResponse.MemberLiveState
+                    Encore.Entities.Room.MemberSlot member => new LiveStateResponse.MemberLiveState
                     {
                         Active     = true,
                         MemberInfo = new LiveStateResponse.MemberInfo
@@ -157,7 +157,7 @@ public class WaitingController(
             {
                 return slot switch
                 {
-                    Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
+                    Encore.Entities.Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
                     {
                         MemberId = (byte)i,
                         State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
@@ -181,7 +181,7 @@ public class WaitingController(
             Room.Id, request.MemberId
         );
 
-        var member = (Room.MemberSlot)Room.Slots[request.MemberId];
+        var member = (Encore.Entities.Room.MemberSlot)Room.Slots[request.MemberId];
         await Room.Broadcast(new SyncMemberMusicStateEventData
         {
             MemberId = request.MemberId,
@@ -193,7 +193,7 @@ public class WaitingController(
     public void UpdateMusicState(UpdateMusicStateRequest request)
     {
         var slots    = Room.Slots.ToList();
-        int memberId = slots.FindIndex(s => s is Room.MemberSlot m && m.Session == Session);
+        int memberId = slots.FindIndex(s => s is Encore.Entities.Room.MemberSlot m && m.Session == Session);
 
         logger.LogInformation(
             (int)RequestCommand.UpdateMusicState,
@@ -216,7 +216,7 @@ public class WaitingController(
 
         if (request.Progress >= 100)
         {
-            var member = (Room.MemberSlot)Room.Slots[request.MemberId];
+            var member = (Encore.Entities.Room.MemberSlot)Room.Slots[request.MemberId];
             member.MusicState = MusicState.Ready;
             member.Actor.InstalledMusicIds.Add((ushort)(Room.MusicId | 0x8000));
 
@@ -299,7 +299,7 @@ public class WaitingController(
             : 0;
 
         var slots    = Room.Slots;
-        int superId  = slots.ToList().FindIndex(s => s is Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
+        int superId  = slots.ToList().FindIndex(s => s is Encore.Entities.Room.MemberSlot { Actor.InfinityRingPass: true, IsMaster: false });
 
         await Room.Broadcast(new WaitingSkillExChangedEventData
         {
@@ -344,7 +344,7 @@ public class WaitingController(
         {
             Peers = slots.Select((s, i) => s switch
             {
-                Room.MemberSlot member => new P2PListResponse.PeerInfo
+                Encore.Entities.Room.MemberSlot member => new P2PListResponse.PeerInfo
                 {
                     MemberId       = (byte)i,
                     PublicEndpoint = member.Actor.RelaySessionInfo?.PublicEndpoint ?? new IPEndPoint(IPAddress.None, 0),
@@ -390,7 +390,7 @@ public class WaitingController(
         }
 
 
-        var slots = Room.Slots.OfType<Room.MemberSlot>().ToList();
+        var slots = Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().ToList();
         if (Room.UserCount > 1)
         {
             var counts = slots.Select(s => s.Team)
@@ -425,7 +425,7 @@ public class WaitingController(
                     {
                         return slot switch
                         {
-                            Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
+                            Encore.Entities.Room.MemberSlot m => new AcquireMusicEventData.MemberMusicState
                             {
                                 MemberId = (byte)i,
                                 State    = m.MusicState == MusicState.NoMusic ? MusicState.Downloading : m.MusicState
@@ -495,13 +495,13 @@ public class WaitingController(
         }
 
         bool freeMusic = Session.Channel!.FreeMusic ?? options.Value.FreeMusic;
-        var memberUsers = new List<(Room.MemberSlot Member, User User)>();
+        var memberUsers = new List<(Encore.Entities.Room.MemberSlot Member, User User)>();
         if (!freeMusic)
         {
             if (Session.Channel!.GetMusicList().TryGetValue(Room.MusicId, out var music)
                 && music.IsPurchasable && (music.PriceO2Cash > 0 || music.PriceGem > 0))
             {
-                var members = Room.Slots.OfType<Room.MemberSlot>().ToList();
+                var members = Room.Slots.OfType<Encore.Entities.Room.MemberSlot>().ToList();
                 foreach (var member in members.Where(member => member.Actor.FreePass.Type == FreePassType.None))
                 {
                     var memberUser = (await repository.Find(member.Actor.UserId, cancellationToken))!;

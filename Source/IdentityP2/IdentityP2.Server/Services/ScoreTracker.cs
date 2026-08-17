@@ -2,6 +2,7 @@ using Encore.Metadata;
 using Encore.Server.Sessions;
 using Mozart.Entities;
 using Mozart.Metadata;
+using Room = Encore.Entities.Room;
 
 namespace Mozart.Services;
 
@@ -104,8 +105,8 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateLife(Session session, int sequence, int life, uint score, int lnScore = 0)
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000, nameof(life));
-        ArgumentOutOfRangeException.ThrowIfNegative(life, nameof(life));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(life, 1000);
+        ArgumentOutOfRangeException.ThrowIfNegative(life);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -129,7 +130,7 @@ public class ScoreTracker : IScoreTracker
 
     public void UpdateJamCombo(Session session, int sequence, int jamCombo, uint score, int lnScore = 0)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo, nameof(jamCombo));
+        ArgumentOutOfRangeException.ThrowIfNegative(jamCombo);
 
         var state = _states.SingleOrDefault(s => s.Session == session);
         if (state == null)
@@ -163,7 +164,7 @@ public class ScoreTracker : IScoreTracker
 
         for (int i = 0; i < Room.Slots.Count; i++)
         {
-            if (Room.Slots[i] is not Room.MemberSlot member)
+            if (Room.Slots[i] is not Encore.Entities.Room.MemberSlot member)
                 continue;
 
             if (session != member.Session)
@@ -291,7 +292,7 @@ public class ScoreTracker : IScoreTracker
         });
 
         // The room marked as `Waiting` after the first `ExitPlaying` received in the official semantic.
-        // However, performing early clean-up increase robustness. e.g, less room stuck due to network issue
+        // However, performing early cleanup increase robustness. e.g, less room stuck due to network issue
         Room.CompleteGame();
     }
 

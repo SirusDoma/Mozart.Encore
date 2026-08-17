@@ -3,16 +3,14 @@ using Encore.Events;
 using Encore.Metadata;
 using Identity.Messages.Events;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Mozart.Data.Entities;
-using Mozart.Entities;
 using Mozart.Metadata;
-using Mozart.Options;
 using Mozart.Services;
 
 namespace Identity.Events;
 
-public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<GameOptions> gameOptions,
+public class ScoreTrackerEventPublisher(
+    IUserRepository repository,
     ILogger<ScoreTrackerEventPublisher> logger) : IEventPublisher<ScoreTracker>
 {
     private readonly SemaphoreSlim _mutex = new(1, 1);
@@ -46,8 +44,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
         return states
             .OrderByDescending(s => s.Score)
             .Select(s => (byte)s.MemberId)
-            .Concat(Enumerable.Repeat(byte.MaxValue, Room.MaxCapacity))
-            .Take(Room.MaxCapacity)
+            .Concat(Enumerable.Repeat(byte.MaxValue, Encore.Entities.Room.MaxCapacity))
+            .Take(Encore.Entities.Room.MaxCapacity)
             .ToList();
     }
 
@@ -197,9 +195,8 @@ public class ScoreTrackerEventPublisher(IUserRepository repository, IOptions<Gam
 
             var room    = e.Room;
             var channel = e.Room.Channel;
-            var options = gameOptions.Value;
 
-            for (int id = 0; id < Room.MaxCapacity; id++)
+            for (int id = 0; id < Encore.Entities.Room.MaxCapacity; id++)
             {
                 var state = scores.SingleOrDefault(m => m.MemberId == id);
                 if (state == null)
