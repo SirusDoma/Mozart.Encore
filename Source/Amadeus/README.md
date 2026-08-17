@@ -3,7 +3,7 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.82\* (O2Jam NX)** and **v3.00 (O2Jam GAMANIA)**  
+Supported client version: **v3.82\* (O2Jam NX)** and **v3.00 (O2Jam GAMANIA Japan)**  
 <sub>* v3.73 and older might work but not fully tested.</sub>
 
 ### Other Builds

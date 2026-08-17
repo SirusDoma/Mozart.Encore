@@ -7,13 +7,13 @@ Supported client version: **v8.02 (O2Jam Classic)**
 
 ### Other Builds
 
-| Build                                       | Supported client version |
-|---------------------------------------------|--------------------------|
-| [Mozart.Encore](../Mozart/)                 | v3.10 (O2Jam Original)   |
-| [Amadeus.Encore](../Amadeus/)               | v3.82 (O2Jam NX)         |
-| [CrossTime.Encore](../CrossTime/)           | v2.33 (O2Jam X2)         |
-| [Identity.Encore](../Identity/)             | v5.89 (O2JamO2 Beta)     |
-| [IdentityP2.Encore](../IdentityP2/)         | v6.65 (O2JamO2)          |
+| Build                                       | Supported client version         |
+|---------------------------------------------|----------------------------------|
+| [Mozart.Encore](../Mozart/)                 | v3.10 (O2Jam Original)           |
+| [Amadeus.Encore](../Amadeus/)               | v3.82 (O2Jam NX) / v3.00 GAMANIA |
+| [CrossTime.Encore](../CrossTime/)           | v2.33 (O2Jam X2)                 |
+| [Identity.Encore](../Identity/)             | v5.89 (O2JamO2 Beta)             |
+| [IdentityP2.Encore](../IdentityP2/)         | v6.65 (O2JamO2)                  |
 
 > [!IMPORTANT]
 > **O2Jam Classic requires game client modifications and/or client-side hosts file and IP table configuration to run and connect to a custom server.**   
