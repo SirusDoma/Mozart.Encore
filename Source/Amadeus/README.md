@@ -36,6 +36,12 @@ Supported client version: **v3.82\* (O2Jam NX)** and **v3.00 (O2Jam GAMANIA Japa
 
 ## Quick Start
 
+>[!CAUTION]
+> Amadeus now supports handling dual-client: v3.83 e-Games and v3.00 GAMANIA.  
+> Re-run `metadata:import` and use fresh database everytime you are switching to a different client.    
+>
+> See [Database Migration](#database-migration) for more information.
+
 Download and extract the Amadeus server binary from [here](https://github.com/SirusDoma/Mozart.Encore/releases/latest).
 
 ### First-Time Setup
@@ -163,16 +169,16 @@ These options can be configured under `Gateway:Channels:<N>` section as explaine
 > [!IMPORTANT]
 > You can only have exactly one channel in the `Channel` deployment mode.
 
-| Option      | Description                                                                                                                                                   |
-|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Id`        | The channel id (required)                                                                                                                                     |
-| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                      |
-| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                               |
-| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                               |
-| `FreeMusic` | Unlock all premium music based on the provided `MusicList` exclusive for this channel. Default: Default: (Empty) using global [Game settings](#Game-settings) |
-| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)             |
-| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)           |
-| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)            |
+| Option      | Description                                                                                                                                                            |
+|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Id`        | The channel id (required)                                                                                                                                              |
+| `Capacity`  | Channel maximum capacity. Default: `100`                                                                                                                               |
+| `Gem`       | GEM reward rate. Default: `1.0`                                                                                                                                        |
+| `Exp`       | EXP reward rate. Default: `1.0`                                                                                                                                        |
+| `FreeMusic` | Unlock all premium music based on the provided `MusicList` exclusive for this channel. Default: Default: (Empty) using global [Game settings](#Game-settings)          |
+| `MusicList` | Path of `OJNList.dat` exclusive for this channel. Format must compatible with client v`3.82` or v`3.00` GAMANIA. Default: (Empty) using global [Metadata](#Metadata)   |
+| `AlbumList` | Path of `AlbumList.ojs` exclusive for this channel. Format must compatible with client v`3.82` or v`3.00` GAMANIA. Default: (Empty) using global [Metadata](#Metadata) |
+| `ItemData`  | Path of `Itemdata.dat` exclusive for this channel. Format must compatible with client v`3.82`. Default: (Empty) using global [Metadata](#Metadata)                     |
 
 ## Metadata
 Metadata files act as source of truth of particular game data outside the database.  
@@ -190,11 +196,11 @@ Metadata can usually be overridden per channel.
 
 Use `--Metadata:<Option>` to configure these settings via command-line arguments.
 
-| Option      | Description                                                                               |
-|-------------|-------------------------------------------------------------------------------------------|
-| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82`.   |
-| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`3.82`. |
-| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`.  |
+| Option      | Description                                                                                                  |
+|-------------|--------------------------------------------------------------------------------------------------------------|
+| `MusicList` | Relative or absolute path of `OJNList.dat`. Format must compatible with client v`3.82` or v`3.00` GAMANIA.   |
+| `AlbumList` | Relative or absolute path of `AlbumList.ojs`. Format must compatible with client v`3.82` or v`3.00` GAMANIA. |
+| `ItemData`  | Relative or absolute path of `Itemdata.dat`. Format must compatible with client v`3.82`.                     |
 
 ## Game settings
 Gameplay-specific settings.
