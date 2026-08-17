@@ -36,7 +36,7 @@ Supported client version: **v3.82\* (O2Jam NX)** and **v3.00 (O2Jam GAMANIA Japa
 
 ## Quick Start
 
->[!CAUTION]
+>[!WARNING]
 > Amadeus now supports handling dual-client: v3.83 e-Games and v3.00 GAMANIA.  
 > Re-run `metadata:import` and use fresh database everytime you are switching to a different client.    
 >
@@ -229,7 +229,7 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
 >[!CAUTION]
-> Amadeus now supports handling dual-client: v3.83 e-Games and v3.00 GAMANIA.
+> Amadeus now supports handling dual-client: v3.83 e-Games and v3.00 GAMANIA.  
 > Do NOT use the same account across both clients. An account used with one client should not be used with the other.
 > 
 > Otherwise the client may crash due to account data loaded with incompatible MusicList or ItemData table.
