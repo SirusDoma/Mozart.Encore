@@ -7,13 +7,13 @@ Supported client version: **v2.33 (O2Jam X2)**
 
 ### Other Builds
 
-| Build                                        | Supported client version              |
-|----------------------------------------------|---------------------------------------|
-| [Mozart.Encore](../Mozart/)                  | v3.10 (O2Jam Original) / 2.93 GAMANIA |
-| [Amadeus.Encore](../Amadeus/)                | v3.82 (O2Jam NX) / v3.00 GAMANIA      |
-| [Identity.Encore](../Identity/)              | v5.89 (O2JamO2 Beta)                  |
-| [IdentityP2.Encore](../IdentityP2/)          | v6.65 (O2JamO2)                       |
-| [Memoryer.Encore](../Memoryer/)              | v8.02 (O2Jam Classic)                 |
+| Build                                        | Supported client version               |
+|----------------------------------------------|----------------------------------------|
+| [Mozart.Encore](../Mozart/)                  | v3.10 (O2Jam Original) / v2.93 GAMANIA |
+| [Amadeus.Encore](../Amadeus/)                | v3.82 (O2Jam NX) / v3.00 GAMANIA       |
+| [Identity.Encore](../Identity/)              | v5.89 (O2JamO2 Beta)                   |
+| [IdentityP2.Encore](../IdentityP2/)          | v6.65 (O2JamO2)                        |
+| [Memoryer.Encore](../Memoryer/)              | v8.02 (O2Jam Classic)                  |
 
 > [!CAUTION]
 > **Cross.Time.Encore build is set to be diverged from the main build**
