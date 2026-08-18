@@ -113,7 +113,6 @@ public class StartGameCommandTask(
                 string first  = token[..Math.Min(AuthRequest.GamaniaCredential.TokenSplitLength, token.Length)];
                 string second = token[first.Length..];
                 string id     = user.Id.ToString();
-                string rank   = user.Ranking.ToString();
                 gatewayCount  = 3;
 
                 if (first.Length > GamaniaTokenPartLength || second.Length > GamaniaTokenPartLength)
@@ -121,7 +120,7 @@ public class StartGameCommandTask(
 
                 string webHost = $"{httpOptions.Value.Address}:{httpOptions.Value.Port}";
 
-                arguments.AddRange([first, id, second, "0", "20", webHost, "ftp.o2jam.com", "O2Jam"]);
+                arguments.AddRange([first, id, second, "GAMANIA", "0", webHost, "ftp.o2jam.com", "O2JAM"]);
             }
             else
             {
