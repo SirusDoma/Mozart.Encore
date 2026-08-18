@@ -41,14 +41,17 @@ public class CharacterInfoResponse : IMessage
     public int Experience { get; set; }
 
     [MessageField(order: 10)]
+    public int? Battles { get; set; } = null;
+
+    [MessageField(order: 11)]
     public bool IsAdministrator { get; init; }
 
-    [MessageField<CharacterEquipmentInfoCodec>(order: 11)]
+    [MessageField<CharacterEquipmentInfoCodec>(order: 12)]
     public Dictionary<ItemType, int> Equipments { get; init; } = [];
 
-    [CollectionMessageField(order: 12, minCount: 30, maxCount: 30)]
+    [CollectionMessageField(order: 13, minCount: 30, maxCount: 30)]
     public IList<int> Inventory { get; init; } = [];
 
-    [CollectionMessageField(order: 13, prefixSizeType: TypeCode.Int32)]
+    [CollectionMessageField(order: 14, prefixSizeType: TypeCode.Int32)]
     public IList<int> AttributiveItemIds { get; init; } = [];
 }

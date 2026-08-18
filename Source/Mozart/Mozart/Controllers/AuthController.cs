@@ -59,7 +59,8 @@ public class AuthController(
 
             Session.Authorize(new Actor(characterInfo)
             {
-                Token = authSession.Token
+                Token         = authSession.Token,
+                ClientVersion = request.ClientVersion,
             });
         }
         catch (ArgumentException ex)

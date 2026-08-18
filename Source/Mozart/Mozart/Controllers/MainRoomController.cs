@@ -43,6 +43,7 @@ public class MainRoomController(
             Lose               = actor.Lose,
             Draw               = actor.Draw,
             Experience         = actor.Experience,
+            Battles            = actor.ClientVersion != new Version(3, 10) ? actor.Win + actor.Lose + actor.Draw : null,
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
             Inventory          = actor.Inventory,

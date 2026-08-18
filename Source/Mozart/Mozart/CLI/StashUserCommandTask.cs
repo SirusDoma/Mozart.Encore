@@ -78,7 +78,7 @@ public class StashUserCommandTask(
             if (!File.Exists(path))
                 throw new FileNotFoundException("ItemData metadata file is not found", path);
 
-            return ItemDataParser.Parse(File.ReadAllBytes(path), ItemDataFormat.Original);
+            return ItemDataParser.Parse(File.ReadAllBytes(path));
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException)
         {

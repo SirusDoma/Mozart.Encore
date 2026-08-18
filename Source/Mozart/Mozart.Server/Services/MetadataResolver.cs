@@ -51,6 +51,6 @@ public class MetadataResolver(IOptions<MetadataOptions> defaultOptions) : IMetad
             throw new FileNotFoundException("ItemData metadata file is not found", path);
 
         return _itemCache.GetOrAdd(channel.Id, static (_, p) =>
-            ItemDataParser.Parse(File.ReadAllBytes(p), ItemDataFormat.Original), path);
+            ItemDataParser.Parse(File.ReadAllBytes(p)), path);
     }
 }
