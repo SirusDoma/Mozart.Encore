@@ -4,6 +4,7 @@ namespace Encore.Metadata.Items;
 
 public enum ItemDataFormat
 {
+    Beta,     // O2Jam v2.93: length-only render frames, no Back part, frame block gated by an int32 flag
     Original, // O2Jam v3.10: item quantity is a single byte
     Nx,       // O2Jam NX and later: item quantity widened to 2 bytes
     Classic   // O2Jam Classic (O2KR): NX layout plus the special animated item block
@@ -11,6 +12,23 @@ public enum ItemDataFormat
 
 public static class ItemDataParser
 {
+    public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data)
+    {
+        return Parse(data, DetectFormat(data));
+    }
+
+    private static ItemDataFormat DetectFormat(byte[] data)
+    {
+        return Array.FindIndex(data, 12, b => b != 0) switch
+        {
+            4 + 33 => ItemDataFormat.Beta,
+            4 + 71 => ItemDataFormat.Original,
+            4 + 72 => ItemDataFormat.Nx,
+            4 + 80 => ItemDataFormat.Classic,
+            _      => throw new InvalidDataException("Unrecognized item data format")
+        };
+    }
+
     public static IReadOnlyDictionary<int, ItemData> Parse(byte[] data, ItemDataFormat format)
     {
         var items = new Dictionary<int, ItemData>();
@@ -35,7 +53,7 @@ public static class ItemDataParser
             short bitflag         = reader.ReadInt16();
             item.Gender           = (Gender)((bitflag >> 7) & 15);
             item.IsNew            = (bitflag >> 11) == 1;
-            item.Quantity         = format == ItemDataFormat.Original ? reader.ReadByte() : reader.ReadInt16();
+            item.Quantity         = format is ItemDataFormat.Beta or ItemDataFormat.Original ? reader.ReadByte() : reader.ReadInt16();
             item.GameModifier     = (GameModifier) reader.ReadByte();
             item.GameModifierType = (GameModifierType) reader.ReadByte();
             item.Price.Currency   = (Currency)reader.ReadByte();
@@ -88,18 +106,26 @@ public static class ItemDataParser
             item.Name        = identifierEncoding.GetString(reader.ReadBytes(reader.ReadInt32()));
             item.Description = identifierEncoding.GetString(reader.ReadBytes(reader.ReadInt32()));
 
+            if (format == ItemDataFormat.Beta && reader.ReadInt32() == 0)
+            {
+                items.Add(item.Id, item);
+                continue;
+            }
+
             foreach (ItemRenderPart renderPart in Enum.GetValues(typeof(ItemRenderPart)))
             {
+                if (format == ItemDataFormat.Beta && renderPart == ItemRenderPart.Back)
+                    continue;
+
                 if (renderPart is ItemRenderPart.SmallPreview or ItemRenderPart.LargePreview)
                 {
-                    bool valid = reader.ReadBoolean();
-                    if (!valid)
+                    if (!TryReadReference(reader, format, defaultEncoding, out string reference))
                         continue;
 
                     var frame = new ItemRenderFrame
                     {
                         ItemRenderPart = renderPart,
-                        Reference      = defaultEncoding.GetString(reader.ReadBytes(reader.ReadInt32())).Trim('\0')
+                        Reference      = reference
                     };
                     item.RenderFrames.Add(frame);
 
@@ -110,8 +136,7 @@ public static class ItemDataParser
                 {
                     foreach (var gender in new[] {Gender.Male, Gender.Female})
                     {
-                        bool valid  = reader.ReadBoolean();
-                        if (!valid)
+                        if (!TryReadReference(reader, format, defaultEncoding, out string reference))
                             continue;
 
                         var frame = new ItemRenderFrame
@@ -119,7 +144,7 @@ public static class ItemDataParser
                             ItemRenderPart = renderPart,
                             Instrument     = instrument,
                             Gender         = gender,
-                            Reference      = defaultEncoding.GetString(reader.ReadBytes(reader.ReadInt32())).Trim('\0')
+                            Reference      = reference
                         };
 
                         item.RenderFrames.Add(frame);
@@ -131,5 +156,19 @@ public static class ItemDataParser
         }
 
         return items;
+    }
+
+    private static bool TryReadReference(BinaryReader reader, ItemDataFormat format, Encoding encoding, out string reference)
+    {
+        reference = string.Empty;
+        if (format != ItemDataFormat.Beta && !reader.ReadBoolean())
+            return false;
+
+        byte[] bytes = reader.ReadBytes(reader.ReadInt32());
+        if (format == ItemDataFormat.Beta && bytes.Length == 0)
+            return false;
+
+        reference = encoding.GetString(bytes).Trim('\0');
+        return true;
     }
 }
