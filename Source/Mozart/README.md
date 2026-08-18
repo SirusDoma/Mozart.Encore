@@ -3,7 +3,7 @@
 A cross-platform re-implementation of O2Jam game server in C#.  
 This project is inspired by the _Mozart Project 0.028_.
 
-Supported client version: **v3.10 (O2Jam Original)**
+Supported client version: **v3.10 (O2Jam Original)** and **v2.93 (O2Jam GAMANIA Taiwan Beta Client)**.
 
 ### Other Builds
 
@@ -34,6 +34,12 @@ Supported client version: **v3.10 (O2Jam Original)**
 <sub>* FTP and In-game web server features are not included.</sub>
 
 ## Quick Start
+
+>[!WARNING]
+> Mozart now supports handling dual-client: v3.10 e-Games and v2.93 GAMANIA.  
+> Re-run `metadata:import` and use fresh database everytime you are switching to a different client.
+>
+> See [Database Migration](#database-migration) for more information.
 
 Download and extract the Mozart server binary from [here](https://github.com/SirusDoma/Mozart.Encore/releases/latest).
 
@@ -221,10 +227,10 @@ See [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/
 > However, unlike official server app, Mozart will **not** interact with database via Stored Procedure and will execute DML directly.
 
 >[!CAUTION]
-> A breaking change was introduced to the database schema and its migrations starting with Mozart v1.10.0.
-> Manual adjustments to existing database schemas may be required when upgrading from Mozart v1.8.0.
+> Mozart now supports handling dual-client: v3.10 e-Games and v2.93 GAMANIA.  
+> Do NOT use the same account across both clients. An account used with one client should not be used with the other.
 >
-> Foreign database schema remain supported with proper `Auth:Mode` configuration.
+> Otherwise the client may crash due to account data loaded with incompatible MusicList or ItemData table.
 
 ## Add Migration
 
