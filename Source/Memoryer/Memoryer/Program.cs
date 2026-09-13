@@ -112,7 +112,7 @@ public class Program
                     .AddExceptionLogger<DefaultExceptionLogger>()
                     .AddFilter<SessionScopeLoggerFilter>();
 
-                if (options.Mode == DeploymentMode.Relay || relay.Enabled)
+                if (options.Mode == DeploymentMode.Relay || (options.Mode != DeploymentMode.Channel && relay.Enabled))
                     builder.AddFilter<RelayLoggerFilter>();
 
             })
@@ -153,7 +153,7 @@ public class Program
                         routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
                 }
 
-                if (options.Mode == DeploymentMode.Relay || relay.Enabled)
+                if (options.Mode == DeploymentMode.Relay || (options.Mode != DeploymentMode.Channel && relay.Enabled))
                 {
                     routes.Map<RelayController>();
                 }
@@ -200,7 +200,7 @@ public class Program
                         break;
                 }
 
-                if (options.Mode != DeploymentMode.Relay && relay.Enabled)
+                if (options.Mode is DeploymentMode.Full or DeploymentMode.Gateway && relay.Enabled)
                 {
                     services.AddTcpRelayServices();
                     if (relay.P2PEnabled)
