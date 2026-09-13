@@ -12,6 +12,8 @@ public interface ITcpSessionManager<TSession> : ISessionManager<TSession>
 
     bool Validate(TSession session);
 
+    IReadOnlyList<TSession> GetSessions();
+
     Task ClearSessions();
 }
 
@@ -98,6 +100,9 @@ public class TcpSessionManager<TSession> : ITcpSessionManager<TSession>
     {
         return _sessions.FirstOrDefault(m => ReferenceEquals(m.Session, session)) != null;
     }
+
+    public virtual IReadOnlyList<TSession> GetSessions()
+        => _sessions.Select(m => m.Session).ToList();
 
     public Task ClearSessions()
     {

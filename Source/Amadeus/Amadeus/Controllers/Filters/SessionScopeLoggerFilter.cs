@@ -1,3 +1,4 @@
+using Encore;
 using Amadeus.Messages.Requests;
 using Encore.Server;
 using Encore.Sessions;
@@ -12,7 +13,7 @@ public class SessionScopeLoggerFilter(ILogger<SessionScopeLoggerFilter> logger) 
 
     public override void OnActionExecuting(CommandExecutingContext context)
     {
-        if (Enum.GetValues<GatewayCommand>().Contains((GatewayCommand)context.Command))
+        if (context.Command is ServerCommand or GameManagerCommand or GatewayCommand)
             return;
 
         _scope = null;

@@ -2,11 +2,12 @@ using System.Net.Sockets;
 using Amadeus.CLI;
 using Amadeus.Controllers;
 using Amadeus.Controllers.Filters;
-using Amadeus.Controllers.Internal;
+using Encore.Controllers.Internal;
 using Amadeus.Events;
-using Amadeus.Workers.Channels;
-using Amadeus.Workers.Gateway;
+using Encore.Workers.Channels;
+using Encore.Workers.Gateway;
 using Encore.CLI;
+using Encore.Workers;
 using Encore.Contexts;
 using Encore.Data.Repositories;
 using Encore.Events;
@@ -100,9 +101,6 @@ public class Program
                 builder.AddExceptionHandler<DefaultExceptionHandler>()
                     .AddExceptionLogger<DefaultExceptionLogger>()
                     .AddFilter<SessionScopeLoggerFilter>();
-
-                if (options.Mode == DeploymentMode.Gateway)
-                    builder.AddFilter<GatewayFilter>();
             })
             .ConfigureRoutes((context, provider) =>
             {
@@ -112,7 +110,15 @@ public class Program
 
                 // Controller-based routing: Not safe with AOT
                 var routes = provider.UseCodec<DefaultMessageCodec>()
-                    .Map<AuthController>()
+                    .Map<AuthController>();
+
+                if (options.Mode == DeploymentMode.Gateway)
+                {
+                    routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
+                }
+                else
+                {
+                    routes
                     .Map<PlanetController>()
                     .Map<MessagingController>()
                     .Map<MainRoomController>()
@@ -122,14 +128,8 @@ public class Program
                     .Map<WaitingController>()
                     .Map<PlayingController>();
 
-                switch (options.Mode)
-                {
-                    case DeploymentMode.Gateway:
-                        routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
-                        break;
-                    case DeploymentMode.Channel:
+                    if (options.Mode == DeploymentMode.Channel)
                         routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
-                        break;
                 }
             })
             .ConfigureServices((context, services) =>
@@ -143,15 +143,14 @@ public class Program
                 switch (options.Mode)
                 {
                     case DeploymentMode.Channel:
-                        services.AddSingleton<IGatewayClient, GatewayClient>()
-                            .AddSingleton<IUserSessionFactory, UserSessionFactory>()
+                        services.AddSingleton<ITcpServer<Session>>(provider => provider.GetRequiredService<IMozartServer>())
+                            .AddSingleton<IGatewaySessionFactory, GatewaySessionFactory>()
                             .AddHostedService<ChannelWorker>();
 
                         break;
                     case DeploymentMode.Gateway:
                         services.AddSingleton<IClientServer, ClientServer>()
                             .AddSingleton<IGatewayServer, GatewayServer>()
-                            .AddSingleton<IChannelAggregator, ChannelAggregator>()
                             .AddSingleton<IClientSessionFactory, ClientSessionFactory>()
                             .AddSingleton<IChannelSessionFactory, ChannelSessionFactory>()
                             .AddSingleton<IChannelSessionManager, ChannelSessionManager>()

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net;
 using Encore.Entities;
 using Encore.Metadata;
 using Encore.Options;
@@ -15,9 +16,10 @@ public interface IChannelService : IBroadcastable
 {
     IReadOnlyList<IChannel> GetChannels();
     IReadOnlyList<Actor> GetUserList(int id);
-    void CreateChannel(ChannelOptions channelOptions);
+    IChannel CreateChannel(IPEndPoint endPoint, int id, int capacity);
+    bool DeleteChannel(IChannel channel);
+    IChannel? FindChannel(int id);
     IChannel GetChannel(int id);
-    void DeleteChannel(int id);
 }
 
 public class ChannelService : Broadcastable, IChannelService
@@ -66,6 +68,9 @@ public class ChannelService : Broadcastable, IChannelService
     public IReadOnlyList<Actor> GetUserList(int id)
         => _channels[id].Sessions.Select(e => e.GetAuthorizedToken<Actor>()).ToList();
 
+    public IChannel? FindChannel(int id)
+        => _channels.GetValueOrDefault(id);
+
     public IChannel GetChannel(int id)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(id);
@@ -75,23 +80,25 @@ public class ChannelService : Broadcastable, IChannelService
         return channel;
     }
 
-    public void CreateChannel(ChannelOptions channelOptions)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(channelOptions.Id, nameof(channelOptions));
-
-        var channel = new Channel(_metadataResolver, channelOptions);
-        if (!_channels.TryAdd(channelOptions.Id, channel))
-            throw new ArgumentOutOfRangeException(nameof(channelOptions));
-
-        channel.SessionDisconnected += OnChannelSessionDisconnected;
-    }
-
-    public void DeleteChannel(int id)
+    public IChannel CreateChannel(IPEndPoint endPoint, int id, int capacity)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(id);
+        ArgumentNullException.ThrowIfNull(endPoint);
 
-        _channels.Remove(id, out _);
+        var channel = new Channel(_metadataResolver, new ChannelOptions { Id = id, Capacity = capacity })
+        {
+            EndPoint = endPoint
+        };
+        channel.SessionDisconnected += OnChannelSessionDisconnected;
+
+        if (!_channels.TryAdd(id, channel))
+            throw new InvalidOperationException($"Channel [{id:00}] is already registered");
+
+        return channel;
     }
+
+    public bool DeleteChannel(IChannel channel)
+        => _channels.TryRemove(KeyValuePair.Create(channel.Id, channel));
 
     public override void Invalidate()
     {
@@ -112,13 +119,13 @@ public class ChannelService : Broadcastable, IChannelService
             _logger.LogError(
                 argsEx.Exception,
                 "Session [{User}] removed from the channel due to connection lost with exception",
-                ((Session?)sender)?.Socket.RemoteEndPoint
+                ((Session?)sender)?.Socket?.RemoteEndPoint
             );
         }
         else
         {
             _logger.LogWarning("Session [{User}] removed from the channel due to connection lost",
-                ((Session?)sender)?.Socket.RemoteEndPoint);
+                ((Session?)sender)?.Socket?.RemoteEndPoint);
         }
     }
 }

@@ -5,8 +5,6 @@ namespace Memoryer.Relay.Sessions;
 
 public interface ITcpRelaySessionManager : ITcpSessionManager<TcpRelaySession>
 {
-    IReadOnlyList<TcpRelaySession> GetSessions();
-
     TcpRelaySession? FindByKeys(int sessionKey1, int sessionKey2);
 }
 
@@ -55,7 +53,7 @@ public class TcpRelaySessionManager : TcpSessionManager<TcpRelaySession>, ITcpRe
             _udpPeers.Remove(peer);
     }
 
-    public IReadOnlyList<TcpRelaySession> GetSessions()
+    public override IReadOnlyList<TcpRelaySession> GetSessions()
     {
         return _tracked.Keys.ToList();
     }

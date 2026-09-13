@@ -1,39 +1,13 @@
-using System.Net.Sockets;
-using Encore.Messaging;
-using Encore.Server;
-using Encore.Server.Sessions;
-using Microsoft.Extensions.Options;
+using Memoryer;
 
-namespace Memoryer.Workers.Gateway;
+namespace Encore.Workers.Gateway;
 
-public class ClientSession : Session
+public partial class ClientSession
 {
-    private ChannelSession? _channelSession;
-
-    public int? ChannelId => _channelSession?.ChannelId;
-
-    public ClientSession(TcpClient client, IOptions<TcpOptions> options, IMessageFramerFactory framer,
-        ICommandDispatcher dispatcher, IMessageCodec codec) : base(client, options, framer, dispatcher, codec)
+    private static partial bool IsGatewayCommand(ushort command)
     {
-    }
-
-    public string Id { get; private set; } = string.Empty;
-
-    public bool HasChannelSession => _channelSession != null;
-
-    public void Assign(string id)
-    {
-        Id = id;
-    }
-
-    public void Register(ChannelSession session)
-    {
-        _channelSession = session;
-    }
-
-    public override void Terminate()
-    {
-        base.Terminate();
-        _channelSession?.Terminate(this);
+        return command is (ushort)RequestCommand.GetChannelList
+            or (ushort)RequestCommand.ChannelLogin
+            or (ushort)RequestCommand.Terminate;
     }
 }

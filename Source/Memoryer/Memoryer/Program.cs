@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using Encore.CLI;
+using Encore.Workers;
 using Encore.Contexts;
 using Encore.Data.Repositories;
 using Encore.Events;
@@ -15,15 +16,15 @@ using Encore.Web;
 using Memoryer.CLI;
 using Memoryer.Controllers;
 using Memoryer.Controllers.Filters;
-using Memoryer.Controllers.Internal;
+using Encore.Controllers.Internal;
 using Memoryer.Events;
 using Memoryer.Relay;
 using Memoryer.Relay.Controllers;
 using Memoryer.Relay.Controllers.Filters;
 using Memoryer.Relay.Hosting;
 using Memoryer.Services;
-using Memoryer.Workers.Channels;
-using Memoryer.Workers.Gateway;
+using Encore.Workers.Channels;
+using Encore.Workers.Gateway;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -111,9 +112,6 @@ public class Program
                     .AddExceptionLogger<DefaultExceptionLogger>()
                     .AddFilter<SessionScopeLoggerFilter>();
 
-                if (options.Mode == DeploymentMode.Gateway)
-                    builder.AddFilter<GatewayFilter>();
-
                 if (options.Mode == DeploymentMode.Relay || relay.Enabled)
                     builder.AddFilter<RelayLoggerFilter>();
 
@@ -131,7 +129,12 @@ public class Program
                 // Controller-based routing: Not safe with AOT
                 var routes = provider.UseCodec<DefaultMessageCodec>();
 
-                if (options.Mode != DeploymentMode.Relay)
+                if (options.Mode == DeploymentMode.Gateway)
+                {
+                    routes.Map<AuthController>()
+                        .Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
+                }
+                else if (options.Mode != DeploymentMode.Relay)
                 {
                     routes
                         .Map<AuthController>()
@@ -145,16 +148,9 @@ public class Program
                         .Map<MusicShopController>()
                         .Map<WaitingController>()
                         .Map<PlayingController>();
-                }
 
-                switch (options.Mode)
-                {
-                    case DeploymentMode.Gateway:
-                        routes.Map<GatewayController>(c => c.AddFilter<InternalLoggerFilter>());
-                        break;
-                    case DeploymentMode.Channel:
+                    if (options.Mode == DeploymentMode.Channel)
                         routes.Map<ChannelController>(c => c.AddFilter<InternalLoggerFilter>());
-                        break;
                 }
 
                 if (options.Mode == DeploymentMode.Relay || relay.Enabled)
@@ -178,15 +174,14 @@ public class Program
                 switch (options.Mode)
                 {
                     case DeploymentMode.Channel:
-                        services.AddSingleton<IGatewayClient, GatewayClient>()
-                            .AddSingleton<IUserSessionFactory, UserSessionFactory>()
+                        services.AddSingleton<ITcpServer<Session>>(provider => provider.GetRequiredService<GameServer>())
+                            .AddSingleton<IGatewaySessionFactory, GatewaySessionFactory>()
                             .AddHostedService<ChannelWorker>();
 
                         break;
                     case DeploymentMode.Gateway:
                         services.AddSingleton<IClientServer, ClientServer>()
                             .AddSingleton<IGatewayServer, GatewayServer>()
-                            .AddSingleton<IChannelAggregator, ChannelAggregator>()
                             .AddSingleton<IClientSessionFactory, ClientSessionFactory>()
                             .AddSingleton<IChannelSessionFactory, ChannelSessionFactory>()
                             .AddSingleton<IChannelSessionManager, ChannelSessionManager>()

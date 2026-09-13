@@ -1,3 +1,4 @@
+using System.Net;
 using Encore.Metadata.Items;
 using Encore.Metadata.Music;
 using Encore.Server.Sessions;
@@ -13,6 +14,8 @@ public interface IChannel : IBroadcastable
     float GemRates  { get; }
     float ExpRates  { get; }
     bool? FreeMusic { get; }
+
+    IPEndPoint? EndPoint { get; }
 
     string MusicListFileName { get; }
     string AlbumListFileName { get; }

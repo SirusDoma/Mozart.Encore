@@ -13,12 +13,16 @@ public class Session : Encore.Sessions.TcpSession
 
     public Actor Actor => GetAuthorizedToken<Actor>();
 
-    public IChannel? Channel { get; private set; }
+    public IChannel? Channel { get; protected set; }
 
     public IRoom? Room { get; private set; }
 
-    public Session(TcpClient client, IOptions<TcpOptions> options, IMessageFramerFactory framer,
-        ICommandDispatcher dispatcher, IMessageCodec codec) : base(client, options.Value, framer, dispatcher)
+    public Session(
+        TcpClient client,
+        IOptions<TcpOptions> options,
+        IMessageFramerFactory framer,
+        ICommandDispatcher dispatcher, IMessageCodec codec
+    ) : base(client, options.Value, framer, dispatcher)
     {
         _codec = codec;
     }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e49635d4-5ba4-4e4f-8b0a-07d770e6401b</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Encore.Gateway</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controllers\ChannelController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controllers\GatewayController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Entities\GatewayInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Commands.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\AlbumScoreUpdateRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\AnnounceRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\BugleMessageRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ChannelLoginCancelRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ChannelLoginRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ChannelRegisterRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ClaimGiftRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ConsumeAttributiveItemRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\EquipItemRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\FirstPlayBonusRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\GatewayRegisterRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\GetGiftMessageListRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\GrantSessionRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\MusicListRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\ReadGiftMessageRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SellItemRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\StartPaymentRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SyncFreePassRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SyncGemRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SyncItemPurchaseRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SyncMusicPurchaseRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\SyncPointRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\TerminateRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\UserRouteRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Requests\UserStatsUpdateRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\AnnouncementResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\AttributiveItemListResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\BonusPresentItemResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\BugleMessageResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\BugleMessageResultResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelCreatedResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelListResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelLoginResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelRegisterResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelRemovedResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ChannelStateResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\ClaimGiftResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\CreateSessionResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\GetGiftMessageListResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\StartPaymentResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\SyncFreePassResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\SyncItemPurchaseResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\SyncMusicPurchaseResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\SyncPointResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\TerminateSessionResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameManager\Responses\UserRouteResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages\Internal\GameServer\Requests\CreateSessionRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\ChannelSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\ChannelWorker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Channels\GatewaySession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Channels\GatewaySessionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\ChannelSessionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\ChannelSessionManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\ClientServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\ClientSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\ClientSessionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\Gateway\GatewayServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Workers\GatewayWorker.cs" />
+  </ItemGroup>
+</Project>

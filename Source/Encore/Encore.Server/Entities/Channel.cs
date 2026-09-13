@@ -1,3 +1,4 @@
+using System.Net;
 using Encore.Metadata;
 using Encore.Metadata.Items;
 using Encore.Metadata.Music;
@@ -37,6 +38,8 @@ public class Channel : Broadcastable, IChannel
     public float GemRates  { get; init; }
     public float ExpRates  { get; init; }
     public bool? FreeMusic { get; init; }
+
+    public IPEndPoint? EndPoint { get; init; }
 
     public string MusicListFileName { get; init; } = string.Empty;
     public string AlbumListFileName { get; init; } = string.Empty;

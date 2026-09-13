@@ -24,6 +24,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore.Server", "Source\Enc
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore.CLI", "Source\Encore\Encore.CLI\Encore.CLI.shproj", "{A4F9AB1C-5C75-4FD9-AE57-16E83B8C12E1}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore.Gateway", "Source\Encore\Encore.Gateway\Encore.Gateway.shproj", "{E49635D4-5BA4-4E4F-8B0A-07D770E6401B}"
+EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Encore.Web", "Source\Encore\Encore.Web\Encore.Web.shproj", "{B78390B0-0C8B-469D-BBB4-9D7C4C014A73}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mozart", "Source\Mozart\Mozart\Mozart.csproj", "{3FF8E248-A1FC-4376-9183-CFE54AA0D1B4}"
@@ -130,8 +132,10 @@ Global
 		Source\Encore\Encore.Data\Encore.Data.projitems*{3f1c2b4d-8a6e-4d29-9c17-5b0a1e6f2d83}*SharedItemsImports = 13
 		Source\Encore\Encore.Server\Encore.Server.projitems*{7a92d5e1-4c3b-4f68-b7d9-2e8a0c5f1b46}*SharedItemsImports = 13
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{a4f9ab1c-5c75-4fd9-ae57-16e83b8c12e1}*SharedItemsImports = 13
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{e49635d4-5ba4-4e4f-8b0a-07d770e6401b}*SharedItemsImports = 13
 		Source\Encore\Encore.Web\Encore.Web.projitems*{b78390b0-0c8b-469d-bbb4-9d7c4c014a73}*SharedItemsImports = 13
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{3ff8e248-a1fc-4376-9183-cfe54aa0d1b4}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{3ff8e248-a1fc-4376-9183-cfe54aa0d1b4}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{db617ca1-6605-4b21-ac15-4cde4590579b}*SharedItemsImports = 4
 		Source\Encore\Encore.Framework\Encore.Framework.projitems*{f8d598a2-3034-4e75-8007-773e4779f75b}*SharedItemsImports = 4
 		Source\Encore\Encore.Server\Encore.Server.projitems*{f8d598a2-3034-4e75-8007-773e4779f75b}*SharedItemsImports = 4
@@ -140,26 +144,31 @@ Global
 		Source\Encore\Encore.Server\Encore.Server.projitems*{083ffcf6-a563-42f2-b559-077f243263a4}*SharedItemsImports = 4
 		Source\Encore\Encore.Data\Encore.Data.projitems*{5615abf0-a5d7-4bba-9429-a824e68b2f4b}*SharedItemsImports = 4
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{44f9ac87-b751-4ca4-923c-6e66801f5695}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{44f9ac87-b751-4ca4-923c-6e66801f5695}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{022a964c-ba7c-4b45-8bed-9a9093b0a6f2}*SharedItemsImports = 4
 		Source\Encore\Encore.Framework\Encore.Framework.projitems*{20535dbd-09e1-4447-b911-38f405f8e1bf}*SharedItemsImports = 4
 		Source\Encore\Encore.Server\Encore.Server.projitems*{20535dbd-09e1-4447-b911-38f405f8e1bf}*SharedItemsImports = 4
 		Source\Encore\Encore.Data\Encore.Data.projitems*{e8737664-cec2-49a6-8633-f4f14a7a8eae}*SharedItemsImports = 4
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{a8fc0426-bcd1-4fd0-aae7-05d4c044eb1c}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{a8fc0426-bcd1-4fd0-aae7-05d4c044eb1c}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{8e8d84db-9b79-452b-a283-8cfd0c51eecd}*SharedItemsImports = 4
 		Source\Encore\Encore.Framework\Encore.Framework.projitems*{f6921e04-dd59-4542-bd00-9c189c5fe41a}*SharedItemsImports = 4
 		Source\Encore\Encore.Server\Encore.Server.projitems*{f6921e04-dd59-4542-bd00-9c189c5fe41a}*SharedItemsImports = 4
 		Source\Encore\Encore.Data\Encore.Data.projitems*{4f224d0f-be7e-4338-9037-b4e7304ca3d1}*SharedItemsImports = 4
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{f1a43bc6-6836-4c60-ba40-21894cb6514b}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{f1a43bc6-6836-4c60-ba40-21894cb6514b}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{3d78e8a2-2cc7-4802-a0c7-219544dfb85f}*SharedItemsImports = 4
 		Source\Encore\Encore.Framework\Encore.Framework.projitems*{6b78a6f8-f216-420d-ace1-3199fe0d92fe}*SharedItemsImports = 4
 		Source\Encore\Encore.Server\Encore.Server.projitems*{6b78a6f8-f216-420d-ace1-3199fe0d92fe}*SharedItemsImports = 4
 		Source\Encore\Encore.Data\Encore.Data.projitems*{4f9e69d0-9739-4f00-ac61-3aa37ecad9e9}*SharedItemsImports = 4
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{786b322e-ae81-4331-87aa-612dbaffbcd8}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{786b322e-ae81-4331-87aa-612dbaffbcd8}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{9c5c21d9-580b-41d4-83f1-70f1ef4efbdc}*SharedItemsImports = 4
 		Source\Encore\Encore.Framework\Encore.Framework.projitems*{981dc6f6-c7da-4da7-b8f6-f9662c29a53b}*SharedItemsImports = 4
 		Source\Encore\Encore.Server\Encore.Server.projitems*{981dc6f6-c7da-4da7-b8f6-f9662c29a53b}*SharedItemsImports = 4
 		Source\Encore\Encore.Data\Encore.Data.projitems*{4995834e-2d66-4fc5-bd6f-a94f53b883ed}*SharedItemsImports = 4
 		Source\Encore\Encore.CLI\Encore.CLI.projitems*{832fe24a-86a0-4723-bebb-be61844d57b7}*SharedItemsImports = 4
+		Source\Encore\Encore.Gateway\Encore.Gateway.projitems*{832fe24a-86a0-4723-bebb-be61844d57b7}*SharedItemsImports = 4
 		Source\Encore\Encore.Web\Encore.Web.projitems*{2f7694d9-e69f-43e7-851d-d3e6aa5e38fe}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -570,6 +579,7 @@ Global
 		{3F1C2B4D-8A6E-4D29-9C17-5B0A1E6F2D83} = {8CB79FCE-2989-4FDD-8308-FD8BC6DCA05D}
 		{7A92D5E1-4C3B-4F68-B7D9-2E8A0C5F1B46} = {8CB79FCE-2989-4FDD-8308-FD8BC6DCA05D}
 		{A4F9AB1C-5C75-4FD9-AE57-16E83B8C12E1} = {8CB79FCE-2989-4FDD-8308-FD8BC6DCA05D}
+		{E49635D4-5BA4-4E4F-8B0A-07D770E6401B} = {8CB79FCE-2989-4FDD-8308-FD8BC6DCA05D}
 		{B78390B0-0C8B-469D-BBB4-9D7C4C014A73} = {8CB79FCE-2989-4FDD-8308-FD8BC6DCA05D}
 		{3FF8E248-A1FC-4376-9183-CFE54AA0D1B4} = {04CF596B-5351-4C8A-A29F-AF49F338DB85}
 		{DB617CA1-6605-4B21-AC15-4CDE4590579B} = {04CF596B-5351-4C8A-A29F-AF49F338DB85}

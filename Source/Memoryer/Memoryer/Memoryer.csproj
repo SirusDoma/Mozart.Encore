@@ -66,4 +66,5 @@
     </ItemGroup>
 
     <Import Project="..\..\Encore\Encore.CLI\Encore.CLI.projitems" Label="Shared" />
+    <Import Project="..\..\Encore\Encore.Gateway\Encore.Gateway.projitems" Label="Shared" />
 </Project>
