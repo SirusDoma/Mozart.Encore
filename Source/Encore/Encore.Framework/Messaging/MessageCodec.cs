@@ -286,6 +286,9 @@ public partial class DefaultMessageCodec : IMessageCodec, IMessageFieldCodec
             if (!member.CanWrite)
                 continue;
 
+            if (reader.BaseStream.Position == reader.BaseStream.Length && member.IsNullable)
+                continue;
+
             object value;
             var codec      = member.CreateFieldCodec(this);
             var memberType = member.MemberType;

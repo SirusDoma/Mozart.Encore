@@ -20,6 +20,10 @@ public partial class DefaultMessageCodec
         public bool CanRead  => _property?.CanRead ?? true;
         public bool CanWrite => _property?.CanWrite ?? true;
 
+        public bool IsNullable => (_field != null
+            ? new NullabilityInfoContext().Create(_field)
+            : new NullabilityInfoContext().Create(_property!)).ReadState == NullabilityState.Nullable;
+
         public MessageMember(FieldInfo field, MessageFieldAttribute attribute)
         {
             _field = field ?? throw new ArgumentNullException(nameof(field));

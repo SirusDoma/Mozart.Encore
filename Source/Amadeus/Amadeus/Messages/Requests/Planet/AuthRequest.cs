@@ -16,6 +16,8 @@ public class AuthRequest : IMessage
 
     public sealed class EGamesCredential : AuthCredential
     {
+        public const string Id = "ZCTNRY-BOU6-3D9WWT-1PJV-GZOFIO";
+
         public override Version ClientVersion => new(3, 82);
     }
 

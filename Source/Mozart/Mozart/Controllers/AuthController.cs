@@ -23,7 +23,8 @@ public class AuthController(
     {
         try
         {
-            logger.LogInformation((int)RequestCommand.Authorize, "Authorize session");
+            logger.LogInformation((int)RequestCommand.Authorize,
+                "Authorize session (Client: v{Version})", request.ClientVersion);
 
             const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
             var existingSession = channelService.Sessions.FirstOrDefault(s => s.Actor.Token.Equals(request.Token, comparison));
@@ -59,8 +60,8 @@ public class AuthController(
 
             Session.Authorize(new Actor(characterInfo)
             {
-                Token         = authSession.Token,
-                ClientVersion = request.ClientVersion,
+                Token    = authSession.Token,
+                ClientId = request.ClientId
             });
         }
         catch (ArgumentException ex)

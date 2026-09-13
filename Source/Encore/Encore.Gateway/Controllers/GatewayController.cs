@@ -107,7 +107,8 @@ public partial class GatewayController(Session session, IChannelService channelS
             {
                 UserId    = client.Actor.UserId,
                 GatewayId = GatewayId,
-                ChannelId = (ushort)channelId
+                ChannelId = (ushort)channelId,
+                Metadata  = new CreateSessionRequest.EncoreMetadata { ClientId = client.Actor.ClientId }
             }, cancellationToken);
 
             client.Register(session);

@@ -21,4 +21,15 @@ public class CreateSessionRequest : IMessage
 
     [MessageField(order: 4)]
     public int Ranking { get; init; }
+
+    // Encore extension; not part of the original 1006 message.
+    // It is unclear how Client ID forwarded since there is no server implementation reference that supports newer build.
+    [MessageField(order: 5)]
+    public EncoreMetadata? Metadata { get; init; } = null;
+
+    public class EncoreMetadata : SubMessage
+    {
+        [StringMessageField(order: 0)]
+        public required string ClientId { get; init; }
+    }
 }

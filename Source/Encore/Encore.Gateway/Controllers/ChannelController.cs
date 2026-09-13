@@ -1,4 +1,3 @@
-using Encore.Data.Entities;
 using Encore.Data.Repositories;
 using Encore.Entities;
 using Encore.Messages.Requests;
@@ -10,7 +9,6 @@ using Encore.Services;
 using Encore.Workers.Channels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mozart.Data.Entities;
 using Mozart.Options;
 using Mozart.Sessions;
 
@@ -27,7 +25,6 @@ public partial class ChannelController(
     ILogger<ChannelController> logger
     ) : CommandController<Session>(session)
 {
-    private partial Actor CreateActor(User characterInfo, AuthSession authSession);
     private partial IMessage CreateChannelLoginRequest(ushort planet, ushort channel);
 
     [CommandHandler]
@@ -80,7 +77,11 @@ public partial class ChannelController(
             var authSession = await sessionRepository.FindByUsername(characterInfo.Username, cancellationToken)
                 ?? throw new ArgumentException("Character is not logged in");
 
-            Session.Authorize(CreateActor(characterInfo, authSession));
+            Session.Authorize(new Actor(characterInfo)
+            {
+                Token    = authSession.Token,
+                ClientId = request.Metadata?.ClientId ?? string.Empty
+            });
         }
         catch (Exception ex)
         {

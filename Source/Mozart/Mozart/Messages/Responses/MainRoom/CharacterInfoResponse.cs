@@ -41,7 +41,7 @@ public class CharacterInfoResponse : IMessage
     public int Experience { get; set; }
 
     [MessageField(order: 10)]
-    public int BonusPoint { get; set; }
+    public int? BonusPoint { get; set; }
 
     [MessageField(order: 11)]
     public bool IsAdministrator { get; init; }

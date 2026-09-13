@@ -43,7 +43,7 @@ public class MainRoomController(
             Win                = actor.Win,
             Lose               = actor.Lose,
             Experience         = actor.Experience,
-            BonusPoint         = actor.BonusPoint,
+            BonusPoint         = actor.ClientId == AuthRequest.GamaniaCredential.Id ? actor.BonusPoint : null,
             IsAdministrator    = actor.IsAdministrator,
             Equipments         = actor.Equipments,
             Inventory          = actor.Inventory,

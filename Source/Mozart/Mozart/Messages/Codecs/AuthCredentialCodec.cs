@@ -24,7 +24,7 @@ public class AuthCredentialCodec(IMessageFieldAttribute attribute) : MessageFiel
 
         return strings.Count switch
         {
-            2 => new AuthRequest.EGamesCredential
+            1 or 2 => new AuthRequest.EGamesCredential
             {
                 Token = strings[0]
             },

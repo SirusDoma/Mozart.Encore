@@ -47,7 +47,7 @@ public class Actor
 
     public required string Token { get; init; }
 
-    public Version ClientVersion { get; init; } = new(3, 10);
+    public required string ClientId { get; init; }
 
     public int UserId { get; init; }
 

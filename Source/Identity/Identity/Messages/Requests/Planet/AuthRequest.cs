@@ -6,6 +6,8 @@ namespace Identity.Messages.Requests;
 
 public class AuthRequest : IMessage
 {
+    public const string Id = "726PNA-B1YW-28ZG9M-I5SC-Q0OPM6";
+
     public static Enum Command => RequestCommand.Authorize;
 
     [StringMessageField(order: 0)]
