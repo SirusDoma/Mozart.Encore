@@ -257,7 +257,7 @@ public partial class GatewayWorker(
                 {
                     Channels = channelService.GetChannels().Select(c => new ChannelStateResponse.ChannelState
                     {
-                        ServerId   = (ushort)gatewayOptions.Value.Id,
+                        GatewayId  = (ushort)gatewayOptions.Value.Id,
                         ChannelId  = (ushort)c.Id,
                         Capacity   = c.Capacity,
                         Population = c.UserCount,

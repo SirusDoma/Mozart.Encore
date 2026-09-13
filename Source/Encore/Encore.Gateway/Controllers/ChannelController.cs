@@ -45,9 +45,9 @@ public partial class ChannelController(
                 await authService.ClearSessions(gatewayOptions.Value.Id, gatewayOptions.Value.Channels[0].Id,
                     cancellationToken);
 
-            gateway.Authorize(new GatewayInfo { Id = response.ServerId, PlanetKind = response.PlanetKind });
+            gateway.Authorize(new GatewayInfo { Id = response.GatewayId, PlanetKind = response.PlanetKind });
             logger.LogInformation((int)GameManagerCommand.ChannelRegister,
-                "Channel registered with gateway [{ServerId}]", gateway.Gateway.Id);
+                "Channel registered with gateway [{GatewayId}]", gateway.Gateway.Id);
         }
         catch (Exception ex)
         {
@@ -60,14 +60,14 @@ public partial class ChannelController(
     public void OnChannelStateUpdated(ChannelStateResponse response)
     {
         logger.LogInformation((int)GameManagerCommand.ChannelState, "Channel load: {Channels}", string.Join(", ",
-            response.Channels.Select(c => $"[{c.ServerId}/{c.ChannelId:00}] {c.Population}/{c.Capacity}")));
+            response.Channels.Select(c => $"[{c.GatewayId}/{c.ChannelId:00}] {c.Population}/{c.Capacity}")));
     }
 
     [CommandHandler]
     public async Task CreateSession(CreateSessionRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation((int)GatewayCommand.CreateSession, "Create Session [{UserId}] -> [{SID}/{CID:00}]",
-            request.UserId, request.ServerId, request.ChannelId);
+            request.UserId, request.GatewayId, request.ChannelId);
 
         try
         {
@@ -91,7 +91,7 @@ public partial class ChannelController(
             return;
         }
 
-        var login = CreateChannelLoginRequest(request.ServerId, request.ChannelId);
+        var login = CreateChannelLoginRequest(request.GatewayId, request.ChannelId);
         await dispatcher.Dispatch(Session, codec.Encode(login), cancellationToken);
     }
 }

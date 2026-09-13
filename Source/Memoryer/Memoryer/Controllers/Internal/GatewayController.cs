@@ -13,7 +13,7 @@ public partial class GatewayController
     {
         Channels = Channels.Select((c, i) => new ChannelListResponse.ChannelState
         {
-            ServerId  = (ushort)(c != null ? ServerId : 0),
+            GatewayId  = (ushort)(c != null ? GatewayId : 0),
             ChannelId  = (ushort)i,
             Capacity   = c?.Capacity  ?? 0,
             Population = c?.UserCount ?? 0,
@@ -26,7 +26,7 @@ public partial class GatewayController
     public async Task<ChannelLoginResponse?> ChannelLogin(ChannelLoginRequest request,
         CancellationToken cancellationToken)
     {
-        if (!await CreateUserChannelSession(request.ServerId, request.ChannelId, cancellationToken))
+        if (!await CreateUserChannelSession(request.GatewayId, request.ChannelId, cancellationToken))
             return new ChannelLoginResponse { Result = ChannelLoginResult.ChannelUnavailable };
 
         return null;

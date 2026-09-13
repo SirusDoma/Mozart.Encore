@@ -72,7 +72,7 @@ public class Actor
 
     public required string Token { get; init; }
 
-    public int ServerId { get; set; }
+    public int GatewayId { get; set; }
 
     public required string ClientId { get; init; }
 

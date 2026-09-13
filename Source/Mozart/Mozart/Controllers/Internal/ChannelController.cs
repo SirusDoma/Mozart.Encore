@@ -15,7 +15,7 @@ public partial class ChannelController
 
     private partial IMessage CreateChannelLoginRequest(ushort planet, ushort channel) => new ChannelLoginRequest
     {
-        ServerId  = (short)planet,
+        GatewayId = (short)planet,
         ChannelId = (short)channel
     };
 }

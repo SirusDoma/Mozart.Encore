@@ -39,7 +39,7 @@ public class PlanetController(
                 var channel = channels.SingleOrDefault(s => s.Id == i);
                 states.Add(new ChannelListResponse.ChannelState
                 {
-                    ServerId   = (ushort)gateway.Id,
+                    GatewayId  = (ushort)gateway.Id,
                     ChannelId  = i,
                     Capacity   = channel?.Capacity ?? 0,
                     Population = channel?.UserCount ?? 0,
@@ -57,11 +57,11 @@ public class PlanetController(
         logger.LogInformation(
             (int)RequestCommand.ChannelLogin,
             "Enter channel: [{GatewayId}/{ChannelId:00}]",
-            request.ServerId,
+            request.GatewayId,
             request.ChannelId
         );
 
-        if (request.ServerId != options.Value.Id)
+        if (request.GatewayId != options.Value.Id)
             throw new ArgumentOutOfRangeException(nameof(request), "Invalid server id");
 
         const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;

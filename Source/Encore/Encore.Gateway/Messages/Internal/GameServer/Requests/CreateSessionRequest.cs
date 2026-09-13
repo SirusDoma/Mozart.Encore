@@ -11,7 +11,7 @@ public class CreateSessionRequest : IMessage
     public required int UserId { get; init; }
 
     [MessageField(order: 1)]
-    public required ushort ServerId { get; init; }
+    public required ushort GatewayId { get; init; }
 
     [MessageField(order: 2)]
     public required ushort ChannelId { get; init; }

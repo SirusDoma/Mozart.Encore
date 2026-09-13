@@ -21,12 +21,12 @@ public class AlbumListParser
         {
             var header = new AlbumHeader
             {
-                ServerId = reader.ReadInt32(),
-                AlbumId  = reader.ReadInt32(),
-                Name     = reader.ReadBytes(64),
-                Price    = reader.ReadInt16(),
-                Level    = reader.ReadByte(),
-                Ranked   = reader.ReadByte() != 0
+                GatewayId = reader.ReadInt32(),
+                AlbumId   = reader.ReadInt32(),
+                Name      = reader.ReadBytes(64),
+                Price     = reader.ReadInt16(),
+                Level     = reader.ReadByte(),
+                Ranked    = reader.ReadByte() != 0
             };
 
             _ = reader.ReadInt32(); // padding?

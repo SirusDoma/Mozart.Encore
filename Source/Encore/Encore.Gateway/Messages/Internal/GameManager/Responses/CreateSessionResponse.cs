@@ -23,7 +23,7 @@ public class CreateSessionResponse : IMessage
         public int UserId { get; init; }
 
         [MessageField(order: 1)]
-        public ushort ServerId { get; init; }
+        public ushort GatewayId { get; init; }
 
         [MessageField(order: 2)]
         public ushort ChannelId { get; init; }

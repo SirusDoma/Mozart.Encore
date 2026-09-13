@@ -33,7 +33,7 @@ public class GatewaySession(
         {
             Channels = channelService.GetChannels().Select(channel => new ChannelRegisterRequest.ChannelEntry
             {
-                ServerId = (ushort)gatewayOptions.Value.Id,
+                GatewayId = (ushort)gatewayOptions.Value.Id,
                 ChannelId = (ushort)channel.Id,
                 Port      = Options.Port,
                 Capacity  = channel.Capacity,

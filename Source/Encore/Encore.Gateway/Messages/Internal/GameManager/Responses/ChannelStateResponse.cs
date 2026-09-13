@@ -12,7 +12,7 @@ public class ChannelStateResponse : IMessage
     public class ChannelState : SubMessage
     {
         [MessageField(order: 0)]
-        public ushort ServerId { get; init; }
+        public ushort GatewayId { get; init; }
 
         [MessageField(order: 1)]
         public ushort ChannelId { get; init; }

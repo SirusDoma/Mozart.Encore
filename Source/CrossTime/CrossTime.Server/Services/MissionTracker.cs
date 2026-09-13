@@ -5,7 +5,7 @@ namespace Mozart.Services;
 
 public interface IMissionTracker
 {
-    void Track(Session session, int missionLevel, int musicId, int serverId);
+    void Track(Session session, int missionLevel, int musicId, int gatewayId);
     MissionTracker.MissionState Complete(Session session);
 }
 
@@ -16,12 +16,12 @@ public class MissionTracker : IMissionTracker
         public required Session Session  { get; init; }
         public required int MissionLevel { get; init; }
         public required int MusicId      { get; init; }
-        public required int ServerId     { get; init; }
+        public required int GatewayId    { get; init; }
     }
 
     private readonly ConcurrentDictionary<Session, MissionState> _states = [];
 
-    public void Track(Session session, int missionLevel, int musicId, int serverId)
+    public void Track(Session session, int missionLevel, int musicId, int gatewayId)
     {
         if (_states.ContainsKey(session))
             throw new InvalidOperationException("Session is already tracked");
@@ -31,7 +31,7 @@ public class MissionTracker : IMissionTracker
             Session      = session,
             MissionLevel = missionLevel,
             MusicId      = musicId,
-            ServerId     = serverId
+            GatewayId    = gatewayId
         };
 
         _states[session] = state;

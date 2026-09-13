@@ -8,7 +8,7 @@ public class AlbumHeader
         public Difficulty Difficulty { get; set; }
     }
 
-    public int ServerId { get; set; }
+    public int GatewayId { get; set; }
     public int AlbumId { get; set; }
     public short Price { get; set; }
     public byte[] Name { get; set; } = [];

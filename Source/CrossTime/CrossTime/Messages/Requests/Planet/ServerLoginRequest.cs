@@ -10,5 +10,5 @@ public class ServerLoginRequest : IMessage
     public string Token { get; private set; } = string.Empty;
 
     [MessageField(order: 1)]
-    public int ServerId { get; private set; }
+    public int GatewayId { get; private set; }
 }

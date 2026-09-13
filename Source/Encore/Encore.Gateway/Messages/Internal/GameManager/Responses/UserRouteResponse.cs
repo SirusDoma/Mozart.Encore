@@ -16,7 +16,7 @@ public class UserRouteResponse : IMessage
     public int UserId { get; init; }
 
     [MessageField(order: 3)]
-    public ushort ServerId { get; init; }
+    public ushort GatewayId { get; init; }
 
     [MessageField(order: 4)]
     public ushort ChannelId { get; init; }

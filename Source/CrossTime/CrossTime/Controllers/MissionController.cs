@@ -33,12 +33,12 @@ public class MissionController(
         var actor = Session.Actor;
         logger.LogInformation(
             (int)RequestCommand.MissionRanks,
-            "Get mission logs: [{ServerId}/{channelId:00} - {SetId:00}]",
-            actor.ServerId, Channel.Id, request.MissionSetId
+            "Get mission logs: [{GatewayId}/{channelId:00} - {SetId:00}]",
+            actor.GatewayId, Channel.Id, request.MissionSetId
         );
 
         var missions = actor.CompletedMissionList
-            .Where(m => m.GatewayId == actor.ServerId && m.SetId == request.MissionSetId)
+            .Where(m => m.GatewayId == actor.GatewayId && m.SetId == request.MissionSetId)
             .ToList();
 
         var rankList = missions
@@ -61,8 +61,8 @@ public class MissionController(
     {
         var actor = Session.Actor;
         logger.LogInformation((int)RequestCommand.MissionRanks,
-            "Start mission: [{ServerId}/{ChannelId:00}]: o2ma{MusicId} ({MissionLevel:00})",
-            actor.ServerId, Channel.Id, request.MusicId, request.MissionLevel);
+            "Start mission: [{GatewayId}/{ChannelId:00}]: o2ma{MusicId} ({MissionLevel:00})",
+            actor.GatewayId, Channel.Id, request.MusicId, request.MissionLevel);
 
         if (!Channel.GetMusicList().TryGetValue(request.MusicId, out var music))
             return new StartMissionResponse { Result = StartMissionResponse.StartMissionResult.InvalidPlanet };
@@ -95,7 +95,7 @@ public class MissionController(
         }
 
         actor.Sync(user);
-        tracker.Track(Session, request.MissionLevel, request.MusicId, actor.ServerId);
+        tracker.Track(Session, request.MissionLevel, request.MusicId, actor.GatewayId);
 
         return new StartMissionResponse
         {
@@ -113,8 +113,8 @@ public class MissionController(
 
         logger.LogInformation(
             (int)RequestCommand.CompleteMission,
-            "Complete mission: [{ServerId}/{ChannelId:00} - {SetId:00}/{MissionLevel:00}]",
-            actor.ServerId, Channel.Id, request.MissionSetId, state.MissionLevel
+            "Complete mission: [{GatewayId}/{ChannelId:00} - {SetId:00}/{MissionLevel:00}]",
+            actor.GatewayId, Channel.Id, request.MissionSetId, state.MissionLevel
         );
 
         float percentage = request.MaxScore > 0
@@ -126,7 +126,7 @@ public class MissionController(
 
         // Look up previous best rank
         var existing = actor.CompletedMissionList
-            .SingleOrDefault(m => m.GatewayId == actor.ServerId
+            .SingleOrDefault(m => m.GatewayId == actor.GatewayId
                                && m.SetId == request.MissionSetId
                                && m.Level == state.MissionLevel);
 
@@ -139,7 +139,7 @@ public class MissionController(
             user.CompletedMissionList.Add(new CompletedMission
             {
                 UserId    = actor.UserId,
-                GatewayId = actor.ServerId,
+                GatewayId = actor.GatewayId,
                 SetId     = request.MissionSetId,
                 Level     = state.MissionLevel,
                 Rank      = rank

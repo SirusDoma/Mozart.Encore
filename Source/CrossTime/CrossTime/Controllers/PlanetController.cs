@@ -40,13 +40,13 @@ public class PlanetController(
         logger.LogInformation(
             (int)RequestCommand.GetChannelList,
             "Get channel list: [{GatewayId}]",
-            Session.Actor.ServerId
+            Session.Actor.GatewayId
         );
 
         var states   = new List<ChannelListResponse.ChannelState>();
         var channels = channelService.GetChannels();
 
-        if (!ChannelStartIndices.TryGetValue(Session.Actor.ServerId, out int startIndex))
+        if (!ChannelStartIndices.TryGetValue(Session.Actor.GatewayId, out int startIndex))
             startIndex = 1;
 
         if (channels.Count > 0)
@@ -56,7 +56,7 @@ public class PlanetController(
                 var channel = channels.SingleOrDefault(s => s.Id + startIndex == i);
                 states.Add(new ChannelListResponse.ChannelState
                 {
-                    ServerId   = (ushort)Session.Actor.ServerId,
+                    GatewayId  = (ushort)Session.Actor.GatewayId,
                     ChannelId  = (ushort)(i - startIndex),
                     Capacity   = channel?.Capacity ?? 100,
                     Population = channel?.UserCount ?? 0,
@@ -74,11 +74,11 @@ public class PlanetController(
         logger.LogInformation(
             (int)RequestCommand.ChannelLogin,
             "Enter channel: [{GatewayId}/{ChannelId:00}]",
-            request.ServerId,
+            request.GatewayId,
             request.ChannelId
         );
 
-        if (serverOptions.Value.Mode != DeploymentMode.Full && request.ServerId != options.Value.Id)
+        if (serverOptions.Value.Mode != DeploymentMode.Full && request.GatewayId != options.Value.Id)
             throw new ArgumentOutOfRangeException(nameof(request), "Invalid gateway server id");
 
         const StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
@@ -109,7 +109,7 @@ public class PlanetController(
             var channel = channelService.GetChannel(request.ChannelId);
             Session.Register(channel);
 
-            await authService.UpdateChannel(Session.Actor.Token, request.ServerId, request.ChannelId, cancellationToken);
+            await authService.UpdateChannel(Session.Actor.Token, request.GatewayId, request.ChannelId, cancellationToken);
             return new ChannelLoginResponse
             {
                 Failed  = false,

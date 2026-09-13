@@ -22,7 +22,7 @@ public class AuthController(
     public async Task<ServerLoginResponse> ServerLogin(ServerLoginRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation((int)RequestCommand.ServerLogin,
-            "Server Login: [{ServerId}]", request.ServerId);
+            "Server Login: [{GatewayId}]", request.GatewayId);
 
         if (!Session.Authorized)
         {
@@ -32,7 +32,7 @@ public class AuthController(
             }, cancellationToken);
         }
 
-        Session.Actor.ServerId = request.ServerId;
+        Session.Actor.GatewayId = request.GatewayId;
         return new ServerLoginResponse
         {
             Result = Session.Authorized && Session.Actor.Token == request.Token ?

@@ -13,7 +13,7 @@ public class ChannelLoginResponse : IMessage
     public uint SessionId { get; init; }
 
     [MessageField(order: 2)]
-    public ushort ServerId { get; init; }
+    public ushort GatewayId { get; init; }
 
     [MessageField(order: 3)]
     public ushort ChannelId { get; init; }

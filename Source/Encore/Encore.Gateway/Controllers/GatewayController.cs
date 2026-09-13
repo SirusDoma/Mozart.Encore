@@ -17,7 +17,7 @@ public partial class GatewayController(Session session, IChannelService channelS
     IChannelSessionManager channelManager, IChannelSessionFactory factory, IOptions<GatewayOptions> options,
     ILogger<GatewayController> logger) : CommandController<Session>(session)
 {
-    protected ushort ServerId => (ushort)options.Value.Id;
+    protected ushort GatewayId => (ushort)options.Value.Id;
 
     protected IReadOnlyList<IChannel?> Channels
     {
@@ -47,7 +47,7 @@ public partial class GatewayController(Session session, IChannelService channelS
             var address = ((IPEndPoint)Session.Socket.RemoteEndPoint!).Address;
             foreach (var entry in request.Channels)
             {
-                if (entry.ServerId != options.Value.Id)
+                if (entry.GatewayId != options.Value.Id)
                     throw new InvalidOperationException($"Gateway Id mismatch (Expected: {options.Value.Id})");
 
                 var endpoint = new IPEndPoint(address, entry.Port);
@@ -79,19 +79,19 @@ public partial class GatewayController(Session session, IChannelService channelS
         return new ChannelRegisterResponse
         {
             Invalid   = failed,
-            ServerId = ServerId
+            GatewayId = GatewayId
         };
     }
 
-    protected async Task<bool> CreateUserChannelSession(int serverId, int channelId, CancellationToken cancellationToken)
+    protected async Task<bool> CreateUserChannelSession(int gatewayId, int channelId, CancellationToken cancellationToken)
     {
         var client  = (ClientSession)Session;
         var channel = channelService.FindChannel(channelId);
 
-        if (serverId != options.Value.Id || channel?.EndPoint == null || channel.UserCount >= channel.Capacity)
+        if (gatewayId != options.Value.Id || channel?.EndPoint == null || channel.UserCount >= channel.Capacity)
         {
             logger.LogWarning((int)ServerCommand.ChannelLogin,
-                "Channel [{ServerId}/{ChannelId:00}] is unavailable", serverId, channelId);
+                "Channel [{GatewayId}/{ChannelId:00}] is unavailable", gatewayId, channelId);
 
             return false;
         }
@@ -106,7 +106,7 @@ public partial class GatewayController(Session session, IChannelService channelS
             await session.WriteMessage(new CreateSessionRequest
             {
                 UserId    = client.Actor.UserId,
-                ServerId = ServerId,
+                GatewayId = GatewayId,
                 ChannelId = (ushort)channelId
             }, cancellationToken);
 
@@ -114,7 +114,7 @@ public partial class GatewayController(Session session, IChannelService channelS
             channelManager.StartSession(session);
 
             logger.LogInformation((int)ServerCommand.ChannelLogin,
-                "Enter channel [{ServerId}/{ChannelId:00}]",  serverId, channelId);
+                "Enter channel [{GatewayId}/{ChannelId:00}]",  gatewayId, channelId);
 
             return true;
         }
@@ -122,7 +122,7 @@ public partial class GatewayController(Session session, IChannelService channelS
         {
             tcp.Dispose();
             logger.LogError((int)ServerCommand.ChannelLogin, ex,
-                "Failed to enter channel [{ServerId}/{ChannelId:00}]", serverId, channelId);
+                "Failed to enter channel [{GatewayId}/{ChannelId:00}]", gatewayId, channelId);
 
             return false;
         }
