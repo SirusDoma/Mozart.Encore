@@ -23,6 +23,7 @@ Supported client version: **v7.55 (O2Jam Classic)**
 >   Failure to connect to `http://o2jam.nopp.co.kr/client/event/2009/06_moa/hot_time.php` will result in crash.
 > - There are 3 hardcoded IP addresses inside the client that are assigned to each game server, which act as UDP+TCP relay servers.
 >   Live mode will disabled when the game cannot to connect to the both TCP and UDP relay server. See [Live Mode](#live-mode) to learn more.
+> - You can use [O2Jam Workshop Center - Client Patcher](https://sirusdoma.github.io/o2jam-workshop-center/#/tools/client-patcher) to patch the `OTwo.exe`.
 
 ## Features
 
