@@ -332,7 +332,7 @@ See [Server](#Server) and [Gateway &amp; Channels](#gateway--channels) configura
 Clients specify all available Gateways when launching O2Jam via `OTwo.exe`. The syntax is:
 
 ```shell
-OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
+OTwo.exe <mode> <user_index_id> <user_id> <password> O2Jam <gender> <rank> <ftp_host><:ftp_port> <ftp_path> <gateway_count> \
   <gateway_address_1> <gateway_port_1> \
   <gateway_address_2> <gateway_port_2> \
   … \
